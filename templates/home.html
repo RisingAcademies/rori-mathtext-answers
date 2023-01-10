@@ -14,12 +14,12 @@
 import requests
 
 requests.post(
-    url='https://cetinca-fastapi-ep.hf.space/sentiment-analysis',
+    url='https://tangibleai-mathtext-fastapi.hf.space/sentiment-analysis',
     json={"content": "I reject it"}
     ).json()
 
 requests.post(
-    url='https://cetinca-fastapi-ep.hf.space/text2int',
+    url='https://tangibleai-mathtext-fastapi.hf.space/text2int',
     json={"content": "forty two"}
     ).json()
 
@@ -27,9 +27,9 @@ requests.post(
 
 <h4>To make a request with curl</h4>
 <pre><code>
-curl --silent -X POST "https://cetinca-fastapi-ep.hf.space/sentiment-analysis" -H 'Content-Type: application/json' -d '{"content":"I am happy with it!"}'
+curl --silent -X POST "https://tangibleai-mathtext-fastapi.hf.space/sentiment-analysis" -H 'Content-Type: application/json' -d '{"content":"I am happy with it!"}'
 
-curl --silent -X POST "https://cetinca-fastapi-ep.hf.space/text2int" -H 'Content-Type: application/json' -d '{"content":"forty two"}'
+curl --silent -X POST "https://tangibleai-mathtext-fastapi.hf.space/text2int" -H 'Content-Type: application/json' -d '{"content":"forty two"}'
 </code></pre>
 </body>
 </html>

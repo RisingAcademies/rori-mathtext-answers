@@ -9,3 +9,4 @@ spacy
 pandas
 matplotlib
 pytest
+httpx
