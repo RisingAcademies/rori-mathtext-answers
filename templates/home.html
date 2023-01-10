@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <link rel="stylesheet" href="{{ url_for('static', path='/styles.css') }}">
+</head>
+<body>
+<h2>Mathbot</h2>
+<h3>Created with FastAPI</h3>
+
+<h4>To make a request with python</h4>
+<pre><code>
+import requests
+
+requests.post(
+    url='https://cetinca-fastapi-ep.hf.space/sentiment-analysis',
+    json={"content": "I reject it"}
+    ).json()
+
+requests.post(
+    url='https://cetinca-fastapi-ep.hf.space/text2int',
+    json={"content": "forty two"}
+    ).json()
+
+</code></pre>
+
+<h4>To make a request with curl</h4>
+<pre><code>
+curl --silent -X POST "https://cetinca-fastapi-ep.hf.space/sentiment-analysis" -H 'Content-Type: application/json' -d '{"content":"I am happy with it!"}'
+
+curl --silent -X POST "https://cetinca-fastapi-ep.hf.space/text2int" -H 'Content-Type: application/json' -d '{"content":"forty two"}'
+</code></pre>
+</body>
+</html>
