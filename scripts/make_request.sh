@@ -1,5 +1,5 @@
 #root_url="localhost:7860"
-root_url="https://cetinca-fastapi-ep.hf.space"
+root_url="https://tangibleai-mathtext-fastapi.hf.space"
 
 ep="/"
 url=$root_url$ep
@@ -12,8 +12,6 @@ echo "Data: $data"
 echo "Response: $response"
 echo
 
-sleep 0.1
-
 ep="/hello"
 url=$root_url$ep
 data='{"content":"Rori"}'
@@ -25,8 +23,6 @@ echo "Data: $data"
 echo "Response: $response"
 echo
 
-sleep 0.5
-
 ep="/sentiment-analysis"
 url=$root_url$ep
 data='{"content":"I am happy with it!"}'
@@ -37,8 +33,6 @@ echo "URL: $url"
 echo "Data: $data"
 echo "Response: $response"
 echo
-
-sleep 0.5
 
 ep="/text2int"
 url=$root_url$ep

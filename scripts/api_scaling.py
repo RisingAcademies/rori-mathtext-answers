@@ -11,7 +11,7 @@ NUMBER_OF_CALLS = 1
 
 headers = {"Content-Type": "application/json; charset=utf-8"}
 
-# base_url = "https://tangibleai-mathtext.hf.space/run/{endpoint}"
+# base_url = "https://tangibleai-mathtext-fastapi.hf.space/{endpoint}"
 base_url = "http://localhost:7860/run/{endpoint}"
 
 data_list_1 = {

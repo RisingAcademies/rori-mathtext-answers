@@ -49,7 +49,7 @@ simulate_student() {
 
     start_=$(date +"%F %T.%6N")
 
-    url="https://tangibleai-mathtext.hf.space/run/$3"
+    url="https://tangibleai-mathtext-fastapi.hf.space/$3"
     response=$(curl --silent --connect-timeout 30 --max-time 30 -X POST "$url" -H 'Content-Type: application/json' -d "$data")
 
     if [[ "$response" == *"Time-out"* ]]; then
