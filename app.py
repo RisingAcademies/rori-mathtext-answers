@@ -10,6 +10,8 @@ from pydantic import BaseModel
 
 from modules.sentiment import sentiment
 from modules.text2int import text2int
+# FIXME:
+# from mathtext.text2int import text2int
 
 app = FastAPI()
 
