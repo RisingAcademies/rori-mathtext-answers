@@ -10,3 +10,6 @@ pandas
 matplotlib
 pytest
 httpx
+
+django-environ
+supabase
