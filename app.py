@@ -10,6 +10,7 @@ from pydantic import BaseModel
 
 from modules.sentiment import sentiment
 from modules.text2int import text2int
+from modules.nlu import prepare_message_data_for_logging
 # FIXME:
 # from mathtext.text2int import text2int
 
@@ -47,3 +48,32 @@ def text2int_ep(content: Text = None):
     ml_response = text2int(content.content)
     content = {"message": ml_response}
     return JSONResponse(content=content)
+
+@app.post("/nlu")
+async def evaluate_user_message_with_nlu_api(request: Request):
+    """ Calls NLU APIs on the most recent user message from Turn.io message data and logs the message data
+
+    Input
+    - request.body: a json object of message data for the most recent user response
+
+    Output
+    - int_data_dict or sent_data_dict: A dictionary telling the type of NLU run and the resulting data
+      {'type':'integer', 'data': '8'}
+      {'type':'sentiment', 'data': 'negative'}
+    """
+
+    message_data = await request.json()
+    message_text = message_data['message']['text']['body'].lower()
+
+    int_api_resp = text2int(message_text)
+
+    if int_api_resp == '32202':
+        sentiment_api_resp = sentiment(message_text)
+        # [{'label': 'POSITIVE', 'score': 0.991188645362854}]
+        sent_data_dict = {'type': 'sentiment', 'data': sentiment_api_resp[0]['label']}
+        return JSONResponse(content={'type': 'sentiment', 'data': 'negative'})
+
+    prepare_message_data_for_logging(message_data)
+
+    int_data_dict = {'type': 'integer', 'data': int_api_resp}
+    return JSONResponse(content=int_data_dict)

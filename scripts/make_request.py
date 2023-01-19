@@ -12,3 +12,69 @@ request = requests.post(url=
                         ).json()
 
 print(request)
+
+
+json = {
+    'message': {
+        '_vnd': {
+            'v1': {
+                'author': {
+                    'id': 57787919091,
+                    'name': 'GT',
+                    'type': 'OWNER'
+                },
+                'card_uuid': None,
+                'chat': {
+                    'assigned_to': {
+                        'id': 'jhk151kl-hj42-3752-3hjk-h4jk6hjkk2',
+                        'name': 'Greg Thompson',
+                        'type': 'OPERATOR'
+                    },
+                    'contact_uuid': 'j43hk26-2hjl-43jk-hnk2-k4ljl46j0ds09',
+                    'inserted_at': '2022-07-05T04:00:34.033522Z',
+                    'owner': '+57787919091',
+                    'permalink': 'https://app.turn.io/c/4kl209sd0-a7b8-2hj3-8563-3hu4a89b32',
+                    'state': 'OPEN',
+                    'state_reason': 'Re-opened by inbound message.',
+                    'unread_count': 19,
+                    'updated_at': '2023-01-10T02:37:28.487319Z',
+                    'uuid': '4kl209sd0-a7b8-2hj3-8563-3hu4a89b32'
+                },
+                'direction': 'inbound',
+                'faq_uuid': None,
+                'in_reply_to': None,
+                'inserted_at': '2023-01-10T02:37:28.477940Z',
+                'labels': [{
+                    'confidence': 0.506479332,
+                    'metadata': {
+                        'nlu': {
+                            'confidence': 0.506479332,
+                            'intent': 'question',
+                            'model_name': 'nlu-general-spacy-ngrams-20191014'
+                        }
+                    },
+                    'uuid': 'ha7890s2k-hjk2-2476-s8d9-fh9779a8a9ds',
+                    'value': 'Unclassified'
+                }],
+                'last_status': None,
+                'last_status_timestamp': None,
+                'on_fallback_channel': False,
+                'rendered_content': None,
+                'uuid': 's8df79zhws-h89s-hj23-7s8d-thb248d9bh2qn'
+            }
+        },
+        'from': 57787919091,
+        'id': 'hsjkthzZGehkzs09sijWA3',
+        'text': {'body': 'eight'},
+        'timestamp': 1673318248,
+        'type': 'text'
+    },
+    'type': 'message'
+}
+
+request = requests.post(url=
+                        'http://localhost:7860/nlu',
+                        json=json
+                        ).json()
+
+print(request)
