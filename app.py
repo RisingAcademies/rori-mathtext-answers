@@ -62,7 +62,8 @@ async def evaluate_user_message_with_nlu_api(request: Request):
       {'type':'sentiment', 'data': 'negative'}
     """
 
-    message_data = await request.json()
+    data_dict = await request.json()
+    message_data = data_dict.get('message_data', '')
     message_text = message_data['message']['text']['body'].lower()
 
     int_api_resp = text2int(message_text)
