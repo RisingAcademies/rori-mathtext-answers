@@ -1,5 +1,5 @@
 """FastAPI endpoint
-To run locally use 'uvicorn modules.app:app --host localhost --port 7860'
+To run locally use 'uvicorn app:app --host localhost --port 7860'
 """
 
 from fastapi import FastAPI, Request
@@ -78,3 +78,4 @@ async def evaluate_user_message_with_nlu_api(request: Request):
 
     int_data_dict = {'type': 'integer', 'data': int_api_resp}
     return JSONResponse(content=int_data_dict)
+
