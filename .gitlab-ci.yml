@@ -1,9 +1,11 @@
-run_tests:
-  image: python:3.10-slim-buster
+# Official Python language image.
+image: python:3.9
+  - apt-get install -y git curl python-pip python-dev python3-dev build-essential graphviz doxygen
+  - apt-get update -qy
+  - python -v
+
+py39:
   before_script:
-    - echo "Image build has started!"
-    - apt install git
     - pip install -r requirements.txt
   script:
-
     - pytest --verbose
