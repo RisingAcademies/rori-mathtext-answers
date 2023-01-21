@@ -2,6 +2,8 @@ run_tests:
   image: python:3.10-slim-buster
   before_script:
     - echo "Image build has started!"
-  script:
+    - apt install git
     - pip install -r requirements.txt
+  script:
+
     - pytest --verbose
