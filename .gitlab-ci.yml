@@ -3,4 +3,7 @@ run_tests:
   before_script:
     - echo "Image build has started!"
   script:
-    - pip install -r requirements.txt && pytest --verbose
+    - git clone https://gitlab.com/tangibleai/community/mathtext
+    - pip install ./mathtext/
+    - pip install -r requirements.txt
+    - pytest --verbose
