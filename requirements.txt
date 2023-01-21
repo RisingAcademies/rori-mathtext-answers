@@ -1,16 +1,16 @@
 fastapi==0.74.*
 requests==2.27.*
 sentencepiece==0.1.*
-torch==1.11.*
-transformers==4.*
+torch==1.12.*
+transformers==4.24.*
 uvicorn[standard]==0.17.*
 pydantic
 mathtext @ git+https://gitlab.com/tangibleai/community/mathtext@main
-spacy
-pandas
-matplotlib
-pytest
-httpx
+spacy==3.4.*
+pandas==1.5.*
+matplotlib==3.6.*
+pytest==7.2.*
+httpx==0.23.*
 
 django-environ
 supabase

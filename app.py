@@ -8,11 +8,9 @@ from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 from pydantic import BaseModel
 
-from modules.sentiment import sentiment
-from modules.text2int import text2int
 from modules.nlu import prepare_message_data_for_logging
-# FIXME:
-# from mathtext.text2int import text2int
+from mathtext.sentiment import sentiment
+from mathtext.text2int import text2int
 
 app = FastAPI()
 
@@ -49,6 +47,7 @@ def text2int_ep(content: Text = None):
     content = {"message": ml_response}
     return JSONResponse(content=content)
 
+
 @app.post("/nlu")
 async def evaluate_user_message_with_nlu_api(request: Request):
     """ Calls NLU APIs on the most recent user message from Turn.io message data and logs the message data
@@ -78,4 +77,3 @@ async def evaluate_user_message_with_nlu_api(request: Request):
 
     int_data_dict = {'type': 'integer', 'data': int_api_resp}
     return JSONResponse(content=int_data_dict)
-
