@@ -1,6 +1,14 @@
 # Official Python language image.
-test:
+test_py39:
   image: python:3.9
+  before_script:
+    - python -v
+    - pip install -r requirements.txt
+  script:
+    - pytest --verbose
+
+test_py38:
+  image: python:3.8
   before_script:
     - python -v
     - pip install -r requirements.txt
