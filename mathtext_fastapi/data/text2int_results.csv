@@ -1,4 +1,6 @@
 input,output,text2int,score
+notanumber,32202,32202,True
+this is not a number,32202,32202,True
 fourteen,14,14,True
 forteen,14,14,True
 one thousand four hundred ninety two,1492,1492,True
@@ -21,7 +23,7 @@ double eight,88,32202,False
 eight three seven five three O nine,8375309,8375329,False
 eight three seven five three oh nine,8375309,8375309,True
 eight three seven five three zero nine,8375309,8375309,True
-eight three seven five three oh ni-ee-ine,8375309,837530619,False
+eight three seven five three oh ni-ee-ine,8375309,837530611,False
 two eight,28,16,False
 seven oh eleven,7011,77,False
 seven elevens,77,77,True

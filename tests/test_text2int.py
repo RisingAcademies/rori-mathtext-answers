@@ -1,11 +1,16 @@
 import unittest
+from pathlib import Path
 
 import pandas as pd
 from fastapi.testclient import TestClient
 
 from app import app
 
-TEST_DATA_FILE = "data/master_test_text2int.csv"
+# The raw file URL has to be used for GitLab.
+URL = "https://gitlab.com/tangibleai/community/mathtext/-/raw/main/mathtext/data/master_test_text2int.csv"
+
+DATA_DIR = Path(__file__).parent.parent / "mathtext_fastapi" / "data"
+print(DATA_DIR)
 
 client = TestClient(app)
 
@@ -15,6 +20,7 @@ class TestStringMethods(unittest.TestCase):
     def setUp(self):
         """Creates a fastapi test client"""
         self.client = TestClient(app)
+        self.df = pd.read_csv(URL)
 
     def get_response_text2int(self, text):
         """Makes a post request to the endpoint"""
@@ -35,15 +41,14 @@ class TestStringMethods(unittest.TestCase):
 
     def test_acc_score_text2int(self):
         """Calculates accuracy score for endpoint"""
-        df = pd.read_csv(TEST_DATA_FILE)
 
-        df["text2int"] = df["input"].apply(func=self.get_response_text2int)
-        df["score"] = df[["output", "text2int"]].apply(
+        self.df["text2int"] = self.df["input"].apply(func=self.get_response_text2int)
+        self.df["score"] = self.df[["output", "text2int"]].apply(
             lambda row: row[0] == row[1],
             axis=1
         )
-        df.to_csv("data/text2int_results.csv", index=False)
-        acc_score = df["score"].mean().__round__(2)
+        self.df.to_csv(f"{DATA_DIR}/text2int_results.csv", index=False)
+        acc_score = self.df["score"].mean().__round__(2)
 
         self.assertGreaterEqual(acc_score, 0.5, f"Accuracy score: '{acc_score}'. Value is too low!")
 

@@ -6,11 +6,11 @@ from fastapi import FastAPI, Request
 from fastapi.responses import JSONResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
-from pydantic import BaseModel
-
-from modules.nlu import prepare_message_data_for_logging
 from mathtext.sentiment import sentiment
 from mathtext.text2int import text2int
+from pydantic import BaseModel
+
+from mathtext_fastapi.nlu import prepare_message_data_for_logging
 
 app = FastAPI()
 
@@ -67,7 +67,7 @@ async def evaluate_user_message_with_nlu_api(request: Request):
 
     int_api_resp = text2int(message_text)
 
-    if int_api_resp == '32202':
+    if int_api_resp == 32202:
         sentiment_api_resp = sentiment(message_text)
         # [{'label': 'POSITIVE', 'score': 0.991188645362854}]
         sent_data_dict = {'type': 'sentiment', 'data': sentiment_api_resp[0]['label']}
@@ -76,4 +76,5 @@ async def evaluate_user_message_with_nlu_api(request: Request):
     prepare_message_data_for_logging(message_data)
 
     int_data_dict = {'type': 'integer', 'data': int_api_resp}
+
     return JSONResponse(content=int_data_dict)
