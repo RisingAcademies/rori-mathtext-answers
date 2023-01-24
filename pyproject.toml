@@ -1,0 +1,43 @@
+[tool.poetry]
+name = "MathText_FastAPI"
+version = "0.0.1"
+authors = [
+  "Sebastian Larsen <sebastianlarson22@gmail.com>",
+  "Çetin ÇAKIR <cetincakirtr@gmail.com>",
+  "Hobson Lane <gitlab@totalgood.com>",
+  ]
+description = "Natural Language Understanding (text processing) for math symbols, digits, and words with a Gradio user interface and REST API."
+readme = "README.md"
+# requires-python = ">=3.8"
+license = "AGPL-3.0-or-later"
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.8",
+    "Programming Language :: Python :: 3.9",
+    "License :: OSI Approved :: GNU Affero General Public License v3 or later (AGPLv3+)",
+    "Operating System :: OS Independent",
+]
+
+
+[tool.poetry.dependencies]
+mathtext = {git = "https://gitlab.com/tangibleai/community/mathtext", rev = "main"}
+fastapi = "0.74.*"
+pydantic = "*"
+python = "^3.8,<3.10"
+requests = "2.27.*"
+sentencepiece = "0.1.*"
+supabase = "*"
+uvicorn = "0.17.*"
+
+[tool.poetry.group.dev.dependencies]
+pytest = "^7.2"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
+
+# [build-system]
+# requires = ["hatchling"]
+# build-backend = "hatchling.build"
+
+# repository = "https://gitlab.com/tangibleai/community/mathtext-fastapi"
