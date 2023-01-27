@@ -63,9 +63,12 @@ async def evaluate_user_message_with_nlu_api(request: Request):
 
     data_dict = await request.json()
     message_data = data_dict.get('message_data', '')
-    message_text = message_data['message']['text']['body'].lower()
+    message_text = message_data['message']['text']['body']
 
-    int_api_resp = text2int(message_text)
+    if type(message_text) == int or type(message_text) == float:
+        return JSONResponse(content={'type': 'integer', 'data': message_text})
+
+    int_api_resp = text2int(message_text.lower())
 
     if int_api_resp == 32202:
         sentiment_api_resp = sentiment(message_text)
