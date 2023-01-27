@@ -1,6 +1,7 @@
 """FastAPI endpoint
 To run locally use 'uvicorn app:app --host localhost --port 7860'
 """
+import re
 
 from fastapi import FastAPI, Request
 from fastapi.responses import JSONResponse
@@ -63,18 +64,40 @@ async def evaluate_user_message_with_nlu_api(request: Request):
 
     data_dict = await request.json()
     message_data = data_dict.get('message_data', '')
-    message_text = message_data['message']['text']['body'].lower()
+    message_text = message_data['message']['text']['body']
 
-    int_api_resp = text2int(message_text)
+    # Handles if a student answer is already an integer or a float (ie., 8)
+    if type(message_text) == int or type(message_text) == float:
+        return JSONResponse(content={'type': 'integer', 'data': message_text})
 
-    if int_api_resp == 32202:
+    # Removes whitespace and converts str to arr to handle multiple numbers
+    message_text_arr = re.split(", |,| ", message_text.strip())
+
+    # Handle if a student answer is a string of numbers (ie., "8,9, 10")
+    if all(ele.isdigit() for ele in message_text_arr):
+        return JSONResponse(content={'type': 'integer', 'data': ','.join(message_text_arr)})
+
+    student_response_arr = []
+
+    for student_response in message_text_arr:
+        # Checks the student answer and returns an integer
+
+        int_api_resp = text2int(student_response.lower())
+        student_response_arr.append(int_api_resp)
+
+    # '32202' is text2int's error code for non-integer student answers (ie., "I don't know")
+    # If any part of the list is 32202, sentiment analysis will run
+    if 32202 in student_response_arr:
         sentiment_api_resp = sentiment(message_text)
         # [{'label': 'POSITIVE', 'score': 0.991188645362854}]
         sent_data_dict = {'type': 'sentiment', 'data': sentiment_api_resp[0]['label']}
-        return JSONResponse(content={'type': 'sentiment', 'data': 'negative'})
+        response_object = {'type': 'sentiment', 'data': 'negative'}
+    else:
+        if len(student_response_arr) > 1:
+            response_object = {'type': 'integer', 'data': ','.join(str(num) for num in student_response_arr)}
+        else:
+            response_object = {'type': 'integer', 'data': student_response_arr[0]}
 
     prepare_message_data_for_logging(message_data)
 
-    int_data_dict = {'type': 'integer', 'data': int_api_resp}
-
-    return JSONResponse(content=int_data_dict)
+    return JSONResponse(content=response_object)
