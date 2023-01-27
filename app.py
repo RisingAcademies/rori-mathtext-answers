@@ -65,11 +65,14 @@ async def evaluate_user_message_with_nlu_api(request: Request):
     message_data = data_dict.get('message_data', '')
     message_text = message_data['message']['text']['body']
 
+    # Handles if a student answer is already an integer or a float
     if type(message_text) == int or type(message_text) == float:
         return JSONResponse(content={'type': 'integer', 'data': message_text})
 
+    # Checks the student answer and returns an integer
     int_api_resp = text2int(message_text.lower())
 
+    # '32202' is text2int's error code for non-integer student answers (ie., "I don't know")
     if int_api_resp == 32202:
         sentiment_api_resp = sentiment(message_text)
         # [{'label': 'POSITIVE', 'score': 0.991188645362854}]
