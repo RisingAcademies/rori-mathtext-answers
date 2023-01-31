@@ -98,6 +98,7 @@ async def evaluate_user_message_with_nlu_api(request: Request):
         else:
             response_object = {'type': 'integer', 'data': student_response_arr[0]}
 
-    prepare_message_data_for_logging(message_data)
+    # Uncomment to enable logging to Supabase
+    # prepare_message_data_for_logging(message_data)
 
     return JSONResponse(content=response_object)
