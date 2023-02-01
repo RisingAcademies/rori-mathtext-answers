@@ -68,7 +68,7 @@ async def evaluate_user_message_with_nlu_api(request: Request):
 
     # Handles if a student answer is already an integer or a float (ie., 8)
     if type(message_text) == int or type(message_text) == float:
-        prepare_message_data_for_logging(message_data)
+        # prepare_message_data_for_logging(message_data)
         return JSONResponse(content={'type': 'integer', 'data': message_text})
 
     # Removes whitespace and converts str to arr to handle multiple numbers
@@ -76,7 +76,7 @@ async def evaluate_user_message_with_nlu_api(request: Request):
 
     # Handle if a student answer is a string of numbers (ie., "8,9, 10")
     if all(ele.isdigit() for ele in message_text_arr):
-        prepare_message_data_for_logging(message_data)
+        # prepare_message_data_for_logging(message_data)
         return JSONResponse(content={'type': 'integer', 'data': ','.join(message_text_arr)})
 
     student_response_arr = []
