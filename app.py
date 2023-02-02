@@ -69,7 +69,7 @@ async def evaluate_user_message_with_nlu_api(request: Request):
     # Handles if a student answer is already an integer or a float (ie., 8)
     if type(message_text) == int or type(message_text) == float:
         nlu_response = {'type': 'integer', 'data': message_text, 'confidence': ''}
-        # prepare_message_data_for_logging(message_data, nlu_response)
+        prepare_message_data_for_logging(message_data, nlu_response, message_data)
         return JSONResponse(content=nlu_response)
 
     # Removes whitespace and converts str to arr to handle multiple numbers
@@ -78,7 +78,7 @@ async def evaluate_user_message_with_nlu_api(request: Request):
     # Handle if a student answer is a string of numbers (ie., "8,9, 10")
     if all(ele.isdigit() for ele in message_text_arr):
         nlu_response = {'type': 'integer', 'data': ','.join(message_text_arr), 'confidence': ''}
-        # prepare_message_data_for_logging(message_data, nlu_response)
+        prepare_message_data_for_logging(message_data, nlu_response, message_data)
         return JSONResponse(content=nlu_response)
 
     student_response_arr = []
@@ -95,7 +95,7 @@ async def evaluate_user_message_with_nlu_api(request: Request):
         sentiment_api_resp = sentiment(message_text)
         # [{'label': 'POSITIVE', 'score': 0.991188645362854}]
         sent_data_dict = {'type': 'sentiment', 'data': sentiment_api_resp[0]['label']}
-        nlu_response = {'type': 'sentiment', 'data': 'negative', 'confidence': ''}
+        nlu_response = {'type': 'sentiment', 'data': 'negative', 'confidence': sentiment_api_resp[0]['score']}
     else:
         if len(student_response_arr) > 1:
             nlu_response = {'type': 'integer', 'data': ','.join(str(num) for num in student_response_arr), 'confidence': ''}
@@ -103,5 +103,5 @@ async def evaluate_user_message_with_nlu_api(request: Request):
             nlu_response = {'type': 'integer', 'data': student_response_arr[0], 'confidence': ''}
 
     # Uncomment to enable logging to Supabase
-    # prepare_message_data_for_logging(message_data, nlu_response)
+    prepare_message_data_for_logging(message_data, nlu_response, message_data)
     return JSONResponse(content=nlu_response)
