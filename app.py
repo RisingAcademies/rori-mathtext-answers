@@ -95,7 +95,7 @@ async def evaluate_user_message_with_nlu_api(request: Request):
         sentiment_api_resp = sentiment(message_text)
         # [{'label': 'POSITIVE', 'score': 0.991188645362854}]
         sent_data_dict = {'type': 'sentiment', 'data': sentiment_api_resp[0]['label']}
-        nlu_response = {'type': 'sentiment', 'data': 'negative', 'confidence': sentiment_api_resp[0]['score']}
+        nlu_response = {'type': 'sentiment', 'data': sentiment_api_resp[0]['label'], 'confidence': sentiment_api_resp[0]['score']}
     else:
         if len(student_response_arr) > 1:
             nlu_response = {'type': 'integer', 'data': ','.join(str(num) for num in student_response_arr), 'confidence': ''}
