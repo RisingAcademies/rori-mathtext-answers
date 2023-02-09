@@ -9,7 +9,7 @@ load_dotenv()
 # os.environ.get('SUPABASE_URL')
 
 
-def generate_message(data_json):
+def generate_message(data_json, context_data):
     """ pending
 
     REQUIREMENTS
@@ -143,6 +143,6 @@ def generate_message(data_json):
     print("==================")
 
 
-    context = {"content":{"user":"Alan", "state": "received-and-replied-state"}}
+    context = {"context":{"user":"Alan", "state": "received-and-replied-state"}}
 
     return context

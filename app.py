@@ -56,8 +56,9 @@ async def programmatic_message_manager(request: Request):
 
     data_dict = await request.json()
     message_data = data_dict.get('message_data', '')
+    context_data = data_dict.get('context', '')
 
-    context = generate_message(message_data)
+    context = generate_message(message_data, context_data)
     return JSONResponse(context)
 
 @app.post("/nlu")
