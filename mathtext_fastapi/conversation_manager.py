@@ -46,7 +46,7 @@ def generate_message(data_json):
 
     if user_message == 'add':
         data = {
-            "preview_url": false,
+            "preview_url": False,
             "recipient_type": "individual",
             "to": whatsapp_id,
             "type": "text",
@@ -56,7 +56,7 @@ def generate_message(data_json):
         }
     elif user_message == 'substract':
         data = {
-            "preview_url": false,
+            "preview_url": False,
             "recipient_type": "individual",
             "to": whatsapp_id,
             "type": "text",
