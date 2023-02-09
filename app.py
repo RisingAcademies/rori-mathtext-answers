@@ -12,6 +12,7 @@ from mathtext.text2int import text2int
 from pydantic import BaseModel
 
 from mathtext_fastapi.nlu import prepare_message_data_for_logging
+from mathtext_fastapi.conversation_manager import *
 
 app = FastAPI()
 
@@ -48,6 +49,16 @@ def text2int_ep(content: Text = None):
     content = {"message": ml_response}
     return JSONResponse(content=content)
 
+
+@app.post("/manager")
+async def programmatic_message_manager(request: Request):
+    print(request)
+
+    data_dict = await request.json()
+    message_data = data_dict.get('message_data', '')
+
+    context = generate_message(message_data)
+    return JSONResponse(context)
 
 @app.post("/nlu")
 async def evaluate_user_message_with_nlu_api(request: Request):
