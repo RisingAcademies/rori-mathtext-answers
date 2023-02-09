@@ -73,11 +73,7 @@ def generate_message(data_json):
         }
     }
 
-    print("DATA=====================")
-    print(data)
-    print("=========================")
-
-    # r = requests.post(f'https://whatsapp.turn.io/v1/messages', data=json.dumps(data), headers=headers)
+    r = requests.post(f'https://whatsapp.turn.io/v1/messages', data=json.dumps(data), headers=headers)
 
     context = {"content":{"user":"Alan", "state": "received-and-replied-state"}}
 
