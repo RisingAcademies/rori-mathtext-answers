@@ -8,11 +8,6 @@ load_dotenv()
 
 # os.environ.get('SUPABASE_URL')
 
-def parse_data(data):
-    data_bytes = requests.body
-    data_decoded = data_bytes.decode()
-    data_json = json.loads(data_decoded)
-    return data_json
 
 def generate_message(data_json):
     """ pending
@@ -47,7 +42,30 @@ def generate_message(data_json):
     print("DATA JSON")
     print(data_json)
 
-    data = {
+    user_message = data_json['message']['text']['body']
+
+    if user_message == 'add':
+        data = {
+            "preview_url": false,
+            "recipient_type": "individual",
+            "to": whatsapp_id,
+            "type": "text",
+            "text": {
+                "body": "What's 2+2?"
+            }
+        }
+    elif user_message == 'substract':
+        data = {
+            "preview_url": false,
+            "recipient_type": "individual",
+            "to": whatsapp_id,
+            "type": "text",
+            "text": {
+                "body": "What's 1-1?"
+            }
+        }    
+    else:
+        data = {
         "to": whatsapp_id,
         # "to": "alan",
         "type": "interactive",
@@ -55,7 +73,7 @@ def generate_message(data_json):
             "type": "button",
             # "header": { },
             "body": {
-                "text": "Did I answer your question?"
+                "text": "Please choose one of the following options."
             },
             # "footer": { },
             "action": {
@@ -64,20 +82,53 @@ def generate_message(data_json):
                         "type": "reply",
                         "reply": {
                             "id": "inquiry-yes",
-                            "title": "Yes" 
+                            "title": "add" 
                         }
                     },
                     {
                         "type": "reply",
                         "reply": {
                             "id": "inquiry-no",
-                            "title": "No" 
+                            "title": "subtract" 
                         }
                     }
                 ]
             }
         }
     }
+
+
+    # data = {
+    #     "to": whatsapp_id,
+    #     # "to": "alan",
+    #     "type": "interactive",
+    #     "interactive": {
+    #         "type": "button",
+    #         # "header": { },
+    #         "body": {
+    #             "text": "Did I answer your question?"
+    #         },
+    #         # "footer": { },
+    #         "action": {
+    #             "buttons": [
+    #                 {
+    #                     "type": "reply",
+    #                     "reply": {
+    #                         "id": "inquiry-yes",
+    #                         "title": "Yes" 
+    #                     }
+    #                 },
+    #                 {
+    #                     "type": "reply",
+    #                     "reply": {
+    #                         "id": "inquiry-no",
+    #                         "title": "No" 
+    #                     }
+    #                 }
+    #             ]
+    #         }
+    #     }
+    # }
 
     r = requests.post(f'https://whatsapp.turn.io/v1/messages', data=json.dumps(data), headers=headers)
     print("==================")
