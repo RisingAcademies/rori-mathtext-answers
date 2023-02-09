@@ -41,8 +41,14 @@ def generate_message(data_json):
         'Authorization': f"Bearer {os.environ.get('TURN_AUTHENTICATION_TOKEN')}",
         'Content-Type': 'application/json'
     }
+
+    whatsapp_id = data_json['message']['_vnd']['v1']['chat']['owner'].replace("+","")
+
+    print("DATA JSON")
+    print(data_json)
+
     data = {
-        "to": data_json['message']['_vnd']['v1']['chat']['owner'],
+        "to": whatsapp_id,
         # "to": "alan",
         "type": "interactive",
         "interactive": {
@@ -82,7 +88,7 @@ def generate_message(data_json):
     print("Request Info")
     print(r)
     print("--")
-    print(r.body)
+    # print(r.body)
     print("==================")
 
 
