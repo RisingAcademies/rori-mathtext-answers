@@ -78,6 +78,12 @@ def generate_message(data_json):
     whatsapp_id = message_data['message']['_vnd']['v1']['chat']['owner'].replace("+","")
     user_message = message_data['message']['text']['body']
     
+    print("===============")
+    print("context_data")
+    print(context_data)
+    print("===============")
+
+
     if user_message == '' and context_data['state'] == 'start-conversation':
         message_package = {
             'messages': [],
