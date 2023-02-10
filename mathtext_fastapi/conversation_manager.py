@@ -78,7 +78,7 @@ def generate_message(data_json):
     whatsapp_id = message_data['message']['_vnd']['v1']['chat']['owner'].replace("+","")
     user_message = message_data['message']['text']['body']
     
-    if user_message == '':
+    if user_message == '' and context_data['state'] == 'start-conversation':
         message_package = {
             'messages': [],
             'input_prompt': "Welcome to our math practice.  What would you like to try?  Type add or subtract.",
