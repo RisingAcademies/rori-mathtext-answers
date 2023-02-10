@@ -131,7 +131,7 @@ def generate_message(data_json):
     # print("==================")
 
 
-    context = {"context":{"user": whatsapp_id, "state": message_package['state'], "bot_message": message_package['input_prompt'], "user_message": user_message}}
+    context = {"context":{"user": whatsapp_id, "state": message_package['state'], "bot_message": message_package['input_prompt'], "user_message": user_message, "type": 'ask'}}
 
     return context
 
