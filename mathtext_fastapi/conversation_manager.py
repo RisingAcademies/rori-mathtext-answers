@@ -103,6 +103,14 @@ def generate_message(data_json):
             'input_prompt': "Here's the first one... What's 3-1?",
             'state': "subtract-question-sequence"
         }    
+    elif user_message == 'exit':
+        message_package = {
+            'messages': [
+                "Great, thanks for practicing math today.  Come back any time."
+            ],
+            'input_prompt': "",
+            'state': "exit"
+        }   
     else:
         message_package = {
             'messages': [
