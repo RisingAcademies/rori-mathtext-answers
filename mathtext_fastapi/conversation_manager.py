@@ -79,12 +79,14 @@ def generate_message(data_json):
     user_message = message_data['message']['text']['body']
     
     print("===============")
+    print("message_data")
+    print(message_data)
     print("context_data")
     print(context_data)
     print("===============")
 
 
-    if user_message == '' and context_data['state'] == 'start-conversation':
+    if context_data['user_message'] == '' and context_data['state'] == 'start-conversation':
         message_package = {
             'messages': [],
             'input_prompt': "Welcome to our math practice.  What would you like to try?  Type add or subtract.",
