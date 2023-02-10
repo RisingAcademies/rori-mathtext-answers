@@ -10,7 +10,16 @@ load_dotenv()
 
 
 def create_text_message(message_text, whatsapp_id):
-    data = {
+    """ Fills a template with the necessary information to send a text message to Whatsapp
+    
+    Inputs
+    - message_text: str - the content that the message should display
+    - whatsapp_id: str - the message recipient's phone number
+
+    Outputs
+    - message_data: dict - a preformatted template with the inputs' values included
+    """
+    message_data = {
         "preview_url": False,
         "recipient_type": "individual",
         "to": whatsapp_id,
@@ -19,23 +28,46 @@ def create_text_message(message_text, whatsapp_id):
             "body": message_text
         }
     }   
-    return data
+    return message_data
+
 
 def create_button_objects(button_options):
+    """ Creates a list of button objects using the input values
+    Input
+    - button_options: list - a list of text to be displayed in buttons
+
+    Output
+    - button_arr: list - a list of button objects that use a template filled with the input values
+
+    NOTE: Not fully implemented and tested
+    
+    """
     button_arr = []
     for option in button_options:
         button_choice = {
             "type": "reply",
             "reply": {
                 "id": "inquiry-yes",
-                "title": "add" 
+                "title": option['text'] 
             }
         }
         button_arr.append(button_choice)
     return button_arr
 
-def create_interactive_message(message_text, button_options, whatsapp_id):
 
+def create_interactive_message(message_text, button_options, whatsapp_id):
+    """ Fills a template with the necessary information to send a message with button options to Whatsapp
+
+    * NOTE: Not fully implemented and tested
+    * NOTE/TODO: It is possible to create other kinds of messages with the 'interactive message' template
+    * Documentation: https://whatsapp.turn.io/docs/api/messages#interactive-messages
+
+    Inputs
+    - message_text: str - the content that the message should display
+    - button_options: list - what each button option should display
+    - whatsapp_id: str - the message recipient's phone number
+    
+    """
     button_arr = create_button_objects(button_options)
 
     data = {
@@ -56,38 +88,19 @@ def create_interactive_message(message_text, button_options, whatsapp_id):
     return data
 
 
-def generate_message(data_json):
-    """ pending
+def return_next_conversational_state(context_data, user_message):
+    """ Evaluates the current state of the conversation to determine resources for the next state of the conversation
 
-    REQUIREMENTS
-    - implement logging of message
-    - have a very simple activity which allows for different dialogue
-      * add - Add the numbers, 1+1, 2+2
-      * subtract - Subtract the numbers, 1-1, 2-2
-      * menu - Choose one
-    - send message data to retrieve dialogue state
-    - retrieve response and build message object
-    - send message object
+    Input
+    - context_data: dict - data about the conversation's current state received from the Turn.io stack
+    - user_message: str - the message the user sent in response to the state
 
-    Need to make util functions that apply to both /nlu and /conversation_manager
+    Output
+    - message_package: dict - a series of messages and user input to send the user
     """
 
-    message_data = data_json.get('message_data', '')
-    context_data = data_json.get('context', '')
-    
-    whatsapp_id = message_data['message']['_vnd']['v1']['chat']['owner'].replace("+","")
-    user_message = message_data['message']['text']['body']
-    
-    print("===============")
-    print("message_data")
-    print(message_data)
-    print("context_data")
-    print(context_data)
-    print("===============")
-
-
     if context_data['user_message'] == '' and context_data['state'] == 'start-conversation':
-        message_package = {
+            message_package = {
             'messages': [],
             'input_prompt': "Welcome to our math practice.  What would you like to try?  Type add or subtract.",
             'state': "welcome-sequence"
@@ -127,27 +140,54 @@ def generate_message(data_json):
             'input_prompt': "Please type add or subtract to start a math activity.",
             'state': "reprompt-menu-options"
         }
+    return message_package
+
+
+def manage_conversational_response(data_json):
+    """ Parses message data, determines how to respond to user message at a given conversational state, builds/sends messages, and updates/sends context
+
+    Input
+    - data_json: dict - the data for a message the user sent to Turn.io/Whatsapp
+
+    Output
+    - context: dict - a record of the state at a given point a conversation
+
+    TODOs
+    - implement logging of message
+    - test interactive messages
+    - review context object and re-work to use a standardized format
+    - review ways for more robust error handling
+    - need to make util functions that apply to both /nlu and /conversation_manager
+    """
+
+    message_data = data_json.get('message_data', '')
+    context_data = data_json.get('context', '')
+    
+    whatsapp_id = message_data['message']['_vnd']['v1']['chat']['owner'].replace("+","")
+    user_message = message_data['message']['text']['body']
+    
+    message_package = return_next_conversational_state(context_data, user_message)
 
     headers = {
         'Authorization': f"Bearer {os.environ.get('TURN_AUTHENTICATION_TOKEN')}",
         'Content-Type': 'application/json'
     }
 
+    # Send all messages for the current state before a user input prompt (text/button input request)
     for message in message_package['messages']:
         data = create_text_message(message, whatsapp_id)
         r = requests.post(f'https://whatsapp.turn.io/v1/messages', data=json.dumps(data), headers=headers)
 
-    # print("==================")
-    # print("Headers")
-    # print(headers)
-    # print("Data")
-    # print(data)
-    # print("Request Info")
-    # print(r)
-    # print("==================")
-
-
-    context = {"context":{"user": whatsapp_id, "state": message_package['state'], "bot_message": message_package['input_prompt'], "user_message": user_message, "type": 'ask'}}
+    # Update the context object with the new state of the conversation
+    context = {
+        "context":{
+            "user": whatsapp_id, 
+            "state": message_package['state'], 
+            "bot_message": message_package['input_prompt'], 
+            "user_message": user_message, 
+            "type": 'ask'
+        }
+    }
 
     return context
 

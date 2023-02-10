@@ -52,21 +52,8 @@ def text2int_ep(content: Text = None):
 
 @app.post("/manager")
 async def programmatic_message_manager(request: Request):
-    print(request)
-
     data_dict = await request.json()
-    # print("FULL REQUEST")
-    # print(data_dict)
-
-    # message_data = data_dict.get('message_data', '')
-    # context_data = data_dict.get('context', '')
-
-    # print("MESSAGE_DATA")
-    # print(message_data)
-    # print("CONTEXT_DATA")
-    # print(context_data)
-
-    context = generate_message(data_dict)
+    context = manage_conversational_response(data_dict)
     return JSONResponse(context)
 
 @app.post("/nlu")
