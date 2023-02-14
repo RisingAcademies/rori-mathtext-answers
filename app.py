@@ -52,6 +52,31 @@ def text2int_ep(content: Text = None):
 
 @app.post("/manager")
 async def programmatic_message_manager(request: Request):
+    """
+    Calls the conversation management function to determine what to send to the user based on the current state and user response
+
+    Input
+    request.body: dict - a json object of message data for the most recent user response
+    {
+        author_id: "+47897891",
+        author_type: "OWNER",
+        message_body: "a test message",
+        message_direction: "inbound",
+        message_id: "ABJAK64jlk3-agjkl2QHFAFH",
+        message_inserted_at: "2022-07-05T04:00:34.03352Z",
+        message_updated_at: "2023-02-14T03:54:19.342950Z",
+    }
+
+    Output
+    context: dict - a json object that holds the information for the current state
+    {
+        "user": "47897891", 
+        "state": "welcome-message-state", 
+        "bot_message": "Welcome to Rori!", 
+        "user_message": "", 
+        "type": "ask"
+    }
+    """
     data_dict = await request.json()
     context = manage_conversational_response(data_dict)
     return JSONResponse(context)
@@ -68,14 +93,7 @@ async def evaluate_user_message_with_nlu_api(request: Request):
       {'type':'integer', 'data': '8'}
       {'type':'sentiment', 'data': 'negative'}
     """
-
-    print("REQUEST")
-    print(request)
-
     data_dict = await request.json()
-
-    print("DATA DICT")
-    print(data_dict)
 
     message_data = data_dict.get('message_data', '')
     message_text = message_data['message']['text']['body']

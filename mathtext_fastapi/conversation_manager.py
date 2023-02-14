@@ -40,7 +40,6 @@ def create_button_objects(button_options):
     - button_arr: list - a list of button objects that use a template filled with the input values
 
     NOTE: Not fully implemented and tested
-    
     """
     button_arr = []
     for option in button_options:
@@ -66,7 +65,6 @@ def create_interactive_message(message_text, button_options, whatsapp_id):
     - message_text: str - the content that the message should display
     - button_options: list - what each button option should display
     - whatsapp_id: str - the message recipient's phone number
-    
     """
     button_arr = create_button_objects(button_options)
 
@@ -98,7 +96,6 @@ def return_next_conversational_state(context_data, user_message):
     Output
     - message_package: dict - a series of messages and user input to send the user
     """
-
     if context_data['user_message'] == '' and context_data['state'] == 'start-conversation':
             message_package = {
             'messages': [],
@@ -159,7 +156,6 @@ def manage_conversational_response(data_json):
     - review ways for more robust error handling
     - need to make util functions that apply to both /nlu and /conversation_manager
     """
-
     message_data = data_json.get('message_data', '')
     context_data = data_json.get('context_data', '')
     
