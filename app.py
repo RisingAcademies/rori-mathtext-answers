@@ -81,6 +81,7 @@ async def programmatic_message_manager(request: Request):
     context = manage_conversational_response(data_dict)
     return JSONResponse(context)
 
+
 @app.post("/nlu")
 async def evaluate_user_message_with_nlu_api(request: Request):
     """ Calls NLU APIs on the most recent user message from Turn.io message data and logs the message data
@@ -96,12 +97,12 @@ async def evaluate_user_message_with_nlu_api(request: Request):
     data_dict = await request.json()
 
     message_data = data_dict.get('message_data', '')
-    message_text = message_data['message']['text']['body']
+    message_text = message_data['message_body']
 
     # Handles if a student answer is already an integer or a float (ie., 8)
     if type(message_text) == int or type(message_text) == float:
         nlu_response = {'type': 'integer', 'data': message_text, 'confidence': ''}
-        prepare_message_data_for_logging(message_data, nlu_response, message_data)
+        prepare_message_data_for_logging(message_data, nlu_response)
         return JSONResponse(content=nlu_response)
 
     # Removes whitespace and converts str to arr to handle multiple numbers
@@ -110,7 +111,7 @@ async def evaluate_user_message_with_nlu_api(request: Request):
     # Handle if a student answer is a string of numbers (ie., "8,9, 10")
     if all(ele.isdigit() for ele in message_text_arr):
         nlu_response = {'type': 'integer', 'data': ','.join(message_text_arr), 'confidence': ''}
-        prepare_message_data_for_logging(message_data, nlu_response, message_data)
+        prepare_message_data_for_logging(message_data, nlu_response)
         return JSONResponse(content=nlu_response)
 
     student_response_arr = []
@@ -134,6 +135,5 @@ async def evaluate_user_message_with_nlu_api(request: Request):
         else:
             nlu_response = {'type': 'integer', 'data': student_response_arr[0], 'confidence': ''}
 
-    # Uncomment to enable logging to Supabase
-    prepare_message_data_for_logging(message_data, nlu_response, message_data)
+    prepare_message_data_for_logging(message_data, nlu_response)
     return JSONResponse(content=nlu_response)
