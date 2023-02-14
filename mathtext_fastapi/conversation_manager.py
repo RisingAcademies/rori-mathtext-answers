@@ -161,10 +161,10 @@ def manage_conversational_response(data_json):
     """
 
     message_data = data_json.get('message_data', '')
-    context_data = data_json.get('context', '')
+    context_data = data_json.get('context_data', '')
     
-    whatsapp_id = message_data['message']['_vnd']['v1']['chat']['owner'].replace("+","")
-    user_message = message_data['message']['text']['body']
+    whatsapp_id = message_data['author_id']
+    user_message = message_data['message_body']
     
     message_package = return_next_conversational_state(context_data, user_message)
 
