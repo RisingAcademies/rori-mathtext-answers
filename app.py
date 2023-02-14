@@ -58,13 +58,14 @@ async def programmatic_message_manager(request: Request):
     Input
     request.body: dict - a json object of message data for the most recent user response
     {
-        author_id: "+47897891",
-        author_type: "OWNER",
-        message_body: "a test message",
-        message_direction: "inbound",
-        message_id: "ABJAK64jlk3-agjkl2QHFAFH",
-        message_inserted_at: "2022-07-05T04:00:34.03352Z",
-        message_updated_at: "2023-02-14T03:54:19.342950Z",
+        "author_id": "+47897891",
+        "contact_uuid": "j43hk26-2hjl-43jk-hnk2-k4ljl46j0ds09",
+        "author_type": "OWNER",
+        "message_body": "a test message",
+        "message_direction": "inbound",
+        "message_id": "ABJAK64jlk3-agjkl2QHFAFH",
+        "message_inserted_at": "2022-07-05T04:00:34.03352Z",
+        "message_updated_at": "2023-02-14T03:54:19.342950Z",
     }
 
     Output

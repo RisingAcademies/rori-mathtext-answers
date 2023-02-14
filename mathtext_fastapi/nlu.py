@@ -64,6 +64,9 @@ def prepare_message_data_for_logging(message_data, nlu_response):
     }
     contact_data_log = get_or_create_supabase_entry('contact', contact_data)
 
+
+    del message_data['author_id']
+
     message_data = {
         'contact': contact_data_log.data[0]['id'],  # FK
         'original_message_id': message_data['message_id'],
