@@ -3,6 +3,7 @@ import json
 import requests
 
 from dotenv import load_dotenv
+from mathtext_fastapi.nlu import evaluate_message_with_nlu
 
 load_dotenv()
 
@@ -161,6 +162,9 @@ def manage_conversational_response(data_json):
     
     whatsapp_id = message_data['author_id']
     user_message = message_data['message_body']
+
+    # TODO: Need to incorporate nlu_response into wormhole by checking answers against database (spreadsheet?)
+    nlu_response = evaluate_message_with_nlu(message_data)
     
     message_package = return_next_conversational_state(context_data, user_message)
 

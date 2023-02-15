@@ -11,8 +11,9 @@ from mathtext.sentiment import sentiment
 from mathtext.text2int import text2int
 from pydantic import BaseModel
 
-from mathtext_fastapi.nlu import prepare_message_data_for_logging
-from mathtext_fastapi.conversation_manager import *
+from mathtext_fastapi.logging import prepare_message_data_for_logging
+from mathtext_fastapi.conversation_manager import manage_conversational_response
+from mathtext_fastapi.nlu import evaluate_message_with_nlu
 
 app = FastAPI()
 
@@ -85,7 +86,7 @@ async def programmatic_message_manager(request: Request):
 
 @app.post("/nlu")
 async def evaluate_user_message_with_nlu_api(request: Request):
-    """ Calls NLU APIs on the most recent user message from Turn.io message data and logs the message data
+    """ Calls the nlu evaluation function to run nlu functions and returns the nlu_response to Turn.io
 
     Input
     - request.body: a json object of message data for the most recent user response
@@ -96,45 +97,6 @@ async def evaluate_user_message_with_nlu_api(request: Request):
       {'type':'sentiment', 'data': 'negative'}
     """
     data_dict = await request.json()
-
     message_data = data_dict.get('message_data', '')
-    message_text = message_data['message_body']
-
-    # Handles if a student answer is already an integer or a float (ie., 8)
-    if type(message_text) == int or type(message_text) == float:
-        nlu_response = {'type': 'integer', 'data': message_text, 'confidence': ''}
-        prepare_message_data_for_logging(message_data, nlu_response)
-        return JSONResponse(content=nlu_response)
-
-    # Removes whitespace and converts str to arr to handle multiple numbers
-    message_text_arr = re.split(", |,| ", message_text.strip())
-
-    # Handle if a student answer is a string of numbers (ie., "8,9, 10")
-    if all(ele.isdigit() for ele in message_text_arr):
-        nlu_response = {'type': 'integer', 'data': ','.join(message_text_arr), 'confidence': ''}
-        prepare_message_data_for_logging(message_data, nlu_response)
-        return JSONResponse(content=nlu_response)
-
-    student_response_arr = []
-
-    for student_response in message_text_arr:
-        # Checks the student answer and returns an integer
-
-        int_api_resp = text2int(student_response.lower())
-        student_response_arr.append(int_api_resp)
-
-    # '32202' is text2int's error code for non-integer student answers (ie., "I don't know")
-    # If any part of the list is 32202, sentiment analysis will run
-    if 32202 in student_response_arr:
-        sentiment_api_resp = sentiment(message_text)
-        # [{'label': 'POSITIVE', 'score': 0.991188645362854}]
-        sent_data_dict = {'type': 'sentiment', 'data': sentiment_api_resp[0]['label']}
-        nlu_response = {'type': 'sentiment', 'data': sentiment_api_resp[0]['label'], 'confidence': sentiment_api_resp[0]['score']}
-    else:
-        if len(student_response_arr) > 1:
-            nlu_response = {'type': 'integer', 'data': ','.join(str(num) for num in student_response_arr), 'confidence': ''}
-        else:
-            nlu_response = {'type': 'integer', 'data': student_response_arr[0], 'confidence': ''}
-
-    prepare_message_data_for_logging(message_data, nlu_response)
+    nlu_response = evaluate_message_with_nlu(message_data)
     return JSONResponse(content=nlu_response)
