@@ -72,25 +72,25 @@ async def programmatic_message_manager(request: Request):
     Output
     context: dict - the information for the current state
     {
-        "user": "47897891", 
-        "state": "welcome-message-state", 
-        "bot_message": "Welcome to Rori!", 
-        "user_message": "", 
+        "user": "47897891",
+        "state": "welcome-message-state",
+        "bot_message": "Welcome to Rori!",
+        "user_message": "",
         "type": "ask"
     }
     """
     data_dict = await request.json()
-    context = manage_conversational_response(data_dict)
+    context = manage_conversation_response(data_dict)
     return JSONResponse(context)
 
 
 @app.post("/nlu")
 async def evaluate_user_message_with_nlu_api(request: Request):
     """ Calls nlu evaluation and returns the nlu_response
-    
+
     Input
     - request.body: json - message data for the most recent user response
-    
+
     Output
     - int_data_dict or sent_data_dict: dict - the type of NLU run and result
       {'type':'integer', 'data': '8'}

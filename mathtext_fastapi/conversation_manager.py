@@ -12,7 +12,7 @@ load_dotenv()
 
 def create_text_message(message_text, whatsapp_id):
     """ Fills a template with input values to send a text message to Whatsapp
-    
+
     Inputs
     - message_text: str - the content that the message should display
     - whatsapp_id: str - the message recipient's phone number
@@ -28,7 +28,7 @@ def create_text_message(message_text, whatsapp_id):
         "text": {
             "body": message_text
         }
-    }   
+    }
     return message_data
 
 
@@ -48,7 +48,7 @@ def create_button_objects(button_options):
             "type": "reply",
             "reply": {
                 "id": "inquiry-yes",
-                "title": option['text'] 
+                "title": option['text']
             }
         }
         button_arr.append(button_choice)
@@ -59,9 +59,9 @@ def create_interactive_message(message_text, button_options, whatsapp_id):
     """ Fills a template to create a button message for Whatsapp
 
     * NOTE: Not fully implemented and tested
-    * NOTE/TODO: It is possible to create other kinds of messages 
+    * NOTE/TODO: It is possible to create other kinds of messages
                  with the 'interactive message' template
-    * Documentation: 
+    * Documentation:
       https://whatsapp.turn.io/docs/api/messages#interactive-messages
 
     Inputs
@@ -124,7 +124,7 @@ def return_next_conversational_state(context_data, user_message):
             ],
             'input_prompt': "Here's the first one... What's 3-1?",
             'state': "subtract-question-sequence"
-        }    
+        }
     elif user_message == 'exit':
         message_package = {
             'messages': [
@@ -132,7 +132,7 @@ def return_next_conversational_state(context_data, user_message):
             ],
             'input_prompt': "",
             'state': "exit"
-        }   
+        }
     else:
         message_package = {
             'messages': [
@@ -162,15 +162,15 @@ def manage_conversation_response(data_json):
     """
     message_data = data_json.get('message_data', '')
     context_data = data_json.get('context_data', '')
-    
+
     whatsapp_id = message_data['author_id']
     user_message = message_data['message_body']
 
     # TODO: Need to incorporate nlu_response into wormhole by checking answers against database (spreadsheet?)
     nlu_response = evaluate_message_with_nlu(message_data)
-    
+
     message_package = return_next_conversational_state(
-        context_data, 
+        context_data,
         user_message
     )
 
@@ -183,18 +183,18 @@ def manage_conversation_response(data_json):
     for message in message_package['messages']:
         data = create_text_message(message, whatsapp_id)
         r = requests.post(
-            f'https://whatsapp.turn.io/v1/messages', 
-            data=json.dumps(data), 
+            f'https://whatsapp.turn.io/v1/messages',
+            data=json.dumps(data),
             headers=headers
         )
 
     # Update the context object with the new state of the conversation
     context = {
         "context":{
-            "user": whatsapp_id, 
-            "state": message_package['state'], 
-            "bot_message": message_package['input_prompt'], 
-            "user_message": user_message, 
+            "user": whatsapp_id,
+            "state": message_package['state'],
+            "bot_message": message_package['input_prompt'],
+            "user_message": user_message,
             "type": 'ask'
         }
     }
@@ -217,14 +217,14 @@ def manage_conversation_response(data_json):
     #                     "type": "reply",
     #                     "reply": {
     #                         "id": "inquiry-yes",
-    #                         "title": "Yes" 
+    #                         "title": "Yes"
     #                     }
     #                 },
     #                 {
     #                     "type": "reply",
     #                     "reply": {
     #                         "id": "inquiry-no",
-    #                         "title": "No" 
+    #                         "title": "No"
     #                     }
     #                 }
     #             ]

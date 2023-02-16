@@ -26,8 +26,8 @@ def test_for_number_sequence(message_text_arr, message_data, message_text):
     nlu_response = {}
     if all(ele.isdigit() for ele in message_text_arr):
         nlu_response = build_nlu_response_object(
-            'integer', 
-            ','.join(message_text_arr), 
+            'integer',
+            ','.join(message_text_arr),
             ''
         )
         prepare_message_data_for_logging(message_data, nlu_response)
@@ -79,25 +79,23 @@ def evaluate_message_with_nlu(message_data):
     if 32202 in student_response_arr:
         sentiment_api_resp = sentiment(message_text)
         nlu_response = build_nlu_response_object(
-            'sentiment', 
-            sentiment_api_resp[0]['label'], 
+            'sentiment',
+            sentiment_api_resp[0]['label'],
             sentiment_api_resp[0]['score']
         )
     else:
         if len(student_response_arr) > 1:
             nlu_response = build_nlu_response_object(
-                'integer', 
-                ','.join(str(num) for num in student_response_arr), 
+                'integer',
+                ','.join(str(num) for num in student_response_arr),
                 ''
             )
         else:
             nlu_response = build_nlu_response_object(
-                'integer', 
-                student_response_arr[0], 
+                'integer',
+                student_response_arr[0],
                 ''
             )
 
     prepare_message_data_for_logging(message_data, nlu_response)
     return nlu_response
-
-
