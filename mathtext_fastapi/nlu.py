@@ -5,11 +5,11 @@ import re
 
 
 def build_nlu_response_object(type, data, confidence):
-    """ Builds a json object from the result of nlu functions to send back to Turn.io
+    """ Turns nlu results into an object to send back to Turn.io
     Inputs
     - type: str - the type of nlu run (integer or sentiment-analysis)
     - data: str - the student message
-    - confidence: - the nlu confidence score.  Integer is ''.  Sentiment analysis is a float
+    - confidence: - the nlu confidence score (sentiment) or '' (integer)
     """
     return {'type': type, 'data': data, 'confidence': confidence}
 
@@ -25,19 +25,23 @@ def test_for_float_or_int(message_data, message_text):
 def test_for_number_sequence(message_text_arr, message_data, message_text):
     nlu_response = {}
     if all(ele.isdigit() for ele in message_text_arr):
-        nlu_response = build_nlu_response_object('integer', ','.join(message_text_arr), '')
+        nlu_response = build_nlu_response_object(
+            'integer', 
+            ','.join(message_text_arr), 
+            ''
+        )
         prepare_message_data_for_logging(message_data, nlu_response)
     return nlu_response
 
 
 def run_text2int_on_each_list_item(message_text_arr):
-    """ Checks each item in an array to see if it can be converted to an integer
+    """ Attempts to convert each list item to an integer
 
     Input
     - message_text_arr: list - a set of text extracted from the student message
 
     Output
-    - student_response_arr: list - a set of integers derived from the nlu function
+    - student_response_arr: list - a set of integers (32202 for error code)
     """
     student_response_arr = []
     for student_response in message_text_arr:
@@ -74,12 +78,24 @@ def evaluate_message_with_nlu(message_data):
     student_response_arr = run_text2int_on_each_list_item(message_text_arr)
     if 32202 in student_response_arr:
         sentiment_api_resp = sentiment(message_text)
-        nlu_response = build_nlu_response_object('sentiment', sentiment_api_resp[0]['label'], sentiment_api_resp[0]['score'])
+        nlu_response = build_nlu_response_object(
+            'sentiment', 
+            sentiment_api_resp[0]['label'], 
+            sentiment_api_resp[0]['score']
+        )
     else:
         if len(student_response_arr) > 1:
-            nlu_response = build_nlu_response_object('integer', ','.join(str(num) for num in student_response_arr), '' )
+            nlu_response = build_nlu_response_object(
+                'integer', 
+                ','.join(str(num) for num in student_response_arr), 
+                ''
+            )
         else:
-            nlu_response = build_nlu_response_object('integer', student_response_arr[0], '')
+            nlu_response = build_nlu_response_object(
+                'integer', 
+                student_response_arr[0], 
+                ''
+            )
 
     prepare_message_data_for_logging(message_data, nlu_response)
     return nlu_response

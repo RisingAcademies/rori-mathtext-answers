@@ -12,7 +12,7 @@ from mathtext.text2int import text2int
 from pydantic import BaseModel
 
 from mathtext_fastapi.logging import prepare_message_data_for_logging
-from mathtext_fastapi.conversation_manager import manage_conversational_response
+from mathtext_fastapi.conversation_manager import manage_conversation_response
 from mathtext_fastapi.nlu import evaluate_message_with_nlu
 
 app = FastAPI()
@@ -54,10 +54,10 @@ def text2int_ep(content: Text = None):
 @app.post("/manager")
 async def programmatic_message_manager(request: Request):
     """
-    Calls the conversation management function to determine what to send to the user based on the current state and user response
+    Calls conversation management function to determine the next state
 
     Input
-    request.body: dict - a json object of message data for the most recent user response
+    request.body: dict - message data for the most recent user response
     {
         "author_id": "+47897891",
         "contact_uuid": "j43hk26-2hjl-43jk-hnk2-k4ljl46j0ds09",
@@ -70,7 +70,7 @@ async def programmatic_message_manager(request: Request):
     }
 
     Output
-    context: dict - a json object that holds the information for the current state
+    context: dict - the information for the current state
     {
         "user": "47897891", 
         "state": "welcome-message-state", 
@@ -86,13 +86,13 @@ async def programmatic_message_manager(request: Request):
 
 @app.post("/nlu")
 async def evaluate_user_message_with_nlu_api(request: Request):
-    """ Calls the nlu evaluation function to run nlu functions and returns the nlu_response to Turn.io
-
+    """ Calls nlu evaluation and returns the nlu_response
+    
     Input
-    - request.body: a json object of message data for the most recent user response
-
+    - request.body: json - message data for the most recent user response
+    
     Output
-    - int_data_dict or sent_data_dict: A dictionary telling the type of NLU run and the resulting data
+    - int_data_dict or sent_data_dict: dict - the type of NLU run and result
       {'type':'integer', 'data': '8'}
       {'type':'sentiment', 'data': 'negative'}
     """
