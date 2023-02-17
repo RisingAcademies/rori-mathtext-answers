@@ -7,7 +7,7 @@ import requests
 from dotenv import load_dotenv
 from mathtext_fastapi.nlu import evaluate_message_with_nlu
 from mathtext_fastapi.math_quiz_fsm import MathQuizFSM
-
+from supabase import create_client
 from transitions import Machine
 
 load_dotenv()
