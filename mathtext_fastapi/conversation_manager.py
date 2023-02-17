@@ -151,7 +151,8 @@ def return_next_conversational_state(context_data, user_message, contact_uuid):
             print("user_message")
             print(user_message)
 
-            math_quiz_state_machine.student_answer == user_message
+            math_quiz_state_machine.student_answer = user_message
+            math_quiz_state_machine.correct_answer = str(math_quiz_state_machine.correct_answer)
             messages = math_quiz_state_machine.validate_answer()
             dump_encoded = pickle_and_encode_state_machine(math_quiz_state_machine)          
             SUPA.table('state_machines').update({
