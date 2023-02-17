@@ -6,7 +6,7 @@ import requests
 
 from dotenv import load_dotenv
 from mathtext_fastapi.nlu import evaluate_message_with_nlu
-from math_quiz_fsm import MathQuizFSM
+from mathtext_fastapi.math_quiz_fsm import MathQuizFSM
 
 from transitions import Machine
 
