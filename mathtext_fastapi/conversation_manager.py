@@ -147,7 +147,7 @@ def return_next_conversational_state(context_data, user_message, contact_uuid):
             math_quiz_state_machine = pickle.loads(undump_encoded)
 
             print("student answer")
-            print(student_answer)
+            print(math_quiz_state_machine.student_answer)
             print("user_message")
             print(user_message)
 
