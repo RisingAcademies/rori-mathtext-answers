@@ -46,20 +46,20 @@ def run_simulated_request(endpoint, sample_answer, context=None):
     print(request)
 
 
-run_simulated_request('sentiment-analysis', 'I reject it')
-run_simulated_request('text2int', 'seven thousand nine hundred fifty seven')
-run_simulated_request('nlu', 'test message')
-run_simulated_request('nlu', 'eight')
-run_simulated_request('nlu', 'eight, nine, ten')
-run_simulated_request('nlu', '8, 9, 10')
-run_simulated_request('nlu', '8')
-run_simulated_request('nlu', "I don't know")
-run_simulated_request('nlu', 'Today is a wonderful day')
-run_simulated_request('nlu', 'IDK 5?')
-run_simulated_request('manager', '')
+# run_simulated_request('sentiment-analysis', 'I reject it')
+# run_simulated_request('text2int', 'seven thousand nine hundred fifty seven')
+# run_simulated_request('nlu', 'test message')
+# run_simulated_request('nlu', 'eight')
+# run_simulated_request('nlu', 'eight, nine, ten')
+# run_simulated_request('nlu', '8, 9, 10')
+# run_simulated_request('nlu', '8')
+# run_simulated_request('nlu', "I don't know")
+# run_simulated_request('nlu', 'Today is a wonderful day')
+# run_simulated_request('nlu', 'IDK 5?')
+# run_simulated_request('manager', '')
 run_simulated_request('manager', 'add')
-run_simulated_request('manager', 'subtract')
-run_simulated_request('manager', 'exit')
+# run_simulated_request('manager', 'subtract')
+# run_simulated_request('manager', 'exit')
 
 
 # Example of simplified object received from Turn.io stacks
@@ -72,7 +72,7 @@ simplified_json = {
         "bot_message": "What is 2+2?", 
         "user_message": "eight",
         "type": "ask"
-    }, 
+    },
     "message_data": {
         "author_id": "+57787919091", 
         "author_type": "OWNER", 

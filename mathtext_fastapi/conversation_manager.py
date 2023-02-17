@@ -1,6 +1,9 @@
-import dill as pickle
+import base64
+import dill
 import os
 import json
+import jsonpickle
+import pickle
 import random
 import requests
 
@@ -97,6 +100,12 @@ def create_interactive_message(message_text, button_options, whatsapp_id):
     return data
 
 
+def pickle_and_encode_state_machine(state_machine):
+    dump = pickle.dumps(state_machine)
+    dump_encoded = base64.b64encode(dump).decode('utf-8')
+    return dump_encoded
+
+
 def return_next_conversational_state(context_data, user_message, contact_uuid):
     """ Evaluates the conversation's current state to determine the next state
 
@@ -117,23 +126,30 @@ def return_next_conversational_state(context_data, user_message, contact_uuid):
     elif user_message == 'add':
 
         fsm_check = SUPA.table('state_machines').select("*").eq(
-            "uuid",
+            "contact_uuid",
             contact_uuid
         ).execute()
 
         if fsm_check.data == []:
             math_quiz_state_machine = MathQuizFSM()
             messages = [math_quiz_state_machine.response_text]
-            dump = pickle.dumps(math_quiz_state_machine)
+            dump_encoded = pickle_and_encode_state_machine(math_quiz_state_machine)
 
-            # TODO: Check how to save - JSONB?
-            SUPA.table('state_machines').insert(dump).execute()
+            SUPA.table('state_machines').insert({
+                'contact_uuid': contact_uuid,
+                'addition3': dump_encoded
+            }).execute()
         else:
-            math_quiz_state_machine = pickle.loads(fsm_check.data['add'])
-            math_quiz_state_machine.student_answer
-            messages = math_quiz_state_machine.validate()
-            dump = pickle.dumps(math_quiz_state_machine)            
-            SUPA.table('state_machines').update(dump).eq(
+            undump_encoded = base64.b64decode(
+                fsm_check.data[0]['addition3'].encode('utf-8')
+            )
+            math_quiz_state_machine = pickle.loads(undump_encoded)
+            math_quiz_state_machine.student_answer == user_message
+            messages = math_quiz_state_machine.validate_answer()
+            dump_encoded = pickle_and_encode_state_machine(math_quiz_state_machine)          
+            SUPA.table('state_machines').update({
+                'addition3': dump_encoded
+            }).eq(
                 "contact_uuid", contact_uuid
             ).execute()
 
@@ -201,6 +217,7 @@ def manage_conversation_response(data_json):
         user_message,
         contact_uuid
     )
+
 
     headers = {
         'Authorization': f"Bearer {os.environ.get('TURN_AUTHENTICATION_TOKEN')}",
