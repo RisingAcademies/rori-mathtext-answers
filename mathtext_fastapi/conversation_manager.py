@@ -1,13 +1,24 @@
+import base64
+import dill
 import os
 import json
+import jsonpickle
+import pickle
+import random
 import requests
 
 from dotenv import load_dotenv
 from mathtext_fastapi.nlu import evaluate_message_with_nlu
+from mathtext_fastapi.math_quiz_fsm import MathQuizFSM
+from supabase import create_client
+from transitions import Machine
 
 load_dotenv()
 
-# os.environ.get('SUPABASE_URL')
+SUPA = create_client(
+    os.environ.get('SUPABASE_URL'),
+    os.environ.get('SUPABASE_KEY')
+)
 
 
 def create_text_message(message_text, whatsapp_id):
@@ -89,7 +100,13 @@ def create_interactive_message(message_text, button_options, whatsapp_id):
     return data
 
 
-def return_next_conversational_state(context_data, user_message):
+def pickle_and_encode_state_machine(state_machine):
+    dump = pickle.dumps(state_machine)
+    dump_encoded = base64.b64encode(dump).decode('utf-8')
+    return dump_encoded
+
+
+def return_next_conversational_state(context_data, user_message, contact_uuid):
     """ Evaluates the conversation's current state to determine the next state
 
     Input
@@ -106,15 +123,46 @@ def return_next_conversational_state(context_data, user_message):
             'input_prompt': "Welcome to our math practice.  What would you like to try?  Type add or subtract.",
             'state': "welcome-sequence"
         }
-    elif user_message == 'add':
+    elif context_data['state'] == 'addition-question-sequence' or \
+        user_message == 'add':
+
+        fsm_check = SUPA.table('state_machines').select("*").eq(
+            "contact_uuid",
+            contact_uuid
+        ).execute()
+
+        if fsm_check.data == []:
+            math_quiz_state_machine = MathQuizFSM()
+            messages = [math_quiz_state_machine.response_text]
+            dump_encoded = pickle_and_encode_state_machine(math_quiz_state_machine)
+
+            SUPA.table('state_machines').insert({
+                'contact_uuid': contact_uuid,
+                'addition3': dump_encoded
+            }).execute()
+        else:
+            undump_encoded = base64.b64decode(
+                fsm_check.data[0]['addition3'].encode('utf-8')
+            )
+            math_quiz_state_machine = pickle.loads(undump_encoded)
+            math_quiz_state_machine.student_answer == user_message
+            messages = math_quiz_state_machine.validate_answer()
+            dump_encoded = pickle_and_encode_state_machine(math_quiz_state_machine)          
+            SUPA.table('state_machines').update({
+                'addition3': dump_encoded
+            }).eq(
+                "contact_uuid", contact_uuid
+            ).execute()
+
+        if user_message == 'exit':
+            state_label = 'exit'
+        else:
+            state_label = 'addition-question-sequence'
+
         message_package = {
-            'messages': [
-                "Great, let's do some addition",
-                "First, we'll start with single digits.",
-                "Type your response as a number.  For example, for '1 + 1', you'd write 2."
-            ],
-            'input_prompt': "Here's the first one... What's 2+2?",
-            'state': "add-question-sequence"
+            'messages': messages,
+            'input_prompt': "temporary value",
+            'state': state_label
         }
     elif user_message == 'subtract':
         message_package = {
@@ -125,7 +173,7 @@ def return_next_conversational_state(context_data, user_message):
             'input_prompt': "Here's the first one... What's 3-1?",
             'state': "subtract-question-sequence"
         }
-    elif user_message == 'exit':
+    elif context_data['state'] == 'exit' or user_message == 'exit':
         message_package = {
             'messages': [
                 "Great, thanks for practicing math today.  Come back any time."
@@ -165,14 +213,17 @@ def manage_conversation_response(data_json):
 
     whatsapp_id = message_data['author_id']
     user_message = message_data['message_body']
+    contact_uuid = message_data['contact_uuid']
 
     # TODO: Need to incorporate nlu_response into wormhole by checking answers against database (spreadsheet?)
     nlu_response = evaluate_message_with_nlu(message_data)
 
     message_package = return_next_conversational_state(
         context_data,
-        user_message
+        user_message,
+        contact_uuid
     )
+
 
     headers = {
         'Authorization': f"Bearer {os.environ.get('TURN_AUTHENTICATION_TOKEN')}",
