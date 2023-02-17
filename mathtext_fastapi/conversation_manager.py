@@ -145,7 +145,7 @@ def return_next_conversational_state(context_data, user_message, contact_uuid):
                 fsm_check.data[0]['addition3'].encode('utf-8')
             )
             math_quiz_state_machine = pickle.loads(undump_encoded)
-            math_quiz_state_machine.student_answer == user_message
+            math_quiz_state_machine.student_answer == int(user_message)
             messages = math_quiz_state_machine.validate_answer()
             dump_encoded = pickle_and_encode_state_machine(math_quiz_state_machine)          
             SUPA.table('state_machines').update({
