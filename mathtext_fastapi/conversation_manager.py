@@ -123,7 +123,8 @@ def return_next_conversational_state(context_data, user_message, contact_uuid):
             'input_prompt': "Welcome to our math practice.  What would you like to try?  Type add or subtract.",
             'state': "welcome-sequence"
         }
-    elif user_message == 'add':
+    elif context_data['state'] == 'addition-question-sequence' or \
+        user_message == 'add':
 
         fsm_check = SUPA.table('state_machines').select("*").eq(
             "contact_uuid",
@@ -153,10 +154,15 @@ def return_next_conversational_state(context_data, user_message, contact_uuid):
                 "contact_uuid", contact_uuid
             ).execute()
 
+        if user_message == 'exit':
+            state_label = 'exit'
+        else:
+            state_label = 'addition-question-sequence'
+
         message_package = {
             'messages': messages,
             'input_prompt': "temporary value",
-            'state': "addition-question-sequence"
+            'state': state_label
         }
     elif user_message == 'subtract':
         message_package = {
@@ -167,7 +173,7 @@ def return_next_conversational_state(context_data, user_message, contact_uuid):
             'input_prompt': "Here's the first one... What's 3-1?",
             'state': "subtract-question-sequence"
         }
-    elif user_message == 'exit':
+    elif context_data['state'] == 'exit' or user_message == 'exit':
         message_package = {
             'messages': [
                 "Great, thanks for practicing math today.  Come back any time."
