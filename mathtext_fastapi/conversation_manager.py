@@ -159,9 +159,11 @@ def return_next_conversational_state(context_data, user_message, contact_uuid):
         else:
             state_label = 'addition-question-sequence'
 
+        input_prompt = messages.pop()
+
         message_package = {
             'messages': messages,
-            'input_prompt': "temporary value",
+            'input_prompt': input_prompt,
             'state': state_label
         }
     elif user_message == 'subtract':
@@ -224,6 +226,8 @@ def manage_conversation_response(data_json):
         contact_uuid
     )
 
+    print("MESSAGE PACKAGE")
+    print(message_package)
 
     headers = {
         'Authorization': f"Bearer {os.environ.get('TURN_AUTHENTICATION_TOKEN')}",
@@ -233,6 +237,10 @@ def manage_conversation_response(data_json):
     # Send all messages for the current state before a user input prompt (text/button input request)
     for message in message_package['messages']:
         data = create_text_message(message, whatsapp_id)
+
+        print("data")
+        print(data)
+
         r = requests.post(
             f'https://whatsapp.turn.io/v1/messages',
             data=json.dumps(data),
