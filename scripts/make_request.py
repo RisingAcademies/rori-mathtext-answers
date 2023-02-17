@@ -13,7 +13,7 @@ def add_message_text_to_sample_object(message_text):
     "test message"
 
     Output
-    - b_string: json b-string - an object simulating what Turn.io sends to the API endpoint using the message_text
+    - b_string: json b-string - simulated Turn.io message data
 
     Example Output
     b'{"context": "hi", "message_data": {"author_id": "+57787919091", "author_type": "OWNER", "contact_uuid": "j43hk26-2hjl-43jk-hnk2-k4ljl46j0ds09", "message_body": "test message", "message_direction": "inbound", "message_id": "4kl209sd0-a7b8-2hj3-8563-3hu4a89b32", "message_inserted_at": "2023-01-10T02:37:28.477940Z", "message_updated_at": "2023-01-10T02:37:28.487319Z"}}'
@@ -28,22 +28,23 @@ def add_message_text_to_sample_object(message_text):
     return b_string
 
 
-def run_simulated_request(endpoint, sample_answer, context = None):
+def run_simulated_request(endpoint, sample_answer, context=None):
     print(f"Case: {sample_answer}")
     b_string = add_message_text_to_sample_object(sample_answer)
 
     if endpoint == 'sentiment-analysis' or endpoint == 'text2int':
-        request = requests.post(url=
-            f'http://localhost:7860/{endpoint}',
+        request = requests.post(
+            url=f'http://localhost:7860/{endpoint}',
             json={'content': sample_answer}
         ).json()
     else:
-        request = requests.post(url=
-            f'http://localhost:7860/{endpoint}',
+        request = requests.post(
+            url=f'http://localhost:7860/{endpoint}',
             data=b_string
         ).json()
 
     print(request)
+
 
 run_simulated_request('sentiment-analysis', 'I reject it')
 run_simulated_request('text2int', 'seven thousand nine hundred fifty seven')
@@ -66,10 +67,10 @@ run_simulated_request('manager', 'exit')
 # NOTE: This is actually a bstring, not a dict
 simplified_json = {
     "context": {
-        "user":"+57787919091", 
-        "state":"answer-addition-problem", 
-        "bot_message":"What is 2+2?", 
-        "user_message":"eight",
+        "user": "+57787919091", 
+        "state": "answer-addition-problem", 
+        "bot_message": "What is 2+2?", 
+        "user_message": "eight",
         "type": "ask"
     }, 
     "message_data": {
@@ -83,7 +84,6 @@ simplified_json = {
         "message_updated_at": "2023-01-10T02:37:28.487319Z"
     }
 }
-
 
 
 # Full example of event data from Turn.io 

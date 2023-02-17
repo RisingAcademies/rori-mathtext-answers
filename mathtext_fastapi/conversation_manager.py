@@ -1,13 +1,21 @@
+import dill as pickle
 import os
 import json
+import random
 import requests
 
 from dotenv import load_dotenv
 from mathtext_fastapi.nlu import evaluate_message_with_nlu
+from math_quiz_fsm import MathQuizFSM
+
+from transitions import Machine
 
 load_dotenv()
 
-# os.environ.get('SUPABASE_URL')
+SUPA = create_client(
+    os.environ.get('SUPABASE_URL'),
+    os.environ.get('SUPABASE_KEY')
+)
 
 
 def create_text_message(message_text, whatsapp_id):
@@ -89,7 +97,7 @@ def create_interactive_message(message_text, button_options, whatsapp_id):
     return data
 
 
-def return_next_conversational_state(context_data, user_message):
+def return_next_conversational_state(context_data, user_message, contact_uuid):
     """ Evaluates the conversation's current state to determine the next state
 
     Input
@@ -107,14 +115,32 @@ def return_next_conversational_state(context_data, user_message):
             'state': "welcome-sequence"
         }
     elif user_message == 'add':
+
+        fsm_check = SUPA.table('state_machines').select("*").eq(
+            "uuid",
+            contact_uuid
+        ).execute()
+
+        if fsm_check.data == []:
+            math_quiz_state_machine = MathQuizFSM()
+            messages = [math_quiz_state_machine.response_text]
+            dump = pickle.dumps(math_quiz_state_machine)
+
+            # TODO: Check how to save - JSONB?
+            SUPA.table('state_machines').insert(dump).execute()
+        else:
+            math_quiz_state_machine = pickle.loads(fsm_check.data['add'])
+            math_quiz_state_machine.student_answer
+            messages = math_quiz_state_machine.validate()
+            dump = pickle.dumps(math_quiz_state_machine)            
+            SUPA.table('state_machines').update(dump).eq(
+                "contact_uuid", contact_uuid
+            ).execute()
+
         message_package = {
-            'messages': [
-                "Great, let's do some addition",
-                "First, we'll start with single digits.",
-                "Type your response as a number.  For example, for '1 + 1', you'd write 2."
-            ],
-            'input_prompt': "Here's the first one... What's 2+2?",
-            'state': "add-question-sequence"
+            'messages': messages,
+            'input_prompt': "temporary value",
+            'state': "addition-question-sequence"
         }
     elif user_message == 'subtract':
         message_package = {
@@ -165,13 +191,15 @@ def manage_conversation_response(data_json):
 
     whatsapp_id = message_data['author_id']
     user_message = message_data['message_body']
+    contact_uuid = message_data['contact_uuid']
 
     # TODO: Need to incorporate nlu_response into wormhole by checking answers against database (spreadsheet?)
     nlu_response = evaluate_message_with_nlu(message_data)
 
     message_package = return_next_conversational_state(
         context_data,
-        user_message
+        user_message,
+        contact_uuid
     )
 
     headers = {
