@@ -2,7 +2,9 @@
 To run locally use 'uvicorn app:app --host localhost --port 7860'
 """
 import ast
-import re
+import scripts.quiz.generators as generators
+import scripts.quiz.hints as hints
+import scripts.quiz.questions as questions
 
 from fastapi import FastAPI, Request
 from fastapi.responses import JSONResponse
@@ -15,10 +17,6 @@ from pydantic import BaseModel
 from mathtext_fastapi.logging import prepare_message_data_for_logging
 from mathtext_fastapi.conversation_manager import manage_conversation_response
 from mathtext_fastapi.nlu import evaluate_message_with_nlu
-from scripts.quiz.generators import start_interactive_math
-from scripts.quiz.hints import generate_hint
-from scripts.quiz.questions import generate_question_answer_pair
-from scripts.quiz.questions import generate_numbers_by_level
 
 app = FastAPI()
 
@@ -132,11 +130,11 @@ async def ask_math_question(request: Request):
     """
     data_dict = await request.json()
     message_data = ast.literal_eval(data_dict.get('message_data', '').get('message_body', ''))
-    number_correct = message_data['number_correct']
-    number_incorrect = message_data['number_incorrect']
+    right_answers = message_data['number_correct']
+    wrong_answers = message_data['number_incorrect']
     level = message_data['level']
 
-    return JSONResponse(start_interactive_math(number_correct, number_incorrect, level))
+    return JSONResponse(generators.start_interactive_math(right_answers, wrong_answers, level))
 
 
 @app.post("/hint")
@@ -175,7 +173,7 @@ async def get_hint(request: Request):
     level = message_data['level']
     hints_used = message_data['hints_used']
 
-    return JSONResponse(generate_hint(question_numbers, right_answer, number_correct, number_incorrect, level, hints_used))
+    return JSONResponse(hints.generate_hint(question_numbers, right_answer, number_correct, number_incorrect, level, hints_used))
 
 
 @app.post("/numbers_by_level")
@@ -199,4 +197,30 @@ async def get_numbers_by_level(request: Request):
     data_dict = await request.json()
     message_data = ast.literal_eval(data_dict.get('message_data', '').get('message_body', ''))
     level = message_data['level']
-    return JSONResponse(generate_numbers_by_level(level))
+    return JSONResponse(questions.generate_numbers_by_level(level))
+
+
+@app.post("/generate_question")
+async def generate_question(request: Request):
+    """Generates a hint and returns it as response along with hint data
+    
+    Input
+    request.body: json - level
+    {
+        'level': 'easy'
+    }
+
+    Output
+    context: dict - the information for the current state
+    {
+        "question": "Let's count up by 2s. What number is next if we start from 10",
+        "current_number": 10,
+        "ordinal_number": 2,
+        "answer": 12
+    }
+    """
+    data_dict = await request.json()
+    message_data = ast.literal_eval(data_dict.get('message_data', '').get('message_body', ''))
+    level = message_data['level']
+
+    return JSONResponse(questions.generate_question_data(level)['question'])
