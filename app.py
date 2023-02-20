@@ -103,7 +103,7 @@ async def evaluate_user_message_with_nlu_api(request: Request):
     message_data = data_dict.get('message_data', '')
     nlu_response = evaluate_message_with_nlu(message_data)
     return JSONResponse(content=nlu_response)
-
+    
 
 @app.post("/question")
 async def ask_math_question(request: Request):
@@ -113,14 +113,15 @@ async def ask_math_question(request: Request):
     request.body: json - amount of correct and incorrect answers in the account
     {
         'number_correct': 0,
-        'number_incorrect': 0
+        'number_incorrect': 0,
+        'level': 'easy'
     }
 
     Output
     context: dict - the information for the current state
     {
         'text': 'What is 1+2?',
-        'question_numbers': [1,2,3,4], #3 or 4 numbers
+        'question_numbers': [1,2,3], #2 or 3 numbers
         'right_answer': 3,
         'number_correct': 0,
         'number_incorrect': 0,
@@ -131,8 +132,9 @@ async def ask_math_question(request: Request):
     message_data = ast.literal_eval(data_dict.get('message_data', '').get('message_body', ''))
     number_correct = message_data['number_correct']
     number_incorrect = message_data['number_incorrect']
+    level = message_data['level']
 
-    return JSONResponse(start_interactive_math(number_correct, number_incorrect))
+    return JSONResponse(start_interactive_math(number_correct, number_incorrect, level))
 
 
 @app.post("/hint")
@@ -142,11 +144,11 @@ async def get_hint(request: Request):
     Input
     request.body: json - amount of correct and incorrect answers in the account
     {
-        'question_numbers': [1,2,3,4], # 3 or 4 numbers
+        'question_numbers': [1,2,3], # 2 or 3 numbers
         'right_answer': 3,
-        'user_answer': 10,
         'number_correct': 0,
         'number_incorrect': 0,
+        'level': 'easy',
         'hints_used': 0
     }
 
@@ -154,19 +156,21 @@ async def get_hint(request: Request):
     context: dict - the information for the current state
     {
         'text': 'What is 1+2?',
-        'question_numbers': [1,2,3], #3 or 4 numbers
+        'question_numbers': [1,2,3], #2 or 3 numbers
         'right_answer': 3,
         'number_correct': 0,
         'number_incorrect': 0,
+        'level': 'easy',
         'hints_used': 0
     }
     """
     data_dict = await request.json()
     message_data = ast.literal_eval(data_dict.get('message_data', '').get('message_body', ''))
-    question_numbers = message_data['number_correct']
-    question_numbers = message_data['number_correct']
+    question_numbers = message_data['question_numbers']
+    right_answer = message_data['right_answer']
     number_correct = message_data['number_correct']
     number_incorrect = message_data['number_incorrect']
+    level = message_data['level']
     hints_used = message_data['hints_used']
 
-    return JSONResponse(generate_hint(question_numbers, number_correct, number_incorrect, hints_used))
+    return JSONResponse(generate_hint(question_numbers, right_answer, number_correct, number_incorrect, level, hints_used))
