@@ -176,30 +176,6 @@ async def get_hint(request: Request):
     return JSONResponse(hints.generate_hint(question_numbers, right_answer, number_correct, number_incorrect, level, hints_used))
 
 
-@app.post("/numbers_by_level")
-async def get_numbers_by_level(request: Request):
-    """Generates a hint and returns it as response along with hint data
-    
-    Input
-    request.body: json - level
-    {
-        'level': 'easy'
-    }
-
-    Output
-    context: dict - three generated numbers for specified level
-    {
-        "current_number": 10,
-        "ordinal_number": 2,
-        "times": 1
-    }
-    """
-    data_dict = await request.json()
-    message_data = ast.literal_eval(data_dict.get('message_data', '').get('message_body', ''))
-    level = message_data['level']
-    return JSONResponse(questions.generate_numbers_by_level(level))
-
-
 @app.post("/generate_question")
 async def generate_question(request: Request):
     """Generates a hint and returns it as response along with hint data
@@ -224,3 +200,27 @@ async def generate_question(request: Request):
     level = message_data['level']
 
     return JSONResponse(questions.generate_question_data(level)['question'])
+
+
+@app.post("/numbers_by_level")
+async def get_numbers_by_level(request: Request):
+    """Generates a hint and returns it as response along with hint data
+    
+    Input
+    request.body: json - level
+    {
+        'level': 'easy'
+    }
+
+    Output
+    context: dict - three generated numbers for specified level
+    {
+        "current_number": 10,
+        "ordinal_number": 2,
+        "times": 1
+    }
+    """
+    data_dict = await request.json()
+    message_data = ast.literal_eval(data_dict.get('message_data', '').get('message_body', ''))
+    level = message_data['level']
+    return JSONResponse(questions.generate_numbers_by_level(level))
