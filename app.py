@@ -5,6 +5,7 @@ import ast
 import scripts.quiz.generators as generators
 import scripts.quiz.hints as hints
 import scripts.quiz.questions as questions
+import scripts.quiz.utils as utils
 
 from fastapi import FastAPI, Request
 from fastapi.responses import JSONResponse
@@ -107,7 +108,7 @@ async def evaluate_user_message_with_nlu_api(request: Request):
 
 @app.post("/question")
 async def ask_math_question(request: Request):
-    """Generates a question and returns it as response along with question data
+    """Generate a question and return it as response along with question data
     
     Input
     request.body: json - amount of correct and incorrect answers in the account
@@ -121,7 +122,7 @@ async def ask_math_question(request: Request):
     context: dict - the information for the current state
     {
         'text': 'What is 1+2?',
-        'question_numbers': [1,2,3], #2 or 3 numbers
+        'question_numbers': [1,2,3], #3 numbers - current number, ordinal number, times
         'right_answer': 3,
         'number_correct': 0,
         'number_incorrect': 0,
@@ -139,12 +140,12 @@ async def ask_math_question(request: Request):
 
 @app.post("/hint")
 async def get_hint(request: Request):
-    """Generates a hint and returns it as response along with hint data
+    """Generate a hint and return it as response along with hint data
     
     Input
     request.body:
     {
-        'question_numbers': [1,2,3], # 2 or 3 numbers
+        'question_numbers': [1,2,3], #3 numbers - current number, ordinal number, times
         'right_answer': 3,
         'number_correct': 0,
         'number_incorrect': 0,
@@ -178,7 +179,7 @@ async def get_hint(request: Request):
 
 @app.post("/generate_question")
 async def generate_question(request: Request):
-    """Generates a hint and returns it as response along with hint data
+    """Generate a bare question and return it as response
     
     Input
     request.body: json - level
@@ -189,10 +190,8 @@ async def generate_question(request: Request):
     Output
     context: dict - the information for the current state
     {
-        "question": "Let's count up by 2s. What number is next if we start from 10",
-        "current_number": 10,
-        "ordinal_number": 2,
-        "answer": 12
+        "question": "Let's count up by 2s. What number is next if we start from 10?
+        6 8 10 ..."
     }
     """
     data_dict = await request.json()
@@ -204,7 +203,7 @@ async def generate_question(request: Request):
 
 @app.post("/numbers_by_level")
 async def get_numbers_by_level(request: Request):
-    """Generates a hint and returns it as response along with hint data
+    """Generate three numbers and return them as response
     
     Input
     request.body: json - level
@@ -224,3 +223,49 @@ async def get_numbers_by_level(request: Request):
     message_data = ast.literal_eval(data_dict.get('message_data', '').get('message_body', ''))
     level = message_data['level']
     return JSONResponse(questions.generate_numbers_by_level(level))
+
+
+@app.post("/number_sequence")
+async def get_number_sequence(request: Request):
+    """Generate a number sequence
+    
+    Input
+    request.body: json - level
+    {
+        "current_number": 10,
+        "ordinal_number": 2,
+        "times": 1
+    }
+
+    Output
+    one of following strings with (numbers differ):
+    ... 1 2 3
+    1 2 3 ...
+    """
+    data_dict = await request.json()
+    message_data = ast.literal_eval(data_dict.get('message_data', '').get('message_body', ''))
+    cur_num = message_data['current_number']
+    ord_num = message_data['ordinal_number']
+    times = message_data['times']
+    return JSONResponse(questions.generate_number_sequence(cur_num, ord_num, times))
+
+
+@app.post("/level")
+async def get_next_level(request: Request):
+    """Depending on current level and desire to level up/down return next level
+    
+    Input
+    request.body: json - level
+    {
+        "current_level": "easy",
+        "level_up": True
+    }
+
+    Output
+    Literal - "easy", "medium" or "hard"
+    """
+    data_dict = await request.json()
+    message_data = ast.literal_eval(data_dict.get('message_data', '').get('message_body', ''))
+    cur_level = message_data['current_level']
+    level_up = message_data['level_up']
+    return JSONResponse(utils.get_next_level(cur_level, level_up))
