@@ -16,21 +16,26 @@ class MathQuizFSM(object):
         ['exit', 'quiz_question', 'quiz_end'],
     ]
 
-    def __init__(self):
+    def __init__(
+        self,
+        initial_state='quiz_start',
+        question_nums=[2, 3],
+        initial_student_answer=0,
+    ):
         # Instantiate the FSM
         self.machine = Machine(
-            model=self, 
-            states=MathQuizFSM.states, 
+            model=self,
+            states=MathQuizFSM.states,
             transitions=MathQuizFSM.transitions,
-            initial='quiz_start'
+            initial=initial_state
         )
 
         # Instantiate variables necessary for tracking activity
-        self.question_nums = [2, 3]
-        self.correct_answer = 5
-        self.student_answer = 0
+        self.question_nums = question_nums
+        self.correct_answer = self.question_nums[0] + self.question_nums[1]
+        self.student_answer = initial_student_answer
         self.is_correct_answer = False
-        self.response_text = "What is 2 + 3?"
+        self.response_text = f"What is {self.question_nums[0]} + {self.question_nums[1]}?"
 
         # Define functions to run on transitions
         self.machine.on_enter_quiz_question('generate_math_problem')
