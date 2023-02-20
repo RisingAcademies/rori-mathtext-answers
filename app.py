@@ -17,6 +17,8 @@ from mathtext_fastapi.conversation_manager import manage_conversation_response
 from mathtext_fastapi.nlu import evaluate_message_with_nlu
 from scripts.quiz.generators import start_interactive_math
 from scripts.quiz.hints import generate_hint
+from scripts.quiz.questions import generate_question_answer_pair
+from scripts.quiz.questions import generate_numbers_by_level
 
 app = FastAPI()
 
@@ -142,7 +144,7 @@ async def get_hint(request: Request):
     """Generates a hint and returns it as response along with hint data
     
     Input
-    request.body: json - amount of correct and incorrect answers in the account
+    request.body:
     {
         'question_numbers': [1,2,3], # 2 or 3 numbers
         'right_answer': 3,
@@ -174,3 +176,27 @@ async def get_hint(request: Request):
     hints_used = message_data['hints_used']
 
     return JSONResponse(generate_hint(question_numbers, right_answer, number_correct, number_incorrect, level, hints_used))
+
+
+@app.post("/numbers_by_level")
+async def get_numbers_by_level(request: Request):
+    """Generates a hint and returns it as response along with hint data
+    
+    Input
+    request.body: json - level
+    {
+        'level': 'easy'
+    }
+
+    Output
+    context: dict - three generated numbers for specified level
+    {
+        "current_number": 10,
+        "ordinal_number": 2,
+        "times": 1
+    }
+    """
+    data_dict = await request.json()
+    message_data = ast.literal_eval(data_dict.get('message_data', '').get('message_body', ''))
+    level = message_data['level']
+    return JSONResponse(generate_numbers_by_level(level))
