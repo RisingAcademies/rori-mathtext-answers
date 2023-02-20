@@ -105,6 +105,7 @@ def pickle_and_encode_state_machine(state_machine):
     dump_encoded = base64.b64encode(dump).decode('utf-8')
     return dump_encoded
 
+
 def manage_math_quiz_fsm(user_message, contact_uuid):
     fsm_check = SUPA.table('state_machines').select("*").eq(
         "contact_uuid",
