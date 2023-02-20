@@ -105,6 +105,38 @@ def pickle_and_encode_state_machine(state_machine):
     dump_encoded = base64.b64encode(dump).decode('utf-8')
     return dump_encoded
 
+def manage_math_quiz_fsm(user_message, contact_uuid):
+    fsm_check = SUPA.table('state_machines').select("*").eq(
+        "contact_uuid",
+        contact_uuid
+    ).execute()
+
+    if fsm_check.data == []:
+        math_quiz_state_machine = MathQuizFSM()
+        messages = [math_quiz_state_machine.response_text]
+        dump_encoded = pickle_and_encode_state_machine(math_quiz_state_machine)
+
+        SUPA.table('state_machines').insert({
+            'contact_uuid': contact_uuid,
+            'addition3': dump_encoded
+        }).execute()
+    else:
+        undump_encoded = base64.b64decode(
+            fsm_check.data[0]['addition3'].encode('utf-8')
+        )
+        math_quiz_state_machine = pickle.loads(undump_encoded)
+
+        math_quiz_state_machine.student_answer = user_message
+        math_quiz_state_machine.correct_answer = str(math_quiz_state_machine.correct_answer)
+        messages = math_quiz_state_machine.validate_answer()
+        dump_encoded = pickle_and_encode_state_machine(math_quiz_state_machine)          
+        SUPA.table('state_machines').update({
+            'addition3': dump_encoded
+        }).eq(
+            "contact_uuid", contact_uuid
+        ).execute()
+    return messages
+
 
 def return_next_conversational_state(context_data, user_message, contact_uuid):
     """ Evaluates the conversation's current state to determine the next state
@@ -126,40 +158,7 @@ def return_next_conversational_state(context_data, user_message, contact_uuid):
     elif context_data['state'] == 'addition-question-sequence' or \
         user_message == 'add':
 
-        fsm_check = SUPA.table('state_machines').select("*").eq(
-            "contact_uuid",
-            contact_uuid
-        ).execute()
-
-        if fsm_check.data == []:
-            math_quiz_state_machine = MathQuizFSM()
-            messages = [math_quiz_state_machine.response_text]
-            dump_encoded = pickle_and_encode_state_machine(math_quiz_state_machine)
-
-            SUPA.table('state_machines').insert({
-                'contact_uuid': contact_uuid,
-                'addition3': dump_encoded
-            }).execute()
-        else:
-            undump_encoded = base64.b64decode(
-                fsm_check.data[0]['addition3'].encode('utf-8')
-            )
-            math_quiz_state_machine = pickle.loads(undump_encoded)
-
-            print("student answer")
-            print(math_quiz_state_machine.student_answer)
-            print("user_message")
-            print(user_message)
-
-            math_quiz_state_machine.student_answer = user_message
-            math_quiz_state_machine.correct_answer = str(math_quiz_state_machine.correct_answer)
-            messages = math_quiz_state_machine.validate_answer()
-            dump_encoded = pickle_and_encode_state_machine(math_quiz_state_machine)          
-            SUPA.table('state_machines').update({
-                'addition3': dump_encoded
-            }).eq(
-                "contact_uuid", contact_uuid
-            ).execute()
+        messages = manage_math_quiz_fsm(user_message, contact_uuid)
 
         if user_message == 'exit':
             state_label = 'exit'
