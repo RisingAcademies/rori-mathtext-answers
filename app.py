@@ -1,6 +1,7 @@
 """FastAPI endpoint
 To run locally use 'uvicorn app:app --host localhost --port 7860'
 """
+import ast
 import re
 
 from fastapi import FastAPI, Request
@@ -14,6 +15,8 @@ from pydantic import BaseModel
 from mathtext_fastapi.logging import prepare_message_data_for_logging
 from mathtext_fastapi.conversation_manager import manage_conversation_response
 from mathtext_fastapi.nlu import evaluate_message_with_nlu
+from scripts.quiz.generators import start_interactive_math
+from scripts.quiz.hints import generate_hint
 
 app = FastAPI()
 
@@ -100,3 +103,70 @@ async def evaluate_user_message_with_nlu_api(request: Request):
     message_data = data_dict.get('message_data', '')
     nlu_response = evaluate_message_with_nlu(message_data)
     return JSONResponse(content=nlu_response)
+
+
+@app.post("/question")
+async def ask_math_question(request: Request):
+    """Generates a question and returns it as response along with question data
+    
+    Input
+    request.body: json - amount of correct and incorrect answers in the account
+    {
+        'number_correct': 0,
+        'number_incorrect': 0
+    }
+
+    Output
+    context: dict - the information for the current state
+    {
+        'text': 'What is 1+2?',
+        'question_numbers': [1,2,3,4], #3 or 4 numbers
+        'right_answer': 3,
+        'number_correct': 0,
+        'number_incorrect': 0,
+        'hints_used': 0
+    }
+    """
+    data_dict = await request.json()
+    message_data = ast.literal_eval(data_dict.get('message_data', '').get('message_body', ''))
+    number_correct = message_data['number_correct']
+    number_incorrect = message_data['number_incorrect']
+
+    return JSONResponse(start_interactive_math(number_correct, number_incorrect))
+
+
+@app.post("/hint")
+async def get_hint(request: Request):
+    """Generates a hint and returns it as response along with hint data
+    
+    Input
+    request.body: json - amount of correct and incorrect answers in the account
+    {
+        'question_numbers': [1,2,3,4], # 3 or 4 numbers
+        'right_answer': 3,
+        'user_answer': 10,
+        'number_correct': 0,
+        'number_incorrect': 0,
+        'hints_used': 0
+    }
+
+    Output
+    context: dict - the information for the current state
+    {
+        'text': 'What is 1+2?',
+        'question_numbers': [1,2,3], #3 or 4 numbers
+        'right_answer': 3,
+        'number_correct': 0,
+        'number_incorrect': 0,
+        'hints_used': 0
+    }
+    """
+    data_dict = await request.json()
+    message_data = ast.literal_eval(data_dict.get('message_data', '').get('message_body', ''))
+    question_numbers = message_data['number_correct']
+    question_numbers = message_data['number_correct']
+    number_correct = message_data['number_correct']
+    number_incorrect = message_data['number_incorrect']
+    hints_used = message_data['hints_used']
+
+    return JSONResponse(generate_hint(question_numbers, number_correct, number_incorrect, hints_used))
