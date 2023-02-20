@@ -14,11 +14,11 @@ def start_interactive_math(successful_answers=0, wrong_answers=0, level="easy"):
         
     question_data = generate_question_answer_pair(level)
     question = question_data['question']
-    proper_answer = question_data['answer']
+    right_answer = question_data['answer']
     current_number = question_data['current_number']
     ordinal_number = question_data['ordinal_number']
 
-    numbers_group = [current_number, ordinal_number, proper_answer]
+    numbers_group = [current_number, ordinal_number]
     if "times" in question_data:
         times = question_data['times']
         numbers_group.append(times)
@@ -26,9 +26,10 @@ def start_interactive_math(successful_answers=0, wrong_answers=0, level="easy"):
     data_to_return = {
         "text": question,
         "question_numbers": numbers_group,
-        "right_answer": proper_answer,
+        "right_answer": right_answer,
         'number_correct': successful_answers,
         'number_incorrect': wrong_answers,
+        'level': level,
         "hints_used": 0
     }
     return data_to_return

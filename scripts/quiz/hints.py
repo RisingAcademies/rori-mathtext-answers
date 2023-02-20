@@ -3,9 +3,8 @@ from random import random
 
 import random
 
-def generate_hint(question_numbers, number_correct, number_incorrect, hints_used):
+def generate_hint(question_numbers, right_answer, number_correct, number_incorrect, level, hints_used):
     ordinal_number = question_numbers[1]
-    right_answer = question_numbers[2]
     equation = right_answer - 2 * ordinal_number - 1
     least_number = equation if equation > 0 else 0
     seq_before_answer = " ".join(
@@ -29,6 +28,7 @@ def generate_hint(question_numbers, number_correct, number_incorrect, hints_used
         "right_answer": right_answer,
         'number_correct': number_correct,
         'number_incorrect': number_incorrect,
+        'level': level,
         "hints_used": hints_used
     }
     return data_to_return
