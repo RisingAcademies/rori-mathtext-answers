@@ -10,8 +10,12 @@ import requests
 from dotenv import load_dotenv
 from mathtext_fastapi.nlu import evaluate_message_with_nlu
 from mathtext_fastapi.math_quiz_fsm import MathQuizFSM
+from mathtext_fastapi.math_subtraction_fsm import MathSubtractionFSM
 from supabase import create_client
 from transitions import Machine
+
+from scripts.quiz.generators import start_interactive_math
+from scripts.quiz.hints import generate_hint
 
 load_dotenv()
 
@@ -106,24 +110,27 @@ def pickle_and_encode_state_machine(state_machine):
     return dump_encoded
 
 
-def manage_math_quiz_fsm(user_message, contact_uuid):
+def manage_math_quiz_fsm(user_message, contact_uuid, type):
     fsm_check = SUPA.table('state_machines').select("*").eq(
         "contact_uuid",
         contact_uuid
     ).execute()
 
     if fsm_check.data == []:
-        math_quiz_state_machine = MathQuizFSM()
+        if type == 'addition':
+            math_quiz_state_machine = MathQuizFSM()
+        else:
+            math_quiz_state_machine = MathSubtractionFSM()
         messages = [math_quiz_state_machine.response_text]
         dump_encoded = pickle_and_encode_state_machine(math_quiz_state_machine)
 
         SUPA.table('state_machines').insert({
             'contact_uuid': contact_uuid,
-            'addition3': dump_encoded
+            f'{type}': dump_encoded
         }).execute()
     else:
         undump_encoded = base64.b64decode(
-            fsm_check.data[0]['addition3'].encode('utf-8')
+            fsm_check.data[0][type].encode('utf-8')
         )
         math_quiz_state_machine = pickle.loads(undump_encoded)
 
@@ -132,11 +139,59 @@ def manage_math_quiz_fsm(user_message, contact_uuid):
         messages = math_quiz_state_machine.validate_answer()
         dump_encoded = pickle_and_encode_state_machine(math_quiz_state_machine)          
         SUPA.table('state_machines').update({
-            'addition3': dump_encoded
+            f'{type}': dump_encoded
         }).eq(
             "contact_uuid", contact_uuid
         ).execute()
     return messages
+
+
+def use_quiz_module_approach(user_message, context_data):
+    print("USER MESSAGE")
+    print(user_message)
+    print("=======================")
+    if user_message == 'add':
+        context_result = start_interactive_math()
+        message_package = {
+            'messages': [
+                "Great, let's do some addition",
+                "First, we'll start with single digits.",
+                "Type your response as a number.  For example, for '1 + 1', you'd write 2."
+            ],
+            'input_prompt': context_result['text'],
+            'state': "addition-question-sequence"
+        }
+
+    elif user_message == context_data.get('right_answer'):
+        context_result = start_interactive_math(
+            context_data['number_correct'],
+            context_data['number_incorrect'],
+            context_data['level']
+        )
+        message_package = {
+            'messages': [
+                "That's right, great!",
+            ],
+            'input_prompt': context_result['text'],
+            'state': "addition-question-sequence"
+        }
+    else:
+        context_result = generate_hint(
+            context_data['question_numbers'],
+            context_data['right_answer'],
+            context_data['number_correct'],
+            context_data['number_incorrect'],
+            context_data['level'],
+            context_data['hints_used']
+        )
+        message_package = {
+            'messages': [
+                context_result['text'],
+            ],
+            'input_prompt': context_data['text'],
+            'state': "addition-question-sequence"
+        }
+    return message_package, context_result
 
 
 def return_next_conversational_state(context_data, user_message, contact_uuid):
@@ -159,12 +214,36 @@ def return_next_conversational_state(context_data, user_message, contact_uuid):
     elif context_data['state'] == 'addition-question-sequence' or \
         user_message == 'add':
 
-        messages = manage_math_quiz_fsm(user_message, contact_uuid)
+        # Used in FSM
+        # messages = manage_math_quiz_fsm(user_message, contact_uuid)
+
+        message_package, context_result = use_quiz_module_approach(user_message, context_data)
 
         if user_message == 'exit':
             state_label = 'exit'
         else:
             state_label = 'addition-question-sequence'
+        # Used in FSM
+        # input_prompt = messages.pop()
+        # message_package = {
+        #     'messages': messages,
+        #     'input_prompt': input_prompt,
+        #     'state': state_label
+        # }
+
+        print("MESSAGE PACKAGE")
+        print(message_package)
+        context_data = context_result
+        message_package['state'] = state_label
+
+    elif context_data['state'] == 'subtraction-question-sequence' or \
+        user_message == 'subtract':
+        messages = manage_math_quiz_fsm(user_message, contact_uuid, 'subtraction')
+
+        if user_message == 'exit':
+            state_label = 'exit'
+        else:
+            state_label = 'subtraction-question-sequence'
 
         input_prompt = messages.pop()
 
@@ -173,15 +252,15 @@ def return_next_conversational_state(context_data, user_message, contact_uuid):
             'input_prompt': input_prompt,
             'state': state_label
         }
-    elif user_message == 'subtract':
-        message_package = {
-            'messages': [
-                "Time for some subtraction!",
-                "Type your response as a number.  For example, for '1 - 1', you'd write 0."
-            ],
-            'input_prompt': "Here's the first one... What's 3-1?",
-            'state': "subtract-question-sequence"
-        }
+
+        # message_package = {
+        #     'messages': [
+        #         "Time for some subtraction!",
+        #         "Type your response as a number.  For example, for '1 - 1', you'd write 0."
+        #     ],
+        #     'input_prompt': "Here's the first one... What's 3-1?",
+        #     'state': "subtract-question-sequence"
+        # }
     elif context_data['state'] == 'exit' or user_message == 'exit':
         message_package = {
             'messages': [
@@ -198,7 +277,11 @@ def return_next_conversational_state(context_data, user_message, contact_uuid):
             'input_prompt': "Please type add or subtract to start a math activity.",
             'state': "reprompt-menu-options"
         }
+    # Used in FSM
     return message_package
+
+    # Used in quiz folder approach
+    # return context_result, message_package
 
 
 def manage_conversation_response(data_json):
@@ -227,11 +310,18 @@ def manage_conversation_response(data_json):
     # TODO: Need to incorporate nlu_response into wormhole by checking answers against database (spreadsheet?)
     nlu_response = evaluate_message_with_nlu(message_data)
 
-    message_package = return_next_conversational_state(
-        context_data,
-        user_message,
-        contact_uuid
-    )
+    if context_data['state'] == 'addition':
+        context_result, message_package = return_next_conversational_state(
+            context_data,
+            user_message,
+            contact_uuid
+        )
+    else:
+        message_package = return_next_conversational_state(
+            context_data,
+            user_message,
+            contact_uuid
+        )
 
     print("MESSAGE PACKAGE")
     print(message_package)
@@ -255,15 +345,32 @@ def manage_conversation_response(data_json):
         )
 
     # Update the context object with the new state of the conversation
-    context = {
-        "context":{
-            "user": whatsapp_id,
-            "state": message_package['state'],
-            "bot_message": message_package['input_prompt'],
-            "user_message": user_message,
-            "type": 'ask'
+    if context_data['state'] == 'addition':
+        context = {
+            "context": {
+                "user": whatsapp_id,
+                "state": message_package['state'],
+                "bot_message": message_package['input_prompt'],
+                "user_message": user_message,
+                "type": 'ask',
+                # Necessary for quiz folder approach
+                "text": context_result.get('text'),
+                "question_numbers": context_result.get('question_numbers'),
+                "right_answer": context_result.get('right_answer'),
+                "number_correct": context_result.get('number_correct'),
+                "hints_used": context_result.get('hints_used'),
+            }
         }
-    }
+    else:
+        context = {
+            "context": {
+                "user": whatsapp_id,
+                "state": message_package['state'],
+                "bot_message": message_package['input_prompt'],
+                "user_message": user_message,
+                "type": 'ask',
+            }
+        }
 
     return context
 
