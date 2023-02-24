@@ -116,6 +116,25 @@ def manage_math_quiz_fsm(user_message, contact_uuid, type):
         contact_uuid
     ).execute()
 
+    # This doesn't allow for when one FSM is present and the other is empty
+    """
+    1
+    data=[] count=None
+    
+    2
+    data=[{'id': 29, 'contact_uuid': 'j43hk26-2hjl-43jk-hnk2-k4ljl46j0ds09', 'addition3': None, 'subtraction': None, 'addition': 
+
+    - but problem is there is no subtraction , but it's assuming there's a subtration
+
+
+    Cases
+    - make a completely new record
+    - update an existing record with an existing FSM
+    - update an existing record without an existing FSM
+    """
+
+
+    # Make a completely new entry
     if fsm_check.data == []:
         if type == 'addition':
             math_quiz_state_machine = MathQuizFSM()
@@ -128,7 +147,22 @@ def manage_math_quiz_fsm(user_message, contact_uuid, type):
             'contact_uuid': contact_uuid,
             f'{type}': dump_encoded
         }).execute()
-    else:
+    # Update an existing record with a new state machine
+    elif not fsm_check.data[0][type]:
+        if type == 'addition':
+            math_quiz_state_machine = MathQuizFSM()
+        else:
+            math_quiz_state_machine = MathSubtractionFSM()
+        messages = [math_quiz_state_machine.response_text]
+        dump_encoded = pickle_and_encode_state_machine(math_quiz_state_machine)
+
+        SUPA.table('state_machines').update({
+            f'{type}': dump_encoded
+        }).eq(
+            "contact_uuid", contact_uuid
+        ).execute()      
+    # Update an existing record with an existing state machine
+    elif fsm_check.data[0][type]:
         undump_encoded = base64.b64decode(
             fsm_check.data[0][type].encode('utf-8')
         )
@@ -217,24 +251,24 @@ def return_next_conversational_state(context_data, user_message, contact_uuid):
         # Used in FSM
         # messages = manage_math_quiz_fsm(user_message, contact_uuid)
 
-        message_package, context_result = use_quiz_module_approach(user_message, context_data)
+        # message_package, context_result = use_quiz_module_approach(user_message, context_data)
+        messages = manage_math_quiz_fsm(user_message, contact_uuid, 'addition')
 
         if user_message == 'exit':
             state_label = 'exit'
         else:
             state_label = 'addition-question-sequence'
         # Used in FSM
-        # input_prompt = messages.pop()
-        # message_package = {
-        #     'messages': messages,
-        #     'input_prompt': input_prompt,
-        #     'state': state_label
-        # }
+        input_prompt = messages.pop()
+        message_package = {
+            'messages': messages,
+            'input_prompt': input_prompt,
+            'state': state_label
+        }
 
-        print("MESSAGE PACKAGE")
-        print(message_package)
-        context_data = context_result
-        message_package['state'] = state_label
+        # Used in quiz w/ hints
+        # context_data = context_result
+        # message_package['state'] = state_label
 
     elif context_data['state'] == 'subtraction-question-sequence' or \
         user_message == 'subtract':
@@ -322,9 +356,6 @@ def manage_conversation_response(data_json):
             user_message,
             contact_uuid
         )
-
-    print("MESSAGE PACKAGE")
-    print(message_package)
 
     headers = {
         'Authorization': f"Bearer {os.environ.get('TURN_AUTHENTICATION_TOKEN')}",
