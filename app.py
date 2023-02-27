@@ -15,9 +15,9 @@ from mathtext.sentiment import sentiment
 from mathtext.text2int import text2int
 from pydantic import BaseModel
 
-from mathtext_fastapi.logging import prepare_message_data_for_logging
-from mathtext_fastapi.conversation_manager import manage_conversation_response
-from mathtext_fastapi.nlu import evaluate_message_with_nlu
+# from mathtext_fastapi.logging import prepare_message_data_for_logging
+# from mathtext_fastapi.conversation_manager import manage_conversation_response
+# from mathtext_fastapi.nlu import evaluate_message_with_nlu
 
 app = FastAPI()
 
@@ -269,3 +269,47 @@ async def get_next_level(request: Request):
     cur_level = message_data['current_level']
     level_up = message_data['level_up']
     return JSONResponse(utils.get_next_level(cur_level, level_up))
+
+
+@app.post("/score")
+async def get_next_level(request: Request):
+    """Depending on current level and desire to level up/down return next level
+    
+    Input
+    request.body: json - score argument with value from 0 to 1
+    {
+        "score": 0.1
+    }
+
+    Output
+    number in range 1-495
+    """
+    data_dict = await request.json()
+    message_data = ast.literal_eval(data_dict.get('message_data', '').get('message_body', ''))
+    score = message_data['score']
+    return JSONResponse(questions.generate_start_by_score(score))
+
+
+@app.post("/question_new")
+async def get_next_level(request: Request):
+    """Depending on current level and desire to level up/down return next level
+    
+    Input
+    request.body: json - score argument with value from 0 to 1
+    {
+        "score": 0.1
+    }
+
+    Output
+    number in range 1-495
+    """
+    data_dict = await request.json()
+    message_data = ast.literal_eval(data_dict.get('message_data', '').get('message_body', ''))
+    start = message_data.get('start', "")
+    start = int(start) if start else start
+    step = message_data.get('step', "")
+    step = int(step) if step else step
+    sequence = message_data.get('sequence', "")
+    question_num = message_data.get('question_num', "")
+    question_num = int(question_num) if question_num else question_num
+    return JSONResponse(questions.generate_question(start, step=step, seq=sequence, question_num=question_num))
