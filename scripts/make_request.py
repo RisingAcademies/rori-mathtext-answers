@@ -62,43 +62,46 @@ def run_simulated_request(endpoint, sample_answer, context=None):
 # run_simulated_request('text2int', 'seven thousand nine hundred fifty seven')
 # run_simulated_request('nlu', 'test message')
 # run_simulated_request('nlu', 'eight')
-# run_simulated_request('nlu', 'eight, nine, ten')
-# run_simulated_request('nlu', '8, 9, 10')
-# run_simulated_request('nlu', '8')
-# run_simulated_request('nlu', "I don't know")
-# run_simulated_request('nlu', 'Today is a wonderful day')
-# run_simulated_request('nlu', 'IDK 5?')
+run_simulated_request('nlu', 'eight, nine, ten')
+run_simulated_request('nlu', '8, 9, 10')
+run_simulated_request('nlu', '8')
+run_simulated_request('nlu', "I don't know")
+run_simulated_request('nlu', "I don't know eight")
+run_simulated_request('nlu', "I don't 9")
+run_simulated_request('nlu', "0.2")
+run_simulated_request('nlu', 'Today is a wonderful day')
+run_simulated_request('nlu', 'IDK 5?')
 # run_simulated_request('manager', '')
-run_simulated_request('manager', 'add')
-run_simulated_request('manager', 'subtract')
-run_simulated_request("question", {
-    'number_correct': 0,
-    'number_incorrect': 0,
-    'level': 'easy'
-})
-run_simulated_request("hint", {
-    'question_numbers': [1, 2, 3],
-    'right_answer': 3,
-    'number_correct': 0,
-    'number_incorrect': 0,
-    'level': 'easy',
-    'hints_used': 0
-})
-run_simulated_request("generate_question", {
-    'level': 'medium'
-})
-run_simulated_request("numbers_by_level", {
-    'level': 'medium'
-})
-run_simulated_request("number_sequence", {
-    "current_number": 10,
-    "ordinal_number": 2,
-    "times": 1
-})
-run_simulated_request("level", {
-    "current_level": "hard",
-    "level_up": False
-})
+# run_simulated_request('manager', 'add')
+# run_simulated_request('manager', 'subtract')
+# run_simulated_request("question", {
+#     'number_correct': 0,
+#     'number_incorrect': 0,
+#     'level': 'easy'
+# })
+# run_simulated_request("hint", {
+#     'question_numbers': [1, 2, 3],
+#     'right_answer': 3,
+#     'number_correct': 0,
+#     'number_incorrect': 0,
+#     'level': 'easy',
+#     'hints_used': 0
+# })
+# run_simulated_request("generate_question", {
+#     'level': 'medium'
+# })
+# run_simulated_request("numbers_by_level", {
+#     'level': 'medium'
+# })
+# run_simulated_request("number_sequence", {
+#     "current_number": 10,
+#     "ordinal_number": 2,
+#     "times": 1
+# })
+# run_simulated_request("level", {
+#     "current_level": "hard",
+#     "level_up": False
+# })
 # run_simulated_request('manager', 'exit')
 
 

@@ -72,25 +72,10 @@ def evaluate_message_with_nlu(message_data):
             'message_updated_at': message_data['message']['_vnd']['v1']['chat']['updated_at'],
         }
         message_text = message_data['message_body']
-    message_text_arr = re.split(", |,| ", message_text.strip())
 
-    # TODO: Replace this with appropriate utility function (is_int, is_float, render_int_or_float)
-    nlu_response = test_for_float_or_int(message_data, message_text)
-    if len(nlu_response) > 0:
-        return nlu_response
+    number_api_resp = text2int(message_text.lower())
 
-    # TODO: Replace this with appropriate utility function
-    nlu_response = test_for_number_sequence(message_text_arr, message_data, message_text)
-    if len(nlu_response) > 0:
-        return nlu_response
-
-    student_response_arr = run_text2int_on_each_list_item(message_text_arr)
-
-    # '32202' is text2int's error code for non-integer student answers (ie., "I don't know")
-    # If any part of the list is 32202, sentiment analysis will run
-    # TODO: Need to replace this with logic that recognizes multiple intents (Maybe 36 = "sentiment analysis" & "integer")
-    student_response_arr = run_text2int_on_each_list_item(message_text_arr)
-    if 32202 in student_response_arr:
+    if number_api_resp == 32202:
         sentiment_api_resp = sentiment(message_text)
         nlu_response = build_nlu_response_object(
             'sentiment',
@@ -98,18 +83,11 @@ def evaluate_message_with_nlu(message_data):
             sentiment_api_resp[0]['score']
         )
     else:
-        if len(student_response_arr) > 1:
-            nlu_response = build_nlu_response_object(
-                'integer',
-                ','.join(str(num) for num in student_response_arr),
-                ''
-            )
-        else:
-            nlu_response = build_nlu_response_object(
-                'integer',
-                student_response_arr[0],
-                ''
-            )
+        nlu_response = build_nlu_response_object(
+            'integer',
+            number_api_resp,
+            ''
+        )
 
     prepare_message_data_for_logging(message_data, nlu_response)
     return nlu_response
