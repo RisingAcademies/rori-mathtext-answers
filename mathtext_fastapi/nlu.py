@@ -86,7 +86,7 @@ def evaluate_message_with_nlu(message_data):
         nlu_response = build_nlu_response_object(
             'integer',
             number_api_resp,
-            ''
+            0
         )
 
     prepare_message_data_for_logging(message_data, nlu_response)
