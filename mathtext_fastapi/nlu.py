@@ -57,7 +57,21 @@ def run_sentiment_analysis(message_text):
 
 
 def evaluate_message_with_nlu(message_data):
-    message_text = message_data['message_body']
+    # Keeps system working with two different inputs - full and filtered @event object
+    try:
+        message_text = message_data['message_body']
+    except KeyError:
+        message_data = {
+            message_data['message']['_vnd']['v1']['chat']['owner'],
+            message_data['message']['_vnd']['v1']['author']['type'],
+            message_data['message']['_vnd']['v1']['chat']['contact_uuid'],
+            message_data['message']['text']['body'],
+            message_data['message']['_vnd']['v1']['direction'],
+            message_data['message']['id'],
+            message_data['message']['_vnd']['v1']['chat']['inserted_at'],
+            message_data['message']['_vnd']['v1']['chat']['updated_at'],
+        }
+        message_text = message_data['message_body']
     message_text_arr = re.split(", |,| ", message_text.strip())
 
     # TODO: Replace this with appropriate utility function (is_int, is_float, render_int_or_float)
