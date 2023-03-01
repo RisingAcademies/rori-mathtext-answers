@@ -62,14 +62,14 @@ def evaluate_message_with_nlu(message_data):
         message_text = message_data['message_body']
     except KeyError:
         message_data = {
-            message_data['message']['_vnd']['v1']['chat']['owner'],
-            message_data['message']['_vnd']['v1']['author']['type'],
-            message_data['message']['_vnd']['v1']['chat']['contact_uuid'],
-            message_data['message']['text']['body'],
-            message_data['message']['_vnd']['v1']['direction'],
-            message_data['message']['id'],
-            message_data['message']['_vnd']['v1']['chat']['inserted_at'],
-            message_data['message']['_vnd']['v1']['chat']['updated_at'],
+            'author_id': message_data['message']['_vnd']['v1']['chat']['owner'],
+            'author_type': message_data['message']['_vnd']['v1']['author']['type'],
+            'contact_uuid': message_data['message']['_vnd']['v1']['chat']['contact_uuid'],
+            'message_body': message_data['message']['text']['body'],
+            'message_direction': message_data['message']['_vnd']['v1']['direction'],
+            'message_id': message_data['message']['id'],
+            'message_inserted_at': message_data['message']['_vnd']['v1']['chat']['inserted_at'],
+            'message_updated_at': message_data['message']['_vnd']['v1']['chat']['updated_at'],
         }
         message_text = message_data['message_body']
     message_text_arr = re.split(", |,| ", message_text.strip())
