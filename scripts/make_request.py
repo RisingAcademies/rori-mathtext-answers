@@ -60,8 +60,10 @@ def run_simulated_request(endpoint, sample_answer, context=None):
 
 # run_simulated_request('sentiment-analysis', 'I reject it')
 # run_simulated_request('text2int', 'seven thousand nine hundred fifty seven')
-# run_simulated_request('nlu', 'test message')
-# run_simulated_request('nlu', 'eight')
+run_simulated_request('nlu', 'test message')
+run_simulated_request('nlu', 'eight')
+run_simulated_request('nlu', 'is it 8')
+run_simulated_request('nlu', 'can I know how its 0.5')
 run_simulated_request('nlu', 'eight, nine, ten')
 run_simulated_request('nlu', '8, 9, 10')
 run_simulated_request('nlu', '8')
