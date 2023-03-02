@@ -97,8 +97,8 @@ async def evaluate_user_message_with_nlu_api(request: Request):
 
     Output
     - int_data_dict or sent_data_dict: dict - the type of NLU run and result
-      {'type':'integer', 'data': '8'}
-      {'type':'sentiment', 'data': 'negative'}
+      {'type':'integer', 'data': '8', 'confidence': 0}
+      {'type':'sentiment', 'data': 'negative', 'confidence': 0.99}
     """
     data_dict = await request.json()
     message_data = data_dict.get('message_data', '')
