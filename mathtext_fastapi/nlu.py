@@ -104,7 +104,7 @@ def run_intent_classification(message_text):
         'exit',
         'harder',
         'hint',
-        'next'
+        'next',
         'stop',
     ]
     
