@@ -20,12 +20,24 @@ def add_message_text_to_sample_object(message_text):
     
     """
     message_data = '{' + f'"author_id": "+57787919091", "author_type": "OWNER", "contact_uuid": "j43hk26-2hjl-43jk-hnk2-k4ljl46j0ds09", "message_body": "{message_text}", "message_direction": "inbound", "message_id": "4kl209sd0-a7b8-2hj3-8563-3hu4a89b32", "message_inserted_at": "2023-01-10T02:37:28.477940Z", "message_updated_at": "2023-01-10T02:37:28.487319Z"' + '}'
+    # context_data = '{' + '"user":"", "state":"addition-question-sequence", "bot_message":"", "user_message":"{message_text}"' + '}'
+
     context_data = '{' + '"user":"", "state":"start-conversation", "bot_message":"", "user_message":"{message_text}"' + '}'
+
+    # context_data = '{' + '"user":"", "state":"addition-question-sequence", "bot_message":"", "user_message":"{message_text}","text": "What is 2+3?","question_numbers": [4,3],"right_answer": 7,"number_correct": 2, "number_incorrect": 0, "hints_used": 0, "level": "easy"' + '}'
 
     json_string = '{' + f'"context_data": {context_data}, "message_data": {message_data}' + '}'
     b_string = json_string.encode("utf-8")
 
     return b_string
+
+# """
+#     "text": "What is 2+3?",
+#     "question_numbers": [2,3],
+#     "right_answer": 5,
+#     "number_correct": 2,
+#     "hints_used": 0,
+# """
 
 
 def run_simulated_request(endpoint, sample_answer, context=None):
@@ -57,42 +69,36 @@ def run_simulated_request(endpoint, sample_answer, context=None):
 # run_simulated_request('nlu', 'Today is a wonderful day')
 # run_simulated_request('nlu', 'IDK 5?')
 # run_simulated_request('manager', '')
-# run_simulated_request('manager', 'add')
-# run_simulated_request("question", {
-#     'number_correct': 0,
-#     'number_incorrect': 0,
-#     'level': 'easy'
-# })
-# run_simulated_request("hint", {
-#     'question_numbers': [1,2,3],
-#     'right_answer': 3,
-#     'number_correct': 0,
-#     'number_incorrect': 0,
-#     'level': 'easy',
-#     'hints_used': 0
-# })
-# run_simulated_request("generate_question", {
-#     'level': 'medium'
-# })
-# run_simulated_request("numbers_by_level", {
-#     'level': 'medium'
-# })
-# run_simulated_request("number_sequence", {
-#     "current_number": 10,
-#     "ordinal_number": 2,
-#     "times": 1
-# })
-# run_simulated_request("level", {
-#     "current_level": "hard",
-#     "level_up": False
-# })
-run_simulated_request("question_new", {
-    "start": 10,
-    "step": 1,
-    "sequence": "8... 9... 10...",
-    "question_num": 1
+run_simulated_request('manager', 'add')
+run_simulated_request('manager', 'subtract')
+run_simulated_request("question", {
+    'number_correct': 0,
+    'number_incorrect': 0,
+    'level': 'easy'
 })
-# run_simulated_request('manager', 'subtract')
+run_simulated_request("hint", {
+    'question_numbers': [1, 2, 3],
+    'right_answer': 3,
+    'number_correct': 0,
+    'number_incorrect': 0,
+    'level': 'easy',
+    'hints_used': 0
+})
+run_simulated_request("generate_question", {
+    'level': 'medium'
+})
+run_simulated_request("numbers_by_level", {
+    'level': 'medium'
+})
+run_simulated_request("number_sequence", {
+    "current_number": 10,
+    "ordinal_number": 2,
+    "times": 1
+})
+run_simulated_request("level", {
+    "current_level": "hard",
+    "level_up": False
+})
 # run_simulated_request('manager', 'exit')
 
 

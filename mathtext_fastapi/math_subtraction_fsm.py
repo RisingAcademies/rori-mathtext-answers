@@ -2,7 +2,7 @@ import random
 from transitions import Machine
 
 
-class MathQuizFSM(object):
+class MathSubtractionFSM(object):
     states = [
         'quiz_start',
         'quiz_question',
@@ -19,23 +19,23 @@ class MathQuizFSM(object):
     def __init__(
         self,
         initial_state='quiz_start',
-        question_nums=[2, 3],
+        question_nums=[4, 3],
         initial_student_answer=0,
     ):
         # Instantiate the FSM
         self.machine = Machine(
             model=self,
-            states=MathQuizFSM.states,
-            transitions=MathQuizFSM.transitions,
+            states=MathSubtractionFSM.states,
+            transitions=MathSubtractionFSM.transitions,
             initial=initial_state
         )
 
         # Instantiate variables necessary for tracking activity
         self.question_nums = question_nums
-        self.correct_answer = self.question_nums[0] + self.question_nums[1]
+        self.correct_answer = self.question_nums[0] - self.question_nums[1]
         self.student_answer = initial_student_answer
         self.is_correct_answer = False
-        self.response_text = f"What is {self.question_nums[0]} + {self.question_nums[1]}?"
+        self.response_text = f"What is {self.question_nums[0]} - {self.question_nums[1]}?"
 
         # Define functions to run on transitions
         self.machine.on_enter_quiz_question('generate_math_problem')
@@ -53,6 +53,6 @@ class MathQuizFSM(object):
             return ["That's not quite right.  Try again.", self.response_text]
     
     def generate_math_problem(self):
-        self.question_nums = random.sample(range(1,100),2)
-        self.response_text = f"What is {self.question_nums[0]} + {self.question_nums[1]}"
-        self.correct_answer = self.question_nums[0] + self.question_nums[1]
+        self.question_nums = random.sample(range(1, 100), 2)
+        self.response_text = f"What is {self.question_nums[0]} - {self.question_nums[1]}"
+        self.correct_answer = self.question_nums[0] - self.question_nums[1]
