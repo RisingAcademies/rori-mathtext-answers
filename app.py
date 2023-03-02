@@ -18,6 +18,7 @@ from pydantic import BaseModel
 from mathtext_fastapi.logging import prepare_message_data_for_logging
 from mathtext_fastapi.conversation_manager import manage_conversation_response
 from mathtext_fastapi.nlu import evaluate_message_with_nlu
+from mathtext_fastapi.nlu import run_intent_classification
 
 app = FastAPI()
 
@@ -86,6 +87,13 @@ async def programmatic_message_manager(request: Request):
     data_dict = await request.json()
     context = manage_conversation_response(data_dict)
     return JSONResponse(context)
+
+
+@app.post("/intent-classification")
+def intent_classification_ep(content: Text = None):
+    ml_response = run_intent_classification(content.content)
+    content = {"message": ml_response}
+    return JSONResponse(content=content)
 
 
 @app.post("/nlu")

@@ -145,9 +145,6 @@ def evaluate_message_with_nlu(message_data):
     number_api_resp = text2int(message_text.lower())
 
     if number_api_resp == 32202:
-        print("MESSAGE TEXT")
-        print(message_text)
-        print("============")
         intent_api_response = run_intent_classification(message_text)
         if intent_api_response['data']:
             return intent_api_response

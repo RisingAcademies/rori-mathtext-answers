@@ -44,7 +44,7 @@ def run_simulated_request(endpoint, sample_answer, context=None):
     print(f"Case: {sample_answer}")
     b_string = add_message_text_to_sample_object(sample_answer)
 
-    if endpoint == 'sentiment-analysis' or endpoint == 'text2int':
+    if endpoint == 'sentiment-analysis' or endpoint == 'text2int' or endpoint =='intent-classification':
         request = requests.post(
             url=f'http://localhost:7860/{endpoint}',
             json={'content': sample_answer}
@@ -58,6 +58,7 @@ def run_simulated_request(endpoint, sample_answer, context=None):
     print(request)
 
 
+run_simulated_request('intent-classification', 'exit')
 run_simulated_request('sentiment-analysis', 'I reject it')
 run_simulated_request('text2int', 'seven thousand nine hundred fifty seven')
 run_simulated_request('nlu', 'test message')
