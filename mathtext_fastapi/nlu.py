@@ -142,13 +142,13 @@ def evaluate_message_with_nlu(message_data):
         }
         message_text = message_data['message_body']
 
+    intent_api_response = run_intent_classification(message_text)
+    if intent_api_response['data']:
+        return intent_api_response
+
     number_api_resp = text2int(message_text.lower())
 
     if number_api_resp == 32202:
-        intent_api_response = run_intent_classification(message_text)
-        if intent_api_response['data']:
-            return intent_api_response
-
         sentiment_api_resp = sentiment(message_text)
         nlu_response = build_nlu_response_object(
             'sentiment',
