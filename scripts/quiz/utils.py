@@ -18,7 +18,7 @@ def get_next_difficulty(difficulty, do_increase: Literal[True, False] = True):
     return next_difficulty
 
 
-def generate_start_step(difficulty: float, path_to_csv_file: str = "data.csv"):
+def generate_start_step(difficulty: float, path_to_csv_file: str = "scripts/quiz/data.csv"):
     """generate start and step values interpolating results to function built from data from file"""
     df = pandas.read_csv(path_to_csv_file, delimiter=',', header=0, names=['difficulty', 'start'])
     all_rows = df.loc[:]
@@ -39,4 +39,4 @@ def generate_start_step(difficulty: float, path_to_csv_file: str = "data.csv"):
 
 def convert_sequence_to_string(start, step, sep=", "):
     stop = start + 3 * step
-    return sep.join([str(num) for num in range(start, stop, step)])
+    return sep.join([str(num) for num in range(start, stop, step)]) + sep
