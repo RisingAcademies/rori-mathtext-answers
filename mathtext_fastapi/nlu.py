@@ -2,6 +2,7 @@ from fuzzywuzzy import fuzz
 from mathtext_fastapi.logging import prepare_message_data_for_logging
 from mathtext.sentiment import sentiment
 from mathtext.text2int import text2int
+from mathtext_fastapi.intent_classification import create_intent_classification_model, retrieve_intent_classification_model, predict_message_intent
 import re
 
 
@@ -142,6 +143,7 @@ def evaluate_message_with_nlu(message_data):
         }
         message_text = message_data['message_body']
 
+    # Run intent classification only for keywords
     intent_api_response = run_intent_classification(message_text)
     if intent_api_response['data']:
         return intent_api_response
@@ -149,6 +151,13 @@ def evaluate_message_with_nlu(message_data):
     number_api_resp = text2int(message_text.lower())
 
     if number_api_resp == 32202:
+        # Run intent classification with logistic regression model
+        predicted_label = predict_message_intent(message_text)
+        if predicted_label['confidence'] > 0.01:
+            nlu_response = predicted_label
+            return nlu_response
+
+        # Run sentiment analysis
         sentiment_api_resp = sentiment(message_text)
         nlu_response = build_nlu_response_object(
             'sentiment',
