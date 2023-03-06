@@ -8,6 +8,7 @@ pydantic==1.10.*
 python-Levenshtein
 requests==2.27.*
 sentencepiece==0.1.*
+sentence-transformers
 supabase
 transitions
 uvicorn==0.17.*
