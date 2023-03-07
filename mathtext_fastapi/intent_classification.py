@@ -42,7 +42,10 @@ def retrieve_intent_classification_model():
 
 
 encoder = SentenceTransformer('all-MiniLM-L6-v2')
-model = retrieve_intent_classification_model()
+# model = retrieve_intent_classification_model()
+DATA_DIR = Path(__file__).parent.parent / "mathtext_fastapi" / "data" / "intent_classification_model.joblib"
+model = load(DATA_DIR)
+
 
 def predict_message_intent(message):
     tokenized_utterance = np.array([list(encoder.encode(message))])
