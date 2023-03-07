@@ -1,5 +1,5 @@
 ---
-title: Mathtext Fastapi
+title: Mathtext Wormhole
 emoji: 🐨
 colorFrom: blue
 colorTo: red
