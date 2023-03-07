@@ -41,9 +41,10 @@ def retrieve_intent_classification_model():
     return model
 
 
+encoder = SentenceTransformer('all-MiniLM-L6-v2')
+model = retrieve_intent_classification_model()
+
 def predict_message_intent(message):
-    encoder = SentenceTransformer('all-MiniLM-L6-v2')
-    model = retrieve_intent_classification_model()
     tokenized_utterance = np.array([list(encoder.encode(message))])
     predicted_label = model.predict(tokenized_utterance)
     predicted_probabilities = model.predict_proba(tokenized_utterance)
