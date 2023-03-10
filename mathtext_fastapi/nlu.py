@@ -149,7 +149,7 @@ def evaluate_message_with_nlu(message_data):
     # Run intent classification only for keywords
     intent_api_response = run_intent_classification(message_text)
     if intent_api_response['data']:
-        prepare_message_data_for_logging(message_data, nlu_response)
+        prepare_message_data_for_logging(message_data, intent_api_response)
         return intent_api_response
 
     number_api_resp = text2int(message_text.lower())
