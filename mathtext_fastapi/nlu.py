@@ -132,7 +132,7 @@ def evaluate_message_with_nlu(message_data):
     """
     # Keeps system working with two different inputs - full and filtered @event object
     try:
-        message_text = message_data['message_body']
+        message_text = str(message_data['message_body'])
     except KeyError:
         message_data = {
             'author_id': message_data['message']['_vnd']['v1']['chat']['owner'],
