@@ -110,7 +110,10 @@ def run_intent_classification(message_text):
     ]
     
     for command in commands:
-        ratio = fuzz.ratio(command, message_text.lower())
+        try:
+            ratio = fuzz.ratio(command, message_text.lower())
+        except:
+            ratio = 0
         if ratio > 80:
             nlu_response['data'] = command
             nlu_response['confidence'] = ratio / 100
