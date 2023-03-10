@@ -151,7 +151,7 @@ def evaluate_message_with_nlu(message_data):
     if intent_api_response['data']:
         return intent_api_response
 
-    number_api_resp = text2int(message_text.lower())
+    number_api_resp = text2int(message_text)
 
     if number_api_resp == 32202:
         # Run intent classification with logistic regression model
