@@ -144,14 +144,14 @@ def evaluate_message_with_nlu(message_data):
             'message_inserted_at': message_data['message']['_vnd']['v1']['chat']['inserted_at'],
             'message_updated_at': message_data['message']['_vnd']['v1']['chat']['updated_at'],
         }
-        message_text = message_data['message_body']
+        message_text = str(message_data['message_body'])
 
     # Run intent classification only for keywords
     intent_api_response = run_intent_classification(message_text)
     if intent_api_response['data']:
         return intent_api_response
 
-    number_api_resp = text2int(message_text)
+    number_api_resp = text2int(message_text.lower())
 
     if number_api_resp == 32202:
         # Run intent classification with logistic regression model
