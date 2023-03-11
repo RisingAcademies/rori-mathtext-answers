@@ -18,3 +18,6 @@ class GlobalStateManager(object):
             transitions=GlobalStateManager.transitions,
             initial=initial_state
         )
+
+
+curriculum = GlobalStateManager()
