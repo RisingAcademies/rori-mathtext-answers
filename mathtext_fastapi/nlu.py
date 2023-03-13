@@ -155,15 +155,14 @@ def evaluate_message_with_nlu(message_data):
         predicted_label = predict_message_intent(message_text)
         if predicted_label['confidence'] > 0.01:
             nlu_response = predicted_label
-            return nlu_response
-
-        # Run sentiment analysis
-        sentiment_api_resp = sentiment(message_text)
-        nlu_response = build_nlu_response_object(
-            'sentiment',
-            sentiment_api_resp[0]['label'],
-            sentiment_api_resp[0]['score']
-        )
+        else:
+            # Run sentiment analysis
+            sentiment_api_resp = sentiment(message_text)
+            nlu_response = build_nlu_response_object(
+                'sentiment',
+                sentiment_api_resp[0]['label'],
+                sentiment_api_resp[0]['score']
+            )
     else:
         nlu_response = build_nlu_response_object(
             'integer',

@@ -4,6 +4,7 @@ fuzzywuzzy
 jsonpickle
 mathtext @ git+https://gitlab.com/tangibleai/community/mathtext@main
 fastapi==0.74.*
+openpyxl
 pydantic==1.10.*
 python-Levenshtein
 requests==2.27.*
