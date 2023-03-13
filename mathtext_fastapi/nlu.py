@@ -157,7 +157,7 @@ def evaluate_message_with_nlu(message_data):
     if number_api_resp == 32202:
         # Run intent classification with logistic regression model
         predicted_label = predict_message_intent(message_text)
-        if predicted_label['confidence'] > 0.05:
+        if predicted_label['confidence'] > 0.01:
             nlu_response = predicted_label
         else:
             # Run sentiment analysis
