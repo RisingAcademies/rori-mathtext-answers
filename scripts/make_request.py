@@ -22,7 +22,11 @@ def add_message_text_to_sample_object(message_text):
     message_data = '{' + f'"author_id": "+57787919091", "author_type": "OWNER", "contact_uuid": "j43hk26-2hjl-43jk-hnk2-k4ljl46j0ds09", "message_body": "{message_text}", "message_direction": "inbound", "message_id": "4kl209sd0-a7b8-2hj3-8563-3hu4a89b32", "message_inserted_at": "2023-01-10T02:37:28.477940Z", "message_updated_at": "2023-01-10T02:37:28.487319Z"' + '}'
     # context_data = '{' + '"user":"", "state":"addition-question-sequence", "bot_message":"", "user_message":"{message_text}"' + '}'
 
-    context_data = '{' + '"user":"", "state":"start-conversation", "bot_message":"", "user_message":"{message_text}"' + '}'
+    # V1
+    # context_data = '{' + '"user":"", "state":"start-conversation", "bot_message":"", "user_message":"{message_text}"' + '}'
+
+    #V2
+    context_data = '{' + '"contact_uuid": "j43hk26-2hjl-43jk-hnk2-k4ljl46j0ds09", "current_state":"", "local_state": "", "user_message":""' + '}'
 
     # context_data = '{' + '"user":"", "state":"addition-question-sequence", "bot_message":"", "user_message":"{message_text}","text": "What is 2+3?","question_numbers": [4,3],"right_answer": 7,"number_correct": 2, "number_incorrect": 0, "hints_used": 0, "level": "easy"' + '}'
 
@@ -76,6 +80,7 @@ def run_simulated_request(endpoint, sample_answer, context=None):
 # run_simulated_request('nlu', 'Today is a wonderful day')
 # run_simulated_request('nlu', 'IDK 5?')
 run_simulated_request('v2/manager', '')
+run_simulated_request('v2/manager', '5')
 # run_simulated_request('manager', '')
 # run_simulated_request('manager', 'add')
 # run_simulated_request('manager', 'subtract')

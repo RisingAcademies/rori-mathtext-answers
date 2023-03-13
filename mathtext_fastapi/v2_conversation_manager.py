@@ -153,21 +153,53 @@ def lookup_local_state(next_state):
     return microlesson
 
 
+def create_text_message(message_text, whatsapp_id):
+    """ Fills a template with input values to send a text message to Whatsapp
+
+    Inputs
+    - message_text: str - the content that the message should display
+    - whatsapp_id: str - the message recipient's phone number
+
+    Outputs
+    - message_data: dict - a preformatted template filled with inputs
+    """
+    message_data = {
+        "preview_url": False,
+        "recipient_type": "individual",
+        "to": whatsapp_id,
+        "type": "text",
+        "text": {
+            "body": message_text
+        }
+    }
+    return message_data
+
+
 def manage_conversation_response(data_json):
     """ Calls functions necessary to determine message and context data """
     print("V2 ENDPOINT")
 
     user_message = ''
+    # whatsapp_id = data_json['author_id']
+    message_data = data_json['message_data']
+    context_data = data_json['context_data']
+    whatsapp_id = message_data['author_id']
+    print("MESSAGE DATA")
+    print(message_data)
+    print("CONTEXT DATA")
+    print(context_data)
+    print("=================")
 
     # nlu_response = evaluate_message_with_nlu(message_data)
 
-    context_data = {
-        'contact_uuid': 'abcdefg',
-        'current_state': 'N1.1.1_G2',
-        'user_message': '1',
-        'local_state': ''
-    }
+    # context_data = {
+    #     'contact_uuid': 'abcdefg',
+    #     'current_state': 'N1.1.1_G2',
+    #     'user_message': '1',
+    #     'local_state': ''
+    # }
     print("STEP 1")
+    print(data_json)
     if not context_data['current_state']:
         context_data['current_state'] = 'N1.1.1_G1'
 
@@ -191,6 +223,35 @@ def manage_conversation_response(data_json):
 
     microlesson_content = retrieve_microlesson_content(context_data, context_data['user_message'], microlesson, context_data['contact_uuid'])
 
+    headers = {
+        'Authorization': f"Bearer {os.environ.get('TURN_AUTHENTICATION_TOKEN')}",
+        'Content-Type': 'application/json'
+    }
+
+    # Send all messages for the current state before a user input prompt (text/button input request)
+    for message in microlesson_content['messages']:
+        data = create_text_message(message, whatsapp_id)
+
+        print("data")
+        print(data)
+
+        r = requests.post(
+            f'https://whatsapp.turn.io/v1/messages',
+            data=json.dumps(data),
+            headers=headers
+        )
+
     print("STEP 4")
     # combine microlesson content and context_data object
-    return context_data
+
+    updated_context = {
+        "context": {
+            "contact_id": whatsapp_id,
+            "contact_uuid": context_data['contact_uuid'],
+            "state": microlesson_content['state'],
+            "bot_message": microlesson_content['input_prompt'],
+            "user_message": user_message,
+            "type": 'ask'
+        }
+    }
+    return updated_context
