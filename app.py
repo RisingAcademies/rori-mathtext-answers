@@ -2,11 +2,10 @@
 To run locally use 'uvicorn app:app --host localhost --port 7860'
 """
 import ast
-import scripts.quiz.generators as generators
-import scripts.quiz.hints as hints
-import scripts.quiz.questions as questions
-import scripts.quiz.utils as utils
-
+import mathactive.generators as generators
+import mathactive.hints as hints
+import mathactive.questions as questions
+import mathactive.utils as utils
 from fastapi import FastAPI, Request
 from fastapi.responses import JSONResponse
 from fastapi.staticfiles import StaticFiles
