@@ -1,12 +1,14 @@
 dill
 en-core-web-sm @ https://github.com/explosion/spacy-models/releases/download/en_core_web_sm-3.4.1/en_core_web_sm-3.4.1-py3-none-any.whl  
 jsonpickle
-mathtext @ git+https://gitlab.com/tangibleai/community/mathtext@main
-fastapi==0.74.*
-pydantic==1.10.*
-requests==2.27.*
-sentencepiece==0.1.*
+git+ssh://git@gitlab.com/tangibleai/community/mathtext.git@main#egg=mathtext
+git+ssh://git@gitlab.com/tangibleai/community/mathactive.git@vlad#egg=mathactive
+fastapi
+pydantic
+requests
+sentencepiece
 supabase
 transitions
-uvicorn==0.17.*
-
+uvicorn
+pandas
+scipy
