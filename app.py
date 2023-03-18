@@ -1,11 +1,10 @@
 """FastAPI endpoint
 To run locally use 'uvicorn app:app --host localhost --port 7860'
+or
+`python -m uvicorn app:app --reload --host localhost --port 7860`
 """
 import ast
-import mathactive.generators as generators
-import mathactive.hints as hints
-import mathactive.questions as questions
-import mathactive.utils as utils
+import mathactive.microlessons.num_one as num_one_quiz
 from fastapi import FastAPI, Request
 from fastapi.responses import JSONResponse
 from fastapi.staticfiles import StaticFiles
@@ -103,6 +102,29 @@ async def evaluate_user_message_with_nlu_api(request: Request):
     message_data = data_dict.get('message_data', '')
     nlu_response = evaluate_message_with_nlu(message_data)
     return JSONResponse(content=nlu_response)
+
+
+@app.post("/num_one")
+async def num_one(request: Request):
+    """
+    Input: 
+    {
+        "user_id": 1,
+        "message_text": 5,
+    }
+    Output:
+    {
+        'messages': 
+            ["Let's", 'practice', 'counting', '', '', '46...', '47...', '48...', '49', '', '', 'After', '49,', 'what', 'is', 'the', 'next', 'number', 'you', 'will', 'count?\n46,', '47,', '48,', '49'], 
+        'input_prompt': '50', 
+        'state': 'question'
+    }
+    """
+    data_dict = await request.json()
+    message_data = ast.literal_eval(data_dict.get('message_data', '').get('message_body', ''))
+    user_id = message_data['user_id']
+    message_text = message_data['message_text']
+    print(num_one_quiz.process_user_message(user_id, message_text))  # from mathactive repo
     
 
 @app.post("/start")
