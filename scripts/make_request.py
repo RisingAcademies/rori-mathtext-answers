@@ -77,34 +77,33 @@ run_simulated_request('nlu', 'IDK 5?')
 # run_simulated_request('manager', 'add')
 # run_simulated_request('manager', 'subtract')
 
-run_simulated_request("start", {
-    'difficulty': 0.69,
-    'do_increase': True
+# run_simulated_request("start", {
+#     'difficulty': 0.04,
+#     'do_increase': True
+# })
+# run_simulated_request("hint", {
+#     'start': 5,
+#     'step': 1,
+#     'difficulty': 0.56  # optional
+# })
+# run_simulated_request("question", {
+#     'start': 2,
+#     'step': 1,
+#     'question_num': 2  # optional
+# })
+# run_simulated_request("difficulty", {
+#     'difficulty': 0.01,
+#     'do_increase': False  # True | False
+# })
+run_simulated_request("num_one", {
+    "user_id": "1",
+    "message_text": "61",
 })
-run_simulated_request("hint", {
-    'start': 2,
-    'step': 1,
-    'difficulty': 0.01  # optional
-})
-run_simulated_request("question", {
-    'start': 2,
-    'step': 1,
-    'question_num': 2  # optional
-})
-run_simulated_request("difficulty", {
-    'difficulty': 0.01,
-    'do_increase': True  # True | False
-})
-run_simulated_request("start_step", {
-    'start': 2,
-    'step': 1,
-    'difficulty': 0.01  # optional
-})
-run_simulated_request("sequence", {
-    'start': 2,
-    'step': 1,
-    'sep': '... '
-})
+# run_simulated_request("sequence", {
+#     'start': 2,
+#     'step': 1,
+#     'sep': '... '
+# })
 
 # run_simulated_request('manager', 'exit')
 
