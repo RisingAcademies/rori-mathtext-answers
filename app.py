@@ -124,7 +124,7 @@ async def num_one(request: Request):
     message_data = ast.literal_eval(data_dict.get('message_data', '').get('message_body', ''))
     user_id = message_data['user_id']
     message_text = message_data['message_text']
-    print(num_one_quiz.process_user_message(user_id, message_text))  # from mathactive repo
+    return num_one_quiz.process_user_message(user_id, message_text)
     
 
 @app.post("/start")
