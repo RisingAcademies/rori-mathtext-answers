@@ -120,6 +120,9 @@ def retrieve_microlesson_content(context_data, user_message, microlesson, contac
             'input_prompt': input_prompt,
             'state': state_label
         }
+    elif microlesson == 'addition2':
+        pass
+        # message_package = mathactive.process_user_message(user_id, message_text, state)
     elif context_data['local_state'] == 'subtraction-question-sequence' or \
         user_message == 'subtract' or \
         microlesson == 'subtraction':
@@ -144,7 +147,8 @@ def retrieve_microlesson_content(context_data, user_message, microlesson, contac
 
 curriculum_lookup_table = {
     'N1.1.1_G1': 'addition',
-    'N1.1.1_G2': 'subtraction'
+    'N1.1.1_G2': 'addition2',
+    'N1.1.2_G1': 'subtraction'
 }
 
 
