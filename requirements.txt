@@ -2,15 +2,24 @@ dill
 en-core-web-sm @ https://github.com/explosion/spacy-models/releases/download/en_core_web_sm-3.4.1/en_core_web_sm-3.4.1-py3-none-any.whl
 fuzzywuzzy
 jsonpickle
-mathtext @ git+https://gitlab.com/tangibleai/community/mathtext@main
-fastapi==0.74.*
+mathtext
+mathactive
+fastapi
+pydantic
+requests
+sentencepiece
 openpyxl
-pydantic==1.10.*
 python-Levenshtein
-requests==2.27.*
-sentencepiece==0.1.*
 sentence-transformers
 supabase
 transitions
-uvicorn==0.17.*
+uvicorn
+pandas
+scipy
 
+# Deprecated
+# mathtext @ git+https://gitlab.com/tangibleai/community/mathtext@main
+# fastapi==0.74.*
+# pydantic==1.10.*
+# requests==2.27.*
+# sentencepiece==0.1.*

@@ -84,34 +84,35 @@ run_simulated_request('v2/manager', '5')
 # run_simulated_request('manager', '')
 # run_simulated_request('manager', 'add')
 # run_simulated_request('manager', 'subtract')
-# run_simulated_request("question", {
-#     'number_correct': 0,
-#     'number_incorrect': 0,
-#     'level': 'easy'
+
+# run_simulated_request("start", {
+#     'difficulty': 0.04,
+#     'do_increase': True
 # })
 # run_simulated_request("hint", {
-#     'question_numbers': [1, 2, 3],
-#     'right_answer': 3,
-#     'number_correct': 0,
-#     'number_incorrect': 0,
-#     'level': 'easy',
-#     'hints_used': 0
+#     'start': 5,
+#     'step': 1,
+#     'difficulty': 0.56  # optional
 # })
-# run_simulated_request("generate_question", {
-#     'level': 'medium'
+# run_simulated_request("question", {
+#     'start': 2,
+#     'step': 1,
+#     'question_num': 2  # optional
 # })
-# run_simulated_request("numbers_by_level", {
-#     'level': 'medium'
+# run_simulated_request("difficulty", {
+#     'difficulty': 0.01,
+#     'do_increase': False  # True | False
 # })
-# run_simulated_request("number_sequence", {
-#     "current_number": 10,
-#     "ordinal_number": 2,
-#     "times": 1
+run_simulated_request("num_one", {
+    "user_id": "1",
+    "message_text": "61",
+})
+# run_simulated_request("sequence", {
+#     'start': 2,
+#     'step': 1,
+#     'sep': '... '
 # })
-# run_simulated_request("level", {
-#     "current_level": "hard",
-#     "level_up": False
-# })
+
 # run_simulated_request('manager', 'exit')
 
 

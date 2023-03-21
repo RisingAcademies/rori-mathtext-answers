@@ -14,8 +14,8 @@ from mathtext_fastapi.math_subtraction_fsm import MathSubtractionFSM
 from supabase import create_client
 from transitions import Machine
 
-from scripts.quiz.generators import start_interactive_math
-from scripts.quiz.hints import generate_hint
+from mathactive.generators import start_interactive_math
+from mathactive.hints import generate_hint
 
 load_dotenv()
 

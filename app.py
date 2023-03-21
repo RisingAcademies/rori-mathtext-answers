@@ -1,12 +1,10 @@
 """FastAPI endpoint
 To run locally use 'uvicorn app:app --host localhost --port 7860'
+or
+`python -m uvicorn app:app --reload --host localhost --port 7860`
 """
 import ast
-import scripts.quiz.generators as generators
-import scripts.quiz.hints as hints
-import scripts.quiz.questions as questions
-import scripts.quiz.utils as utils
-
+import mathactive.microlessons.num_one as num_one_quiz
 from fastapi import FastAPI, Request
 from fastapi.responses import JSONResponse
 from fastapi.staticfiles import StaticFiles
@@ -146,168 +144,186 @@ async def evaluate_user_message_with_nlu_api(request: Request):
     message_data = data_dict.get('message_data', '')
     nlu_response = evaluate_message_with_nlu(message_data)
     return JSONResponse(content=nlu_response)
-    
 
-@app.post("/question")
-async def ask_math_question(request: Request):
-    """Generate a question and return it as response along with question data
-    
-    Input
-    request.body: json - amount of correct and incorrect answers in the account
+
+@app.post("/num_one")
+async def num_one(request: Request):
+    """
+    Input: 
     {
-        'number_correct': 0,
-        'number_incorrect': 0,
-        'level': 'easy'
+        "user_id": 1,
+        "message_text": 5,
     }
-
-    Output
-    context: dict - the information for the current state
+    Output:
     {
-        'text': 'What is 1+2?',
-        'question_numbers': [1,2,3], #3 numbers - current number, ordinal number, times
-        'right_answer': 3,
-        'number_correct': 0,
-        'number_incorrect': 0,
-        'hints_used': 0
+        'messages': 
+            ["Let's", 'practice', 'counting', '', '', '46...', '47...', '48...', '49', '', '', 'After', '49,', 'what', 'is', 'the', 'next', 'number', 'you', 'will', 'count?\n46,', '47,', '48,', '49'], 
+        'input_prompt': '50', 
+        'state': 'question'
     }
     """
     data_dict = await request.json()
     message_data = ast.literal_eval(data_dict.get('message_data', '').get('message_body', ''))
-    right_answers = message_data['number_correct']
-    wrong_answers = message_data['number_incorrect']
-    level = message_data['level']
+    user_id = message_data['user_id']
+    message_text = message_data['message_text']
+    return num_one_quiz.process_user_message(user_id, message_text)
+    
 
-    return JSONResponse(generators.start_interactive_math(right_answers, wrong_answers, level))
+@app.post("/start")
+async def ask_math_question(request: Request):
+    """Generate a question data
+    
+    Input
+    {
+        'difficulty': 0.1,
+        'do_increase': True | False
+    }
+
+    Output
+    {
+        'text': 'What is 1+2?',
+        'difficulty': 0.2,
+        'question_numbers': [3, 1, 4]
+    }
+    """
+    data_dict = await request.json()
+    message_data = ast.literal_eval(data_dict.get('message_data', '').get('message_body', ''))
+    difficulty = message_data['difficulty']
+    do_increase = message_data['do_increase']
+
+    return JSONResponse(generators.start_interactive_math(difficulty, do_increase))
 
 
 @app.post("/hint")
 async def get_hint(request: Request):
-    """Generate a hint and return it as response along with hint data
+    """Generate a hint data
     
     Input
-    request.body:
     {
-        'question_numbers': [1,2,3], #3 numbers - current number, ordinal number, times
-        'right_answer': 3,
-        'number_correct': 0,
-        'number_incorrect': 0,
-        'level': 'easy',
-        'hints_used': 0
+        'start': 5,
+        'step': 1,
+        'difficulty': 0.1
     }
 
     Output
-    context: dict - the information for the current state
     {
-        'text': 'What is 1+2?',
-        'question_numbers': [1,2,3], #2 or 3 numbers
-        'right_answer': 3,
-        'number_correct': 0,
-        'number_incorrect': 0,
-        'level': 'easy',
-        'hints_used': 0
+        'text': 'What number is greater than 4 and less than 6?',
+        'difficulty': 0.1,
+        'question_numbers': [5, 1, 6]
     }
     """
     data_dict = await request.json()
     message_data = ast.literal_eval(data_dict.get('message_data', '').get('message_body', ''))
-    question_numbers = message_data['question_numbers']
-    right_answer = message_data['right_answer']
-    number_correct = message_data['number_correct']
-    number_incorrect = message_data['number_incorrect']
-    level = message_data['level']
-    hints_used = message_data['hints_used']
+    start = message_data['start']
+    step = message_data['step']
+    difficulty = message_data['difficulty']
 
-    return JSONResponse(hints.generate_hint(question_numbers, right_answer, number_correct, number_incorrect, level, hints_used))
+    return JSONResponse(hints.generate_hint(start, step, difficulty))
 
 
-@app.post("/generate_question")
+@app.post("/question")
+async def ask_math_question(request: Request):
+    """Generate a question data
+    
+    Input
+    {
+        'start': 5,
+        'step': 1,
+        'question_num': 1  # optional
+    }
+
+    Output
+    {
+        'question': 'What is 1+2?',
+        'start': 5,
+        'step': 1,
+        'answer': 6
+    }
+    """
+    data_dict = await request.json()
+    message_data = ast.literal_eval(data_dict.get('message_data', '').get('message_body', ''))
+    start = message_data['start']
+    step = message_data['step']
+    arg_tuple = (start, step)
+    try:
+        question_num = message_data['question_num']
+        arg_tuple += (question_num,)
+    except KeyError:
+        pass
+
+    return JSONResponse(questions.generate_question_data(*arg_tuple))
+
+
+@app.post("/difficulty")
+async def get_hint(request: Request):
+    """Generate a number matching difficulty
+    
+    Input
+    {
+        'difficulty': 0.01,
+        'do_increase': True
+    }
+
+    Output - value from 0.01 to 0.99 inclusively:
+    0.09
+    """
+    data_dict = await request.json()
+    message_data = ast.literal_eval(data_dict.get('message_data', '').get('message_body', ''))
+    difficulty = message_data['difficulty']
+    do_increase = message_data['do_increase']
+
+    return JSONResponse(utils.get_next_difficulty(difficulty, do_increase))
+
+
+@app.post("/start_step")
+async def get_hint(request: Request):
+    """Generate a start and step values
+    
+    Input
+    {
+        'difficulty': 0.01,
+        'path_to_csv_file': 'scripts/quiz/data.csv'  # optional
+    }
+
+    Output - tuple (start, step):
+    (5, 1)
+    """
+    data_dict = await request.json()
+    message_data = ast.literal_eval(data_dict.get('message_data', '').get('message_body', ''))
+    difficulty = message_data['difficulty']
+    arg_tuple = (difficulty,)
+    try:
+        path_to_csv_file = message_data['path_to_csv_file']
+        arg_tuple += (path_to_csv_file,)
+    except KeyError:
+        pass
+
+    return JSONResponse(utils.get_next_difficulty(*arg_tuple))
+
+
+@app.post("/sequence")
 async def generate_question(request: Request):
-    """Generate a bare question and return it as response
+    """Generate a sequence from start, step and optional separator parameter
     
     Input
-    request.body: json - level
     {
-        'level': 'easy'
+        'start': 5,
+        'step': 1,
+        'sep': ', '  # optional
     }
 
     Output
-    context: dict - the information for the current state
-    {
-        "question": "Let's count up by 2s. What number is next if we start from 10?
-        6 8 10 ..."
-    }
+    5, 6, 7
     """
     data_dict = await request.json()
     message_data = ast.literal_eval(data_dict.get('message_data', '').get('message_body', ''))
-    level = message_data['level']
+    start = message_data['start']
+    step = message_data['step']
+    arg_tuple = (start, step)
+    try:
+        sep = message_data['sep']
+        arg_tuple += (sep,)
+    except KeyError:
+        pass
 
-    return JSONResponse(questions.generate_question_data(level)['question'])
-
-
-@app.post("/numbers_by_level")
-async def get_numbers_by_level(request: Request):
-    """Generate three numbers and return them as response
-    
-    Input
-    request.body: json - level
-    {
-        'level': 'easy'
-    }
-
-    Output
-    context: dict - three generated numbers for specified level
-    {
-        "current_number": 10,
-        "ordinal_number": 2,
-        "times": 1
-    }
-    """
-    data_dict = await request.json()
-    message_data = ast.literal_eval(data_dict.get('message_data', '').get('message_body', ''))
-    level = message_data['level']
-    return JSONResponse(questions.generate_numbers_by_level(level))
-
-
-@app.post("/number_sequence")
-async def get_number_sequence(request: Request):
-    """Generate a number sequence
-    
-    Input
-    request.body: json - level
-    {
-        "current_number": 10,
-        "ordinal_number": 2,
-        "times": 1
-    }
-
-    Output
-    one of following strings with (numbers differ):
-    ... 1 2 3
-    1 2 3 ...
-    """
-    data_dict = await request.json()
-    message_data = ast.literal_eval(data_dict.get('message_data', '').get('message_body', ''))
-    cur_num = message_data['current_number']
-    ord_num = message_data['ordinal_number']
-    times = message_data['times']
-    return JSONResponse(questions.generate_number_sequence(cur_num, ord_num, times))
-
-
-@app.post("/level")
-async def get_next_level(request: Request):
-    """Depending on current level and desire to level up/down return next level
-    
-    Input
-    request.body: json - level
-    {
-        "current_level": "easy",
-        "level_up": True
-    }
-
-    Output
-    Literal - "easy", "medium" or "hard"
-    """
-    data_dict = await request.json()
-    message_data = ast.literal_eval(data_dict.get('message_data', '').get('message_body', ''))
-    cur_level = message_data['current_level']
-    level_up = message_data['level_up']
-    return JSONResponse(utils.get_next_level(cur_level, level_up))
+    return JSONResponse(utils.convert_sequence_to_string(*arg_tuple))
