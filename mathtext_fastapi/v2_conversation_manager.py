@@ -122,8 +122,7 @@ def retrieve_microlesson_content(context_data, user_message, microlesson, contac
             'state': state_label
         }
     elif microlesson == 'addition2':
-        pass
-        # message_package = num_one.process_user_message(user_id, message_text, state)
+        message_package = num_one.process_user_message(contact_uuid, user_message)
     elif context_data['local_state'] == 'subtraction-question-sequence' or \
         user_message == 'subtract' or \
         microlesson == 'subtraction':
