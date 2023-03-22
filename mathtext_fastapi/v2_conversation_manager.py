@@ -256,7 +256,7 @@ def manage_conversation_response(data_json):
         "context": {
             "contact_id": whatsapp_id,
             "contact_uuid": context_data['contact_uuid'],
-            "state": microlesson_content['state'],
+            "current_state": microlesson_content['state'],
             "bot_message": microlesson_content['input_prompt'],
             "user_message": user_message,
             "type": 'ask'
