@@ -125,6 +125,8 @@ def retrieve_microlesson_content(context_data, user_message, microlesson, contac
         if user_message == 'harder' or user_message == 'easier':
             user_message = ''
         message_package = num_one.process_user_message(contact_uuid, user_message)
+        message_package['state'] = 'addition2'
+
     elif context_data['local_state'] == 'subtraction-question-sequence' or \
         user_message == 'subtract' or \
         microlesson == 'subtraction':
