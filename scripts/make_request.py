@@ -105,14 +105,14 @@ def run_simulated_request(endpoint, sample_answer, context=None):
 # })
 # Need to start with this command to populate users.json
 # If users.json is not already made
-# run_simulated_request("num_one", {
-#     "user_id": "1",
-#     "message_text": "",
-# })
 run_simulated_request("num_one", {
     "user_id": "1",
-    "message_text": "61",
+    "message_text": "",
 })
+# run_simulated_request("num_one", {
+#     "user_id": "1",
+#     "message_text": "61",
+# })
 # run_simulated_request("sequence", {
 #     'start': 2,
 #     'step': 1,
