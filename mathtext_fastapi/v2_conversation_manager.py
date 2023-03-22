@@ -18,6 +18,7 @@ from transitions import Machine
 
 from mathactive.generators import start_interactive_math
 from mathactive.hints import generate_hint
+from mathactive.microlessons import num_one
 
 load_dotenv()
 
@@ -122,7 +123,7 @@ def retrieve_microlesson_content(context_data, user_message, microlesson, contac
         }
     elif microlesson == 'addition2':
         pass
-        # message_package = mathactive.process_user_message(user_id, message_text, state)
+        # message_package = num_one.process_user_message(user_id, message_text, state)
     elif context_data['local_state'] == 'subtraction-question-sequence' or \
         user_message == 'subtract' or \
         microlesson == 'subtraction':
