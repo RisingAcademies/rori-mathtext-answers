@@ -105,9 +105,8 @@ def manage_math_quiz_fsm(user_message, contact_uuid, type):
 
 
 def retrieve_microlesson_content(context_data, user_message, microlesson, contact_uuid):
-    if context_data['local_state'] == 'addition-question-sequence' or \
-        user_message == 'add' or \
-        microlesson == 'addition':
+    # TODO: This is being filtered by both the local and global states, so not changing
+    if microlesson == 'addition':
         messages = manage_math_quiz_fsm(user_message, contact_uuid, 'addition')
 
         if user_message == 'exit':
@@ -121,11 +120,12 @@ def retrieve_microlesson_content(context_data, user_message, microlesson, contac
             'input_prompt': input_prompt,
             'state': state_label
         }
-    elif context_data['local_state'] =='addition2' or microlesson == 'addition2':
+    elif context_data['local_state'] == 'addition2' or microlesson == 'addition2':
         if user_message == 'harder' or user_message == 'easier':
             user_message = ''
         message_package = num_one.process_user_message(contact_uuid, user_message)
         message_package['state'] = 'addition2'
+        message_package['input_prompt'] = '?'
 
     elif context_data['local_state'] == 'subtraction-question-sequence' or \
         user_message == 'subtract' or \
@@ -187,11 +187,11 @@ def manage_conversation_response(data_json):
     """ Calls functions necessary to determine message and context data """
     print("V2 ENDPOINT")
 
-    user_message = ''
     # whatsapp_id = data_json['author_id']
     message_data = data_json['message_data']
     context_data = data_json['context_data']
     whatsapp_id = message_data['author_id']
+    user_message = message_data['message_body']
     print("MESSAGE DATA")
     print(message_data)
     print("CONTEXT DATA")
@@ -208,20 +208,24 @@ def manage_conversation_response(data_json):
     # }
     print("STEP 1")
     print(data_json)
+    print(f"1: {context_data['current_state']}")
     if not context_data['current_state']:
         context_data['current_state'] = 'N1.1.1_G1'
+    print(f"2: {context_data['current_state']}")
 
     curriculum_copy = copy.deepcopy(gsm.curriculum)
-
+    curriculum_copy.state = context_data['current_state']
     print("STEP 2")
-    if context_data['user_message'] == 'easier':
+    if user_message == 'easier':
         curriculum_copy.left()
         next_state = curriculum_copy.state
-    elif context_data['user_message'] == 'harder':
+    elif user_message == 'harder':
         curriculum_copy.right()
         next_state = curriculum_copy.state
     else:
         next_state = context_data['current_state']
+    print("next_state")
+    print(next_state)
 
     print("STEP 3")
     microlesson = lookup_local_state(next_state)
@@ -229,7 +233,7 @@ def manage_conversation_response(data_json):
     print("microlesson")
     print(microlesson)
 
-    microlesson_content = retrieve_microlesson_content(context_data, context_data['user_message'], microlesson, context_data['contact_uuid'])
+    microlesson_content = retrieve_microlesson_content(context_data, user_message, microlesson, context_data['contact_uuid'])
 
     headers = {
         'Authorization': f"Bearer {os.environ.get('TURN_AUTHENTICATION_TOKEN')}",
@@ -240,8 +244,8 @@ def manage_conversation_response(data_json):
     for message in microlesson_content['messages']:
         data = create_text_message(message, whatsapp_id)
 
-        print("data")
-        print(data)
+        # print("data")
+        # print(data)
 
         r = requests.post(
             f'https://whatsapp.turn.io/v1/messages',
@@ -256,10 +260,12 @@ def manage_conversation_response(data_json):
         "context": {
             "contact_id": whatsapp_id,
             "contact_uuid": context_data['contact_uuid'],
-            "current_state": microlesson_content['state'],
+            "current_state": next_state,
+            "local_state": microlesson_content['state'],
             "bot_message": microlesson_content['input_prompt'],
             "user_message": user_message,
             "type": 'ask'
         }
     }
+    print(updated_context)
     return updated_context
