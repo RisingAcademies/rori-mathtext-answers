@@ -6,6 +6,7 @@ import scripts.quiz.generators as generators
 import scripts.quiz.hints as hints
 import scripts.quiz.questions as questions
 import scripts.quiz.utils as utils
+import sentry_sdk
 
 from fastapi import FastAPI, Request
 from fastapi.responses import JSONResponse
@@ -19,6 +20,15 @@ from mathtext_fastapi.logging import prepare_message_data_for_logging
 from mathtext_fastapi.conversation_manager import manage_conversation_response
 from mathtext_fastapi.nlu import evaluate_message_with_nlu
 from mathtext_fastapi.nlu import run_intent_classification
+
+sentry_sdk.init(
+    dsn="https://143c9ac3f429452eb036deda0e4d5aef@o1297809.ingest.sentry.io/4504896688881664",
+
+    # Set traces_sample_rate to 1.0 to capture 100%
+    # of transactions for performance monitoring.
+    # We recommend adjusting this value in production,
+    traces_sample_rate=1.0,
+)
 
 app = FastAPI()
 
@@ -34,6 +44,11 @@ class Text(BaseModel):
 @app.get("/")
 def home(request: Request):
     return templates.TemplateResponse("home.html", {"request": request})
+
+
+@app.get("/sentry-debug")
+async def trigger_error():
+    division_by_zero = 1 / 0
 
 
 @app.post("/hello")

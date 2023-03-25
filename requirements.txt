@@ -9,6 +9,7 @@ python-Levenshtein
 requests==2.27.*
 sentencepiece==0.1.*
 sentence-transformers
+sentry-sdk[fastapi]
 supabase
 transitions
 uvicorn==0.17.*
