@@ -1,7 +1,11 @@
 """FastAPI endpoint
 To run locally use 'uvicorn app:app --host localhost --port 7860'
 """
-import re
+import ast
+import scripts.quiz.generators as generators
+import scripts.quiz.hints as hints
+import scripts.quiz.questions as questions
+import scripts.quiz.utils as utils
 
 from fastapi import FastAPI, Request
 from fastapi.responses import JSONResponse
@@ -11,8 +15,10 @@ from mathtext.sentiment import sentiment
 from mathtext.text2int import text2int
 from pydantic import BaseModel
 
-from mathtext_fastapi.nlu import prepare_message_data_for_logging
-from mathtext_fastapi.conversation_manager import *
+from mathtext_fastapi.logging import prepare_message_data_for_logging
+from mathtext_fastapi.conversation_manager import manage_conversation_response
+from mathtext_fastapi.nlu import evaluate_message_with_nlu
+from mathtext_fastapi.nlu import run_intent_classification
 
 app = FastAPI()
 
@@ -52,67 +58,222 @@ def text2int_ep(content: Text = None):
 
 @app.post("/manager")
 async def programmatic_message_manager(request: Request):
-    print(request)
+    """
+    Calls conversation management function to determine the next state
 
+    Input
+    request.body: dict - message data for the most recent user response
+    {
+        "author_id": "+47897891",
+        "contact_uuid": "j43hk26-2hjl-43jk-hnk2-k4ljl46j0ds09",
+        "author_type": "OWNER",
+        "message_body": "a test message",
+        "message_direction": "inbound",
+        "message_id": "ABJAK64jlk3-agjkl2QHFAFH",
+        "message_inserted_at": "2022-07-05T04:00:34.03352Z",
+        "message_updated_at": "2023-02-14T03:54:19.342950Z",
+    }
+
+    Output
+    context: dict - the information for the current state
+    {
+        "user": "47897891",
+        "state": "welcome-message-state",
+        "bot_message": "Welcome to Rori!",
+        "user_message": "",
+        "type": "ask"
+    }
+    """
     data_dict = await request.json()
-    message_data = data_dict.get('message_data', '')
-
-    context = generate_message(message_data)
+    context = manage_conversation_response(data_dict)
     return JSONResponse(context)
+
+
+@app.post("/intent-classification")
+def intent_classification_ep(content: Text = None):
+    ml_response = run_intent_classification(content.content)
+    content = {"message": ml_response}
+    return JSONResponse(content=content)
+
 
 @app.post("/nlu")
 async def evaluate_user_message_with_nlu_api(request: Request):
-    """ Calls NLU APIs on the most recent user message from Turn.io message data and logs the message data
+    """ Calls nlu evaluation and returns the nlu_response
 
     Input
-    - request.body: a json object of message data for the most recent user response
+    - request.body: json - message data for the most recent user response
 
     Output
-    - int_data_dict or sent_data_dict: A dictionary telling the type of NLU run and the resulting data
-      {'type':'integer', 'data': '8'}
-      {'type':'sentiment', 'data': 'negative'}
+    - int_data_dict or sent_data_dict: dict - the type of NLU run and result
+      {'type':'integer', 'data': '8', 'confidence': 0}
+      {'type':'sentiment', 'data': 'negative', 'confidence': 0.99}
     """
-
     data_dict = await request.json()
     message_data = data_dict.get('message_data', '')
-    message_text = message_data['message']['text']['body']
-
-    # Handles if a student answer is already an integer or a float (ie., 8)
-    if type(message_text) == int or type(message_text) == float:
-        nlu_response = {'type': 'integer', 'data': message_text, 'confidence': ''}
-        prepare_message_data_for_logging(message_data, nlu_response, message_data)
-        return JSONResponse(content=nlu_response)
-
-    # Removes whitespace and converts str to arr to handle multiple numbers
-    message_text_arr = re.split(", |,| ", message_text.strip())
-
-    # Handle if a student answer is a string of numbers (ie., "8,9, 10")
-    if all(ele.isdigit() for ele in message_text_arr):
-        nlu_response = {'type': 'integer', 'data': ','.join(message_text_arr), 'confidence': ''}
-        prepare_message_data_for_logging(message_data, nlu_response, message_data)
-        return JSONResponse(content=nlu_response)
-
-    student_response_arr = []
-
-    for student_response in message_text_arr:
-        # Checks the student answer and returns an integer
-
-        int_api_resp = text2int(student_response.lower())
-        student_response_arr.append(int_api_resp)
-
-    # '32202' is text2int's error code for non-integer student answers (ie., "I don't know")
-    # If any part of the list is 32202, sentiment analysis will run
-    if 32202 in student_response_arr:
-        sentiment_api_resp = sentiment(message_text)
-        # [{'label': 'POSITIVE', 'score': 0.991188645362854}]
-        sent_data_dict = {'type': 'sentiment', 'data': sentiment_api_resp[0]['label']}
-        nlu_response = {'type': 'sentiment', 'data': sentiment_api_resp[0]['label'], 'confidence': sentiment_api_resp[0]['score']}
-    else:
-        if len(student_response_arr) > 1:
-            nlu_response = {'type': 'integer', 'data': ','.join(str(num) for num in student_response_arr), 'confidence': ''}
-        else:
-            nlu_response = {'type': 'integer', 'data': student_response_arr[0], 'confidence': ''}
-
-    # Uncomment to enable logging to Supabase
-    prepare_message_data_for_logging(message_data, nlu_response, message_data)
+    nlu_response = evaluate_message_with_nlu(message_data)
     return JSONResponse(content=nlu_response)
+    
+
+@app.post("/question")
+async def ask_math_question(request: Request):
+    """Generate a question and return it as response along with question data
+    
+    Input
+    request.body: json - amount of correct and incorrect answers in the account
+    {
+        'number_correct': 0,
+        'number_incorrect': 0,
+        'level': 'easy'
+    }
+
+    Output
+    context: dict - the information for the current state
+    {
+        'text': 'What is 1+2?',
+        'question_numbers': [1,2,3], #3 numbers - current number, ordinal number, times
+        'right_answer': 3,
+        'number_correct': 0,
+        'number_incorrect': 0,
+        'hints_used': 0
+    }
+    """
+    data_dict = await request.json()
+    message_data = ast.literal_eval(data_dict.get('message_data', '').get('message_body', ''))
+    right_answers = message_data['number_correct']
+    wrong_answers = message_data['number_incorrect']
+    level = message_data['level']
+
+    return JSONResponse(generators.start_interactive_math(right_answers, wrong_answers, level))
+
+
+@app.post("/hint")
+async def get_hint(request: Request):
+    """Generate a hint and return it as response along with hint data
+    
+    Input
+    request.body:
+    {
+        'question_numbers': [1,2,3], #3 numbers - current number, ordinal number, times
+        'right_answer': 3,
+        'number_correct': 0,
+        'number_incorrect': 0,
+        'level': 'easy',
+        'hints_used': 0
+    }
+
+    Output
+    context: dict - the information for the current state
+    {
+        'text': 'What is 1+2?',
+        'question_numbers': [1,2,3], #2 or 3 numbers
+        'right_answer': 3,
+        'number_correct': 0,
+        'number_incorrect': 0,
+        'level': 'easy',
+        'hints_used': 0
+    }
+    """
+    data_dict = await request.json()
+    message_data = ast.literal_eval(data_dict.get('message_data', '').get('message_body', ''))
+    question_numbers = message_data['question_numbers']
+    right_answer = message_data['right_answer']
+    number_correct = message_data['number_correct']
+    number_incorrect = message_data['number_incorrect']
+    level = message_data['level']
+    hints_used = message_data['hints_used']
+
+    return JSONResponse(hints.generate_hint(question_numbers, right_answer, number_correct, number_incorrect, level, hints_used))
+
+
+@app.post("/generate_question")
+async def generate_question(request: Request):
+    """Generate a bare question and return it as response
+    
+    Input
+    request.body: json - level
+    {
+        'level': 'easy'
+    }
+
+    Output
+    context: dict - the information for the current state
+    {
+        "question": "Let's count up by 2s. What number is next if we start from 10?
+        6 8 10 ..."
+    }
+    """
+    data_dict = await request.json()
+    message_data = ast.literal_eval(data_dict.get('message_data', '').get('message_body', ''))
+    level = message_data['level']
+
+    return JSONResponse(questions.generate_question_data(level)['question'])
+
+
+@app.post("/numbers_by_level")
+async def get_numbers_by_level(request: Request):
+    """Generate three numbers and return them as response
+    
+    Input
+    request.body: json - level
+    {
+        'level': 'easy'
+    }
+
+    Output
+    context: dict - three generated numbers for specified level
+    {
+        "current_number": 10,
+        "ordinal_number": 2,
+        "times": 1
+    }
+    """
+    data_dict = await request.json()
+    message_data = ast.literal_eval(data_dict.get('message_data', '').get('message_body', ''))
+    level = message_data['level']
+    return JSONResponse(questions.generate_numbers_by_level(level))
+
+
+@app.post("/number_sequence")
+async def get_number_sequence(request: Request):
+    """Generate a number sequence
+    
+    Input
+    request.body: json - level
+    {
+        "current_number": 10,
+        "ordinal_number": 2,
+        "times": 1
+    }
+
+    Output
+    one of following strings with (numbers differ):
+    ... 1 2 3
+    1 2 3 ...
+    """
+    data_dict = await request.json()
+    message_data = ast.literal_eval(data_dict.get('message_data', '').get('message_body', ''))
+    cur_num = message_data['current_number']
+    ord_num = message_data['ordinal_number']
+    times = message_data['times']
+    return JSONResponse(questions.generate_number_sequence(cur_num, ord_num, times))
+
+
+@app.post("/level")
+async def get_next_level(request: Request):
+    """Depending on current level and desire to level up/down return next level
+    
+    Input
+    request.body: json - level
+    {
+        "current_level": "easy",
+        "level_up": True
+    }
+
+    Output
+    Literal - "easy", "medium" or "hard"
+    """
+    data_dict = await request.json()
+    message_data = ast.literal_eval(data_dict.get('message_data', '').get('message_body', ''))
+    cur_level = message_data['current_level']
+    level_up = message_data['level_up']
+    return JSONResponse(utils.get_next_level(cur_level, level_up))

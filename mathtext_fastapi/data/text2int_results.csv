@@ -1,92 +1,105 @@
 input,output,text2int,score
-notanumber,32202,32202,True
-this is not a number,32202,32202,True
-fourteen,14,14,True
-forteen,14,14,True
-one thousand four hundred ninety two,1492,1492,True
-one thousand ninety two,1092,1092,True
-Fourteen Hundred Ninety-Two,1492,1492,True
-Fourteen Hundred,1400,1400,True
-Ninety nine,99,99,True
-fifteen thousand five hundred-sixty,15560,15560,True
-three hundred fifty,350,350,True
-one nine eight five,1985,1985,True
-nineteen eighty-five,1985,1605,False
-oh one,1,1,True
-six oh 1,601,601,True
-sex,6,6,True
-six,6,6,True
-eight oh,80,8,False
-eighty,80,80,True
-ate,8,1,False
-double eight,88,32202,False
-eight three seven five three O nine,8375309,8375329,False
-eight three seven five three oh nine,8375309,8375309,True
-eight three seven five three zero nine,8375309,8375309,True
-eight three seven five three oh ni-ee-ine,8375309,837530611,False
-two eight,28,16,False
-seven oh eleven,7011,77,False
-seven elevens,77,77,True
-seven eleven,711,77,False
-ninety nine oh five,9905,149,False
-seven 0 seven 0 seven 0 seven,7070707,7070707,True
-123 hundred,123000,223,False
-5 o 5,505,525,False
-15 o 5,1505,22,False
-15-o 5,1505,22,False
-15 o-5,1505,22,False
-911-thousand,911000,911000,True
-twenty-two twenty-two,2222,44,False
-twenty-two twenty-twos,484,44,False
-four eighty four,484,404,False
-four eighties,320,72,False
-four eighties and nine nineties,1130,243,False
-ninety nine hundred and seventy seven,9977,276,False
-seven thousands,7000,7000,True
-2 hundreds,200,200,True
-99 thousands and one,99001,99001,True
-"forty-five thousand, seven hundred and nine",45709,1161,False
-eighty eight hundred eighty,8880,268,False
-a hundred hundred,10000,32202,False
-a hundred thousand,100000,32202,False
-a hundred million,100000000,32202,False
-nineteen ninety nine,1999,1809,False
-forteen twenty seven,1427,307,False
-seventeen-thousand and seventy two,17072,17072,True
-two hundred and nine,209,209,True
-two thousand ten,2010,2010,True
-two thousand and ten,2010,2010,True
-twelve million,12000000,12000000,True
-8 billion,8000000000,8000000000,True
-twenty ten,2010,2010,True
-thirty-two hundred,3200,3200,True
-nine,9,9,True
-forty two,42,42,True
-1 2 three,123,123,True
-fourtean,14,14,True
-one tousand four hundred ninty two,1492,1492,True
-Furteen Hundrd Ninety-Too,1492,1492,True
-forrteen,14,14,True
-sevnteen-thosand and seventy two,17072,17072,True
-ninety nine hundred ad seventy seven,9977,32202,False
-seven thusands,7000,7000,True
-2 hunreds,200,200,True
-99 tousands and one,99001,99001,True
-eighty ate hundred eighty,8880,261,False
-fourteen Hundred,1400,1400,True
-8 Bilion,8000000000,8000000,False
-one million three thousand one,1003001,1003001,True
-four million nine thousand seven,4009007,4009007,True
-two million five hundred thousand,2500000,2001500,False
-two tousand ten,2010,2010,True
-two thousand teen,2010,2007,False
-tvelve milion,12000000,12000000,True
-tventy ten,2010,2010,True
-tirty-twoo hunred,3200,3200,True
-sevn thoosands,7000,7000,True
-five,5,5,True
-ten,10,10,True
-one two three and ten,12310,51,False
-ONE MILLion three hunded and fiv,1000305,1000305,True
-"50,500 and six",50506,50506,True
-one_million_and_five,1000005,1000005,True
+notanumber,32202.0,32202.0,True
+this is not a number,32202.0,32202.0,True
+fourteen,14.0,14.0,True
+forteen,14.0,14.0,True
+one thousand four hundred ninety two,1492.0,1492.0,True
+one thousand ninety two,1092.0,1092.0,True
+Fourteen Hundred Ninety-Two,1492.0,1492.0,True
+Fourteen Hundred,1400.0,1400.0,True
+Ninety nine,99.0,99.0,True
+fifteen thousand five hundred-sixty,15560.0,15560.0,True
+three hundred fifty,350.0,350.0,True
+one nine eight five,1985.0,1985.0,True
+nineteen eighty-five,1985.0,1605.0,False
+oh one,1.0,1.0,True
+six oh 1,601.0,601.0,True
+sex,6.0,6.0,True
+six,6.0,6.0,True
+eight oh,80.0,8.0,False
+eighty,80.0,80.0,True
+ate,8.0,1.0,False
+double eight,88.0,8.0,False
+eight three seven five three O nine,8375309.0,8375329.0,False
+eight three seven five three oh nine,8375309.0,8375309.0,True
+eight three seven five three zero nine,8375309.0,8375309.0,True
+eight three seven five three oh ni-ee-ine,8375309.0,837530619.0,False
+two eight,28.0,16.0,False
+seven oh eleven,7011.0,77.0,False
+seven elevens,77.0,77.0,True
+seven eleven,711.0,77.0,False
+ninety nine oh five,9905.0,149.0,False
+seven 0 seven 0 seven 0 seven,7070707.0,7070707.0,True
+123 hundred,123000.0,223.0,False
+5 o 5,505.0,525.0,False
+15 o 5,1505.0,22.0,False
+15-o 5,1505.0,22.0,False
+15 o-5,1505.0,22.0,False
+911-thousand,911000.0,911000.0,True
+twenty-two twenty-two,2222.0,44.0,False
+twenty-two twenty-twos,484.0,44.0,False
+four eighty four,484.0,404.0,False
+four eighties,320.0,72.0,False
+four eighties and nine nineties,1130.0,243.0,False
+ninety nine hundred and seventy seven,9977.0,276.0,False
+seven thousands,7000.0,7000.0,True
+2 hundreds,200.0,200.0,True
+99 thousands and one,99001.0,99001.0,True
+"forty-five thousand, seven hundred and nine",45709.0,1161.0,False
+eighty eight hundred eighty,8880.0,268.0,False
+a hundred hundred,10000.0,100.0,False
+a hundred thousand,100000.0,100.0,False
+a hundred million,100000000.0,100.0,False
+nineteen ninety nine,1999.0,1809.0,False
+forteen twenty seven,1427.0,307.0,False
+seventeen-thousand and seventy two,17072.0,17072.0,True
+two hundred and nine,209.0,209.0,True
+two thousand ten,2010.0,2010.0,True
+two thousand and ten,2010.0,2010.0,True
+twelve million,12000000.0,12000000.0,True
+8 billion,8000000000.0,8000000000.0,True
+twenty ten,2010.0,2010.0,True
+thirty-two hundred,3200.0,3200.0,True
+nine,9.0,9.0,True
+forty two,42.0,42.0,True
+1 2 three,123.0,123.0,True
+fourtean,14.0,14.0,True
+one tousand four hundred ninty two,1492.0,1492.0,True
+Furteen Hundrd Ninety-Too,1492.0,1492.0,True
+forrteen,14.0,14.0,True
+sevnteen-thosand and seventy two,17072.0,17072.0,True
+ninety nine hundred ad seventy seven,9977.0,90.0,False
+seven thusands,7000.0,7000.0,True
+2 hunreds,200.0,200.0,True
+99 tousands and one,99001.0,99001.0,True
+eighty ate hundred eighty,8880.0,261.0,False
+fourteen Hundred,1400.0,1400.0,True
+8 Bilion,8000000000.0,8000000.0,False
+one million three thousand one,1003001.0,1003001.0,True
+four million nine thousand seven,4009007.0,4009007.0,True
+two million five hundred thousand,2500000.0,2001500.0,False
+two tousand ten,2010.0,2010.0,True
+two thousand teen,2010.0,2007.0,False
+tvelve milion,12000000.0,12000000.0,True
+tventy ten,2010.0,2010.0,True
+tirty-twoo hunred,3200.0,3200.0,True
+sevn thoosands,7000.0,7000.0,True
+five,5.0,5.0,True
+ten,10.0,10.0,True
+one two three and ten,12310.0,51.0,False
+ONE MILLion three hunded and fiv,1000305.0,1000305.0,True
+"50,500 and six",50506.0,50506.0,True
+one_million_and_five,1000005.0,1000005.0,True
+2.0,2.0,2.0,True
+4.5,4.5,4.5,True
+12345.001,12345.001,12345.001,True
+7..0,7.0,7.0,True
+0.06,0.06,0.06,True
+"0,25",0.25,25.0,False
+o.45,0.45,32202.0,False
+0.1.2,0.12,32202.0,False
+0.00009,9e-05,9e-05,True
+0.01.,0.01,0.01,True
+I don't know 8,8.0,8.0,True
+"You're wrong it's not 20, it's 45",45.0,20.0,False
+I don't understand why it's 19,19.0,19.0,True

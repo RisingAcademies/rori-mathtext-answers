@@ -1,81 +1,178 @@
-import os
-from datetime import datetime
-
-from dotenv import load_dotenv
-from supabase import create_client
-
-load_dotenv()
-
-SUPA = create_client(os.environ.get('SUPABASE_URL'), os.environ.get('SUPABASE_KEY'))
+from fuzzywuzzy import fuzz
+from mathtext_fastapi.logging import prepare_message_data_for_logging
+from mathtext.sentiment import sentiment
+from mathtext.text2int import text2int
+from mathtext_fastapi.intent_classification import create_intent_classification_model, retrieve_intent_classification_model, predict_message_intent
+import re
 
 
-def log_message_data_through_supabase_api(table_name, log_data):
-    return SUPA.table(table_name).insert(log_data).execute()
+def build_nlu_response_object(type, data, confidence):
+    """ Turns nlu results into an object to send back to Turn.io
+    Inputs
+    - type: str - the type of nlu run (integer or sentiment-analysis)
+    - data: str/int - the student message
+    - confidence: - the nlu confidence score (sentiment) or '' (integer)
+
+    >>> build_nlu_response_object('integer', 8, 0)
+    {'type': 'integer', 'data': 8, 'confidence': 0}
+
+    >>> build_nlu_response_object('sentiment', 'POSITIVE', 0.99)
+    {'type': 'sentiment', 'data': 'POSITIVE', 'confidence': 0.99}
+    """
+    return {'type': type, 'data': data, 'confidence': confidence}
 
 
-def format_datetime_in_isoformat(dt):
-    return getattr(dt.now(), 'isoformat', lambda x: None)()
+# def test_for_float_or_int(message_data, message_text):
+#     nlu_response = {}
+#     if type(message_text) == int or type(message_text) == float:
+#         nlu_response = build_nlu_response_object('integer', message_text, '')
+#         prepare_message_data_for_logging(message_data, nlu_response)
+#     return nlu_response
 
 
-def get_or_create_supabase_entry(table_name, insert_data, check_variable=None):
-    """ Checks whether a project or contact exists in the database and adds if one is not found
+def test_for_number_sequence(message_text_arr, message_data, message_text):
+    """ Determines if the student's message is a sequence of numbers
 
-    Input:
-    - table_name: str- the name of the table in Supabase that is being examined
-    - insert_data: json - the data to insert
-    - check_variable: str/None - the specific field to examine for existing matches
+    >>> test_for_number_sequence(['1','2','3'], {"author_id": "57787919091", "author_type": "OWNER", "contact_uuid": "df78gsdf78df", "message_body": "I am tired", "message_direction": "inbound", "message_id": "dfgha789789ag9ga", "message_inserted_at": "2023-01-10T02:37:28.487319Z", "message_updated_at": "2023-01-10T02:37:28.487319Z"}, '1, 2, 3')
+    {'type': 'integer', 'data': '1,2,3', 'confidence': 0}
 
-    Result
-    - logged_data - an object with the Supabase data
+    >>> test_for_number_sequence(['a','b','c'], {"author_id": "57787919091", "author_type": "OWNER", "contact_uuid": "df78gsdf78df", "message_body": "I am tired", "message_direction": "inbound", "message_id": "dfgha789789ag9ga", "message_inserted_at": "2023-01-10T02:37:28.487319Z", "message_updated_at": "2023-01-10T02:37:28.487319Z"}, 'a, b, c')
+    {}
+    """
+    nlu_response = {}
+    if all(ele.isdigit() for ele in message_text_arr):
+        nlu_response = build_nlu_response_object(
+            'integer',
+            ','.join(message_text_arr),
+            0
+        )
+        prepare_message_data_for_logging(message_data, nlu_response)
+    return nlu_response
+
+
+def run_text2int_on_each_list_item(message_text_arr):
+    """ Attempts to convert each list item to an integer
+
+    Input
+    - message_text_arr: list - a set of text extracted from the student message
+
+    Output
+    - student_response_arr: list - a set of integers (32202 for error code)
+
+    >>> run_text2int_on_each_list_item(['1','2','3'])
+    [1, 2, 3]
+    """
+    student_response_arr = []
+    for student_response in message_text_arr:
+        int_api_resp = text2int(student_response.lower())
+        student_response_arr.append(int_api_resp)
+    return student_response_arr
+
+
+def run_sentiment_analysis(message_text):
+    """ Evaluates the sentiment of a student message
+
+    >>> run_sentiment_analysis("I am tired")
+    [{'label': 'NEGATIVE', 'score': 0.9997807145118713}]
+
+    >>> run_sentiment_analysis("I am full of joy")
+    [{'label': 'POSITIVE', 'score': 0.999882698059082}]
+    """
+    # TODO: Add intent labelling here
+    # TODO: Add logic to determine whether intent labeling or sentiment analysis is more appropriate (probably default to intent labeling)
+    return sentiment(message_text)
+
+
+def run_intent_classification(message_text):
+    """ Process a student's message using basic fuzzy text comparison
+
+    >>> run_intent_classification("exit")
+    {'type': 'intent', 'data': 'exit', 'confidence': 1.0}
+    >>> run_intent_classification("exi")     
+    {'type': 'intent', 'data': 'exit', 'confidence': 0.86}
+    >>> run_intent_classification("eas")
+    {'type': 'intent', 'data': '', 'confidence': 0}
+    >>> run_intent_classification("hard")
+    {'type': 'intent', 'data': '', 'confidence': 0}
+    >>> run_intent_classification("hardier") 
+    {'type': 'intent', 'data': 'harder', 'confidence': 0.92}
+    """
+    label = ''
+    ratio = 0
+    nlu_response = {'type': 'intent', 'data': label, 'confidence': ratio}
+    commands = [
+        'easier',
+        'exit',
+        'harder',
+        'hint',
+        'next',
+        'stop',
+    ]
     
+    for command in commands:
+        try:
+            ratio = fuzz.ratio(command, message_text.lower())
+        except:
+            ratio = 0
+        if ratio > 80:
+            nlu_response['data'] = command
+            nlu_response['confidence'] = ratio / 100
+    
+    return nlu_response
+
+
+def evaluate_message_with_nlu(message_data):
+    """ Process a student's message using NLU functions and send the result
+    
+    >>> evaluate_message_with_nlu({"author_id": "57787919091", "author_type": "OWNER", "contact_uuid": "df78gsdf78df", "message_body": "8", "message_direction": "inbound", "message_id": "dfgha789789ag9ga", "message_inserted_at": "2023-01-10T02:37:28.487319Z", "message_updated_at": "2023-01-10T02:37:28.487319Z"})
+    {'type': 'integer', 'data': 8, 'confidence': 0}
+
+    >>> evaluate_message_with_nlu({"author_id": "57787919091", "author_type": "OWNER", "contact_uuid": "df78gsdf78df", "message_body": "I am tired", "message_direction": "inbound", "message_id": "dfgha789789ag9ga", "message_inserted_at": "2023-01-10T02:37:28.487319Z", "message_updated_at": "2023-01-10T02:37:28.487319Z"})
+    {'type': 'sentiment', 'data': 'NEGATIVE', 'confidence': 0.9997807145118713}
     """
-    if table_name == 'contact':
-        resp = SUPA.table('contact').select("*").eq("original_contact_id", insert_data['original_contact_id']).eq("project", insert_data['project']).execute()
+    # Keeps system working with two different inputs - full and filtered @event object
+    try:
+        message_text = str(message_data['message_body'])
+    except KeyError:
+        message_data = {
+            'author_id': message_data['message']['_vnd']['v1']['chat']['owner'],
+            'author_type': message_data['message']['_vnd']['v1']['author']['type'],
+            'contact_uuid': message_data['message']['_vnd']['v1']['chat']['contact_uuid'],
+            'message_body': message_data['message']['text']['body'],
+            'message_direction': message_data['message']['_vnd']['v1']['direction'],
+            'message_id': message_data['message']['id'],
+            'message_inserted_at': message_data['message']['_vnd']['v1']['chat']['inserted_at'],
+            'message_updated_at': message_data['message']['_vnd']['v1']['chat']['updated_at'],
+        }
+        message_text = str(message_data['message_body'])
+
+    # Run intent classification only for keywords
+    intent_api_response = run_intent_classification(message_text)
+    if intent_api_response['data']:
+        prepare_message_data_for_logging(message_data, intent_api_response)
+        return intent_api_response
+
+    number_api_resp = text2int(message_text.lower())
+
+    if number_api_resp == 32202:
+        # Run intent classification with logistic regression model
+        predicted_label = predict_message_intent(message_text)
+        if predicted_label['confidence'] > 0.01:
+            nlu_response = predicted_label
+        else:
+            # Run sentiment analysis
+            sentiment_api_resp = sentiment(message_text)
+            nlu_response = build_nlu_response_object(
+                'sentiment',
+                sentiment_api_resp[0]['label'],
+                sentiment_api_resp[0]['score']
+            )
     else:
-        resp = SUPA.table(table_name).select("*").eq(check_variable, insert_data[check_variable]).execute()
+        nlu_response = build_nlu_response_object(
+            'integer',
+            number_api_resp,
+            0
+        )
 
-    if len(resp.data) == 0:
-        logged_data = log_message_data_through_supabase_api(table_name, insert_data)
-    else:
-        logged_data = resp
-    return logged_data
-
-
-
-def prepare_message_data_for_logging(message_data, nlu_response, request_object):
-    """ Builds the message data for each table and ensures it's logged to the database
-
-    Input:
-    - message_data: an object with the full message data from Turn.io/Whatsapp
-    """
-    project_data = {
-        'name': "Rori",
-        # Autogenerated fields: id, created_at, modified_at   
-    }
-    project_data_log = get_or_create_supabase_entry('project', project_data, 'name')
-
-    contact_data = {
-        'project': project_data_log.data[0]['id'],  # FK
-        'original_contact_id': message_data['message']['_vnd']['v1']['chat']['contact_uuid'],
-        'urn': "",
-        'language_code': "en",
-        'contact_inserted_at': format_datetime_in_isoformat(datetime.now())
-        # Autogenerated fields: id, created_at, modified_at
-    }
-    contact_data_log = get_or_create_supabase_entry('contact', contact_data)
-
-    message_data = {
-        'contact': contact_data_log.data[0]['id'],  # FK
-        'original_message_id': message_data['message']['id'],
-        'text': message_data['message']['text']['body'],
-        'direction': message_data['message']['_vnd']['v1']['direction'],
-        'sender_type': message_data['message']['_vnd']['v1']['author']['type'],
-        'channel_type': "whatsapp / turn.io",
-        'message_inserted_at': message_data['message']['_vnd']['v1']['chat']['inserted_at'],
-        'message_modified_at': message_data['message']['_vnd']['v1']['chat']['updated_at'],
-        'message_sent_at': format_datetime_in_isoformat(datetime.now()),
-        'nlu_response': nlu_response,
-        'request_object': request_object
-        # Autogenerated fields: created_at, modified_at
-    }
-    message_data_log = log_message_data_through_supabase_api('message', message_data)
+    prepare_message_data_for_logging(message_data, nlu_response)
+    return nlu_response
