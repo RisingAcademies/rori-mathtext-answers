@@ -110,7 +110,10 @@ def run_intent_classification(message_text):
     ]
     
     for command in commands:
-        ratio = fuzz.ratio(command, message_text.lower())
+        try:
+            ratio = fuzz.ratio(command, message_text.lower())
+        except:
+            ratio = 0
         if ratio > 80:
             nlu_response['data'] = command
             nlu_response['confidence'] = ratio / 100
@@ -129,7 +132,7 @@ def evaluate_message_with_nlu(message_data):
     """
     # Keeps system working with two different inputs - full and filtered @event object
     try:
-        message_text = message_data['message_body']
+        message_text = str(message_data['message_body'])
     except KeyError:
         message_data = {
             'author_id': message_data['message']['_vnd']['v1']['chat']['owner'],
@@ -141,11 +144,12 @@ def evaluate_message_with_nlu(message_data):
             'message_inserted_at': message_data['message']['_vnd']['v1']['chat']['inserted_at'],
             'message_updated_at': message_data['message']['_vnd']['v1']['chat']['updated_at'],
         }
-        message_text = message_data['message_body']
+        message_text = str(message_data['message_body'])
 
     # Run intent classification only for keywords
     intent_api_response = run_intent_classification(message_text)
     if intent_api_response['data']:
+        prepare_message_data_for_logging(message_data, intent_api_response)
         return intent_api_response
 
     number_api_resp = text2int(message_text.lower())

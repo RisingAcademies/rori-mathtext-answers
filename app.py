@@ -5,6 +5,8 @@ or
 """
 import ast
 import mathactive.microlessons.num_one as num_one_quiz
+import sentry_sdk
+
 from fastapi import FastAPI, Request
 from fastapi.responses import JSONResponse
 from fastapi.staticfiles import StaticFiles
@@ -18,6 +20,20 @@ from mathtext_fastapi.conversation_manager import manage_conversation_response
 from mathtext_fastapi.v2_conversation_manager import manage_conversation_response
 from mathtext_fastapi.nlu import evaluate_message_with_nlu
 from mathtext_fastapi.nlu import run_intent_classification
+
+import os
+from dotenv import load_dotenv
+
+load_dotenv()
+
+sentry_sdk.init(
+    dsn=os.environ.get('SENTRY_DNS'),
+
+    # Set traces_sample_rate to 1.0 to capture 100%
+    # of transactions for performance monitoring.
+    # We recommend adjusting this value in production,
+    traces_sample_rate=0.20,
+)
 
 app = FastAPI()
 
@@ -33,6 +49,11 @@ class Text(BaseModel):
 @app.get("/")
 def home(request: Request):
     return templates.TemplateResponse("home.html", {"request": request})
+
+
+@app.get("/sentry-debug")
+async def trigger_error():
+    division_by_zero = 1 / 0
 
 
 @app.post("/hello")

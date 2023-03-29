@@ -11,6 +11,7 @@ sentencepiece
 openpyxl
 python-Levenshtein
 sentence-transformers
+sentry-sdk[fastapi]
 supabase
 transitions
 uvicorn
