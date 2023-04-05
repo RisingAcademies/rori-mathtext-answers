@@ -1,10 +1,15 @@
+from logging import getLogger
+import re
+
 from fuzzywuzzy import fuzz
 from mathtext_fastapi.logging import prepare_message_data_for_logging
 from mathtext.sentiment import sentiment
 from mathtext.text2int import text2int
 from mathtext_fastapi.intent_classification import create_intent_classification_model, retrieve_intent_classification_model, predict_message_intent
-import re
 
+log = getLogger(__name__)
+
+ERROR_CODE = 32202
 
 def build_nlu_response_object(type, data, confidence):
     """ Turns nlu results into an object to send back to Turn.io
@@ -141,10 +146,13 @@ def evaluate_message_with_nlu(message_data):
     {'type': 'sentiment', 'data': 'NEGATIVE', 'confidence': 0.9997807145118713}
     """
     # Keeps system working with two different inputs - full and filtered @event object
+    log.info(f'Starting evaluate message: {message_data}')
     try:
         message_text = str(message_data.get('message_body', ''))
-    except KeyError:
-        message_text = ''
+    except:
+        log.error(f'Invalid request payload: {message_data}')
+        # use python logging system to do this//
+        return {'type': 'error', 'data': ERROR_CODE, 'confidence': 0}
 
     # Run intent classification only for keywords
     intent_api_response = run_intent_classification(message_text)
@@ -154,7 +162,7 @@ def evaluate_message_with_nlu(message_data):
 
     number_api_resp = text2int(message_text.lower())
 
-    if number_api_resp == 32202:
+    if number_api_resp == ERROR_CODE:
         # Run intent classification with logistic regression model
         predicted_label = predict_message_intent(message_text)
         if predicted_label['confidence'] > 0.01:
