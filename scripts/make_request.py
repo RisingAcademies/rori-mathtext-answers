@@ -64,21 +64,32 @@ def run_simulated_request(endpoint, sample_answer, context=None):
 
 # run_simulated_request('intent-classification', 'exit')
 # run_simulated_request('intent-classification', "I'm not sure")
+run_simulated_request('intent-classification', "easier")
+run_simulated_request('intent-classification', "easy")
+run_simulated_request('intent-classification', "harder")
+run_simulated_request('intent-classification', "hard")
+run_simulated_request('intent-classification', "hint")
+run_simulated_request('intent-classification', "hin")
+run_simulated_request('intent-classification', "hnt")
+run_simulated_request('intent-classification', "stop")
+run_simulated_request('intent-classification', "stp")
+run_simulated_request('intent-classification', "sop")
+run_simulated_request('intent-classification', "please stop")
 # run_simulated_request('sentiment-analysis', 'I reject it')
 # run_simulated_request('text2int', 'seven thousand nine hundred fifty seven')
-run_simulated_request('nlu', 'test message')
-run_simulated_request('nlu', 'eight')
-run_simulated_request('nlu', 'is it 8')
-run_simulated_request('nlu', 'can I know how its 0.5')
-run_simulated_request('nlu', 'eight, nine, ten')
-run_simulated_request('nlu', '8, 9, 10')
-run_simulated_request('nlu', '8')
-run_simulated_request('nlu', "I don't know")
-run_simulated_request('nlu', "I don't know eight")
-run_simulated_request('nlu', "I don't 9")
-run_simulated_request('nlu', "0.2")
-run_simulated_request('nlu', 'Today is a wonderful day')
-run_simulated_request('nlu', 'IDK 5?')
+# run_simulated_request('nlu', 'test message')
+# run_simulated_request('nlu', 'eight')
+# run_simulated_request('nlu', 'is it 8')
+# run_simulated_request('nlu', 'can I know how its 0.5')
+# run_simulated_request('nlu', 'eight, nine, ten')
+# run_simulated_request('nlu', '8, 9, 10')
+# run_simulated_request('nlu', '8')
+# run_simulated_request('nlu', "I don't know")
+# run_simulated_request('nlu', "I don't know eight")
+# run_simulated_request('nlu', "I don't 9")
+# run_simulated_request('nlu', "0.2")
+# run_simulated_request('nlu', 'Today is a wonderful day')
+# run_simulated_request('nlu', 'IDK 5?')
 # run_simulated_request('manager', '')
 # run_simulated_request('manager', 'add')
 # run_simulated_request('manager', 'subtract')
@@ -103,10 +114,10 @@ run_simulated_request('nlu', 'IDK 5?')
 # })
 # Need to start with this command to populate users.json
 # If users.json is not already made
-run_simulated_request("num_one", {
-    "user_id": "1",
-    "message_text": "",
-})
+# run_simulated_request("num_one", {
+#     "user_id": "1",
+#     "message_text": "",
+# })
 # run_simulated_request("num_one", {
 #     "user_id": "1",
 #     "message_text": "61",
