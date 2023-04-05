@@ -107,6 +107,16 @@ def run_intent_classification(message_text):
         'hint',
         'next',
         'stop',
+        'tired',
+        'tomorrow',
+        'finished',
+        'help',
+        'please',
+        'understand',
+        'question',
+        'easier',
+        'easy',
+        'support'
     ]
     
     for command in commands:
@@ -132,19 +142,9 @@ def evaluate_message_with_nlu(message_data):
     """
     # Keeps system working with two different inputs - full and filtered @event object
     try:
-        message_text = str(message_data['message_body'])
+        message_text = str(message_data.get('message_body', ''))
     except KeyError:
-        message_data = {
-            'author_id': message_data['message']['_vnd']['v1']['chat']['owner'],
-            'author_type': message_data['message']['_vnd']['v1']['author']['type'],
-            'contact_uuid': message_data['message']['_vnd']['v1']['chat']['contact_uuid'],
-            'message_body': message_data['message']['text']['body'],
-            'message_direction': message_data['message']['_vnd']['v1']['direction'],
-            'message_id': message_data['message']['id'],
-            'message_inserted_at': message_data['message']['_vnd']['v1']['chat']['inserted_at'],
-            'message_updated_at': message_data['message']['_vnd']['v1']['chat']['updated_at'],
-        }
-        message_text = str(message_data['message_body'])
+        message_text = ''
 
     # Run intent classification only for keywords
     intent_api_response = run_intent_classification(message_text)
