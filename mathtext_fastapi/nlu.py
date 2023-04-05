@@ -11,6 +11,7 @@ log = getLogger(__name__)
 
 ERROR_CODE = 32202
 
+
 def build_nlu_response_object(type, data, confidence):
     """ Turns nlu results into an object to send back to Turn.io
     Inputs
