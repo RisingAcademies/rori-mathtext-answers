@@ -1,4 +1,6 @@
+from collections.abc import Mapping
 from logging import getLogger
+import datetime as dt
 import re
 
 from fuzzywuzzy import fuzz
@@ -137,6 +139,35 @@ def run_intent_classification(message_text):
     return nlu_response
 
 
+def payload_is_valid(payload_object):
+    """
+    >>> payload_is_valid({'author_id': '+821031323138', 'author_type': 'OWNER', 'contact_uuid': '49d42557-7a64-42fc-98fb-794061f37cf9', 'message_body': 'thirty one', 'message_direction': 'inbound', 'message_id': 'ABEGghAxMjE4Ags-sGJ_JArMAnJBnA', 'message_inserted_at': '2022-07-05T04:00:34.03352Z', 'message_updated_at': '2023-04-06T10:08:23.745072Z'})
+    True
+    """
+    return (
+        isinstance(payload_object, Mapping) and
+        isinstance(payload_object.get('author_id'), str) and
+        isinstance(payload_object.get('author_type'), str) and
+        isinstance(payload_object.get('contact_uuid'), str) and
+        isinstance(payload_object.get('message_body'), str) and
+        isinstance(payload_object.get('message_direction'), str) and
+        isinstance(payload_object.get('inbound'), str) and
+        isinstance(payload_object.get('message_id'), str) and
+        isinstance(payload_object.get('message_inserted_at'), str) and
+        isinstance(payload_object.get('message_updated_at'), str) and
+        isinstance(payload_object.get('message_inserted_at'), str) and
+        isinstance(payload_object.get('message_updated_at'), str) and
+        isinstance(
+            dt.datetime.fromisoformat(payload_object.get('message_inserted_at')),
+            dt.datetime
+        ) and 
+        isinstance(
+            dt.datetime.fromisoformat(payload_object.get('message_updated_at')),
+            dt.datetime
+        )
+    )
+
+
 def evaluate_message_with_nlu(message_data):
     """ Process a student's message using NLU functions and send the result
     
@@ -147,7 +178,12 @@ def evaluate_message_with_nlu(message_data):
     {'type': 'sentiment', 'data': 'NEGATIVE', 'confidence': 0.9997807145118713}
     """
     # Keeps system working with two different inputs - full and filtered @event object
+    # Call validate payload
     log.info(f'Starting evaluate message: {message_data}')
+
+    if not payload_is_valid(message_data):
+        return {'type': 'error', 'data': ERROR_CODE, 'confidence': 0}
+
     try:
         message_text = str(message_data.get('message_body', ''))
     except:
