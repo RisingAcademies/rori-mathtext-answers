@@ -152,7 +152,6 @@ def payload_is_valid(payload_object):
         isinstance(payload_object.get('contact_uuid'), str) and
         isinstance(payload_object.get('message_body'), str) and
         isinstance(payload_object.get('message_direction'), str) and
-        isinstance(payload_object.get('inbound'), str) and
         isinstance(payload_object.get('message_id'), str) and
         isinstance(payload_object.get('message_inserted_at'), str) and
         isinstance(payload_object.get('message_updated_at'), str) and
