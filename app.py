@@ -11,7 +11,7 @@ from fastapi import FastAPI, Request
 from fastapi.responses import JSONResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
-from mathtext.sentiment import sentiment
+# from mathtext.sentiment import sentiment
 from mathtext.text2int import text2int
 from pydantic import BaseModel
 
@@ -62,11 +62,11 @@ def hello(content: Text = None):
     return JSONResponse(content=content)
 
 
-@app.post("/sentiment-analysis")
-def sentiment_analysis_ep(content: Text = None):
-    ml_response = sentiment(content.content)
-    content = {"message": ml_response}
-    return JSONResponse(content=content)
+# @app.post("/sentiment-analysis")
+# def sentiment_analysis_ep(content: Text = None):
+#     ml_response = sentiment(content.content)
+#     content = {"message": ml_response}
+#     return JSONResponse(content=content)
 
 
 @app.post("/text2int")
