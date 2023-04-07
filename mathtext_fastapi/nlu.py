@@ -20,7 +20,6 @@ PAYLOAD_VALUE_TYPES = {
     'message_id': str,
     'message_inserted_at': str,
     'message_updated_at': str,
-    'message_inserted_at': str,
     }
 
 
