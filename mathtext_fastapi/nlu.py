@@ -1,6 +1,7 @@
 from collections.abc import Mapping
 from logging import getLogger
 import datetime as dt
+from dateutil.parser import isoparse
 
 from fuzzywuzzy import fuzz
 from mathtext_fastapi.logging import prepare_message_data_for_logging
@@ -142,7 +143,7 @@ def run_intent_classification(message_text):
 
 def payload_is_valid(payload_object):
     """
-    >>> payload_is_valid({'author_id': '+821031323138', 'author_type': 'OWNER', 'contact_uuid': '49d42557-7a64-42fc-98fb-794061f37cf9', 'message_body': 'thirty one', 'message_direction': 'inbound', 'message_id': 'ABEGghAxMjE4Ags-sGJ_JArMAnJBnA', 'message_inserted_at': '2022-07-05T04:00:34.03352Z', 'message_updated_at': '2023-04-06T10:08:23.745072Z'})
+    >>> payload_is_valid({'author_id': '+5555555', 'author_type': 'OWNER', 'contact_uuid': '3246-43ad-faf7qw-zsdhg-dgGdg', 'message_body': 'thirty one', 'message_direction': 'inbound', 'message_id': 'SDFGGwafada-DFASHA4aDGA', 'message_inserted_at': '2022-07-05T04:00:34.03352Z', 'message_updated_at': '2023-04-06T10:08:23.745072Z'})
     True
     """
     return (
@@ -152,20 +153,19 @@ def payload_is_valid(payload_object):
         isinstance(payload_object.get('contact_uuid'), str) and
         isinstance(payload_object.get('message_body'), str) and
         isinstance(payload_object.get('message_direction'), str) and
-        isinstance(payload_object.get('inbound'), str) and
         isinstance(payload_object.get('message_id'), str) and
         isinstance(payload_object.get('message_inserted_at'), str) and
         isinstance(payload_object.get('message_updated_at'), str) and
         isinstance(payload_object.get('message_inserted_at'), str) and
         isinstance(payload_object.get('message_updated_at'), str) and
         isinstance(
-            dt.datetime.fromisoformat(payload_object.get('message_inserted_at')),
+            isoparse(payload_object.get('message_inserted_at')),
             dt.datetime
         ) and 
         isinstance(
-            dt.datetime.fromisoformat(payload_object.get('message_updated_at')),
+            isoparse(payload_object.get('message_updated_at')),
             dt.datetime
-        )
+        )        
     )
 
 def log_payload_errors(payload_object):
