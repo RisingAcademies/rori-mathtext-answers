@@ -11,6 +11,18 @@ from mathtext_fastapi.intent_classification import predict_message_intent
 
 log = getLogger(__name__)
 
+PAYLOAD_VALUE_TYPES = {
+    'author_id': str,
+    'author_type': str,
+    'contact_uuid': str,
+    'message_body': str,
+    'message_direction': str,
+    'message_id': str,
+    'message_inserted_at': str,
+    'message_updated_at': str,
+    'message_inserted_at': str,
+    }
+
 
 def build_nlu_response_object(nlu_type, data, confidence):
     """ Turns nlu results into an object to send back to Turn.io
@@ -157,7 +169,6 @@ def payload_is_valid(payload_object):
         isinstance(payload_object.get('message_inserted_at'), str) and
         isinstance(payload_object.get('message_updated_at'), str) and
         isinstance(payload_object.get('message_inserted_at'), str) and
-        isinstance(payload_object.get('message_updated_at'), str) and
         isinstance(
             isoparse(payload_object.get('message_inserted_at')),
             dt.datetime
@@ -168,6 +179,7 @@ def payload_is_valid(payload_object):
         )        
     )
 
+
 def log_payload_errors(payload_object):
     errors = []
     try:
@@ -175,61 +187,12 @@ def log_payload_errors(payload_object):
     except Exception as e:
         log.error(f'Invalid HTTP request payload object: {e}')
         errors.append(e)
-    try:
-        assert isinstance(payload_object.get('author_id'), str)
-    except Exception as e:
-        log.error(f'Invalid HTTP request payload object: {e}')
-        errors.append(e)
-    try:
-        assert isinstance(payload_object.get('author_type'), str)
-    except Exception as e:
-        log.error(f'Invalid HTTP request payload object: {e}')
-        errors.append(e)
-    try:
-        assert isinstance(payload_object.get('contact_uuid'), str)
-    except Exception as e:
-        log.error(f'Invalid HTTP request payload object: {e}')
-        errors.append(e)
-    try:
-        assert isinstance(payload_object.get('message_body'), str)
-    except Exception as e:
-        log.error(f'Invalid HTTP request payload object: {e}')
-        errors.append(e)
-    try:
-        assert isinstance(payload_object.get('message_direction'), str)
-    except Exception as e:
-        log.error(f'Invalid HTTP request payload object: {e}')
-        errors.append(e)
-    try:
-        assert isinstance(payload_object.get('inbound'), str)
-    except Exception as e:
-        log.error(f'Invalid HTTP request payload object: {e}')
-        errors.append(e)
-    try:
-        assert isinstance(payload_object.get('message_id'), str)
-    except Exception as e:
-        log.error(f'Invalid HTTP request payload object: {e}')
-        errors.append(e)
-    try:
-        assert isinstance(payload_object.get('message_inserted_at'), str)
-    except Exception as e:
-        log.error(f'Invalid HTTP request payload object: {e}')
-        errors.append(e)
-    try:
-        assert isinstance(payload_object.get('message_updated_at'), str)
-    except Exception as e:
-        log.error(f'Invalid HTTP request payload object: {e}')
-        errors.append(e)
-    try:
-        assert isinstance(payload_object.get('message_inserted_at'), str)
-    except Exception as e:
-        log.error(f'Invalid HTTP request payload object: {e}')
-        errors.append(e)
-    try:
-        assert isinstance(payload_object.get('message_updated_at'), str)
-    except Exception as e:
-        log.error(f'Invalid HTTP request payload object: {e}')
-        errors.append(e)
+    for k, typ in PAYLOAD_VALUE_TYPES.items():
+        try:
+            assert isinstance(payload_object.get(k), typ)
+        except Exception as e:
+            log.error(f'Invalid HTTP request payload object: {e}')
+            errors.append(e)
     try:
         assert isinstance(
             dt.datetime.fromisoformat(payload_object.get('message_inserted_at')),
