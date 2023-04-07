@@ -44,26 +44,35 @@ def add_message_text_to_sample_object(message_text):
 # """
 
 
-def run_simulated_request(endpoint, sample_answer, context=None):
-    print(f"Case: {sample_answer}")
-    b_string = add_message_text_to_sample_object(sample_answer)
+def run_simulated_request(endpoint, sample_payload, context=None):
+    print(f"Case: {sample_payload}")
+    # Used for testing full message object - deprecated April 7
+    # b_string = add_message_text_to_sample_object(sample_answer)
 
-    print("BSTRING")
-    print(b_string)
+    if endpoint == 'sentiment-analysis' or endpoint == 'text2int' or endpoint =='intent-classification':
+        request = requests.post(
+            url=f'http://localhost:7860/{endpoint}',
+            json={'content': sample_payload}
+        ).json()
+    else:
+        request = requests.post(
+            url=f'http://localhost:7860/{endpoint}',
+            data=b_string
+        ).json()
 
-    # if endpoint == 'sentiment-analysis' or endpoint == 'text2int' or endpoint =='intent-classification':
-    #     request = requests.post(
-    #         url=f'http://localhost:7860/{endpoint}',
-    #         json={'content': sample_answer}
-    #     ).json()
-    # else:
-    #     request = requests.post(
-    #         url=f'http://localhost:7860/{endpoint}',
-    #         data=b_string
-    #     ).json()
+    print(request)
 
-    # print(request)
 
+def run_full_nlu_endpoint_payload_test(sample_payload):
+    request = requests.post(
+        url=f'http://localhost:7860/nlu',
+        data=sample_payload
+    ).json()
+    print(request)
+
+
+run_full_nlu_endpoint_payload_test(b'{"message_data": {"author_id": "57787919091", "author_type": "OWNER", "contact_uuid": "df78gsdf78df", "message_body": "8", "message_direction": "inbound", "message_id": "dfgha789789ag9ga", "message_inserted_at": "2023-01-10T02:37:28.487319Z", "message_updated_at": "2023-01-10T02:37:28.487319Z"}}')
+run_full_nlu_endpoint_payload_test(b'{"message_data": {"author_id": "@event.message._vnd.v1.chat.owner", "author_type": "@event.message._vnd.v1.author.type", "contact_uuid": "@event.message._vnd.v1.chat.contact_uuid", "message_body": "@event.message.text.body", "message_direction": "@event.message._vnd.v1.direction", "message_id": "@event.message.id", "message_inserted_at": "@event.message._vnd.v1.chat.inserted_at", "message_updated_at": "@event.message._vnd.v1.chat.updated_at"}}')
 
 # run_simulated_request('intent-classification', 'exit')
 # run_simulated_request('intent-classification', "I'm not sure")
@@ -80,24 +89,24 @@ def run_simulated_request(endpoint, sample_answer, context=None):
 # run_simulated_request('intent-classification', "please stop")
 # run_simulated_request('sentiment-analysis', 'I reject it')
 # run_simulated_request('text2int', 'seven thousand nine hundred fifty seven')
-run_simulated_request('nlu', 'test message')
-run_simulated_request('nlu', 'eight')
-run_simulated_request('nlu', 'is it 8')
-run_simulated_request('nlu', 'can I know how its 0.5')
-run_simulated_request('nlu', 'eight, nine, ten')
-run_simulated_request('nlu', '8, 9, 10')
-run_simulated_request('nlu', '8')
-run_simulated_request('nlu', "I don't know")
-run_simulated_request('nlu', "I don't know eight")
-run_simulated_request('nlu', "I don't 9")
-run_simulated_request('nlu', "0.2")
-run_simulated_request('nlu', 'Today is a wonderful day')
-run_simulated_request('nlu', 'IDK 5?')
-run_simulated_request('nlu', 'hin')
-run_simulated_request('nlu', 'exi')
-run_simulated_request('nlu', 'easier')
-run_simulated_request('nlu', 'stp')
-run_simulated_request('nlu', '')
+# run_simulated_request('nlu', 'test message')
+# run_simulated_request('nlu', 'eight')
+# run_simulated_request('nlu', 'is it 8')
+# run_simulated_request('nlu', 'can I know how its 0.5')
+# run_simulated_request('nlu', 'eight, nine, ten')
+# run_simulated_request('nlu', '8, 9, 10')
+# run_simulated_request('nlu', '8')
+# run_simulated_request('nlu', "I don't know")
+# run_simulated_request('nlu', "I don't know eight")
+# run_simulated_request('nlu', "I don't 9")
+# run_simulated_request('nlu', "0.2")
+# run_simulated_request('nlu', 'Today is a wonderful day')
+# run_simulated_request('nlu', 'IDK 5?')
+# run_simulated_request('nlu', 'hin')
+# run_simulated_request('nlu', 'exi')
+# run_simulated_request('nlu', 'easier')
+# run_simulated_request('nlu', 'stp')
+# run_simulated_request('nlu', '')
 # run_simulated_request('manager', '')
 # run_simulated_request('manager', 'add')
 # run_simulated_request('manager', 'subtract')

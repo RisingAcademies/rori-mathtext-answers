@@ -158,7 +158,7 @@ def payload_is_valid(payload_object):
     >>> payload_is_valid({'author_id': '+5555555', 'author_type': 'OWNER', 'contact_uuid': '3246-43ad-faf7qw-zsdhg-dgGdg', 'message_body': 'thirty one', 'message_direction': 'inbound', 'message_id': 'SDFGGwafada-DFASHA4aDGA', 'message_inserted_at': '2022-07-05T04:00:34.03352Z', 'message_updated_at': '2023-04-06T10:08:23.745072Z'})
     True
 
-    >>> message: {'author_id': '@event.message._vnd.v1.chat.owner', 'author_type': '@event.message._vnd.v1.author.type', 'contact_uuid': '@event.message._vnd.v1.chat.contact_uuid', 'message_body': '@event.message.text.body', 'message_direction': '@event.message._vnd.v1.direction', 'message_id': '@event.message.id', 'message_inserted_at': '@event.message._vnd.v1.chat.inserted_at', 'message_updated_at': '@event.message._vnd.v1.chat.updated_at'}
+    >>> payload_is_valid({"author_id": "@event.message._vnd.v1.chat.owner", "author_type": "@event.message._vnd.v1.author.type", "contact_uuid": "@event.message._vnd.v1.chat.contact_uuid", "message_body": "@event.message.text.body", "message_direction": "@event.message._vnd.v1.direction", "message_id": "@event.message.id", "message_inserted_at": "@event.message._vnd.v1.chat.inserted_at", "message_updated_at": "@event.message._vnd.v1.chat.updated_at"})
     False
     """
     try:
