@@ -39,6 +39,7 @@ def create_text_message(message_text, whatsapp_id):
         "preview_url": False,
         "recipient_type": "individual",
         "to": whatsapp_id,
+        # FIXME: Better to use "message_type" (but be careful with refactor)
         "type": "text",
         "text": {
             "body": message_text
@@ -136,6 +137,9 @@ def manage_math_quiz_fsm(user_message, contact_uuid, type):
 
     # Make a completely new entry
     if fsm_check.data == []:
+        # FIXME: Try not to use the Python reserved keyword `type` as a variable name
+        #        It's better to use `kind` or `convo_type` or `convo_name`
+        #        And the variable `type` is not defined here so I don't understand how this is working at all.
         if type == 'addition':
             math_quiz_state_machine = MathQuizFSM()
         else:

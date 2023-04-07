@@ -1,23 +1,20 @@
 from collections.abc import Mapping
 from logging import getLogger
 import datetime as dt
-import re
 
 from fuzzywuzzy import fuzz
 from mathtext_fastapi.logging import prepare_message_data_for_logging
 from mathtext.sentiment import sentiment
-from mathtext.text2int import text2int
-from mathtext_fastapi.intent_classification import create_intent_classification_model, retrieve_intent_classification_model, predict_message_intent
+from mathtext.text2int import text2int, TOKENS2INT_ERROR_INT
+from mathtext_fastapi.intent_classification import predict_message_intent
 
 log = getLogger(__name__)
 
-ERROR_CODE = 32202
 
-
-def build_nlu_response_object(type, data, confidence):
+def build_nlu_response_object(nlu_type, data, confidence):
     """ Turns nlu results into an object to send back to Turn.io
     Inputs
-    - type: str - the type of nlu run (integer or sentiment-analysis)
+    - nlu_type: str - the type of nlu run (integer or sentiment-analysis)
     - data: str/int - the student message
     - confidence: - the nlu confidence score (sentiment) or '' (integer)
 
@@ -27,7 +24,11 @@ def build_nlu_response_object(type, data, confidence):
     >>> build_nlu_response_object('sentiment', 'POSITIVE', 0.99)
     {'type': 'sentiment', 'data': 'POSITIVE', 'confidence': 0.99}
     """
-    return {'type': type, 'data': data, 'confidence': confidence}
+    return {
+        'type': nlu_type,
+        'data': data,
+        'confidence': confidence
+        }
 
 
 # def test_for_float_or_int(message_data, message_text):
@@ -167,6 +168,86 @@ def payload_is_valid(payload_object):
         )
     )
 
+def log_payload_errors(payload_object):
+    errors = []
+    try:
+        assert isinstance(payload_object, Mapping)
+    except Exception as e:
+        log.error(f'Invalid HTTP request payload object: {e}')
+        errors.append(e)
+    try:
+        assert isinstance(payload_object.get('author_id'), str)
+    except Exception as e:
+        log.error(f'Invalid HTTP request payload object: {e}')
+        errors.append(e)
+    try:
+        assert isinstance(payload_object.get('author_type'), str)
+    except Exception as e:
+        log.error(f'Invalid HTTP request payload object: {e}')
+        errors.append(e)
+    try:
+        assert isinstance(payload_object.get('contact_uuid'), str)
+    except Exception as e:
+        log.error(f'Invalid HTTP request payload object: {e}')
+        errors.append(e)
+    try:
+        assert isinstance(payload_object.get('message_body'), str)
+    except Exception as e:
+        log.error(f'Invalid HTTP request payload object: {e}')
+        errors.append(e)
+    try:
+        assert isinstance(payload_object.get('message_direction'), str)
+    except Exception as e:
+        log.error(f'Invalid HTTP request payload object: {e}')
+        errors.append(e)
+    try:
+        assert isinstance(payload_object.get('inbound'), str)
+    except Exception as e:
+        log.error(f'Invalid HTTP request payload object: {e}')
+        errors.append(e)
+    try:
+        assert isinstance(payload_object.get('message_id'), str)
+    except Exception as e:
+        log.error(f'Invalid HTTP request payload object: {e}')
+        errors.append(e)
+    try:
+        assert isinstance(payload_object.get('message_inserted_at'), str)
+    except Exception as e:
+        log.error(f'Invalid HTTP request payload object: {e}')
+        errors.append(e)
+    try:
+        assert isinstance(payload_object.get('message_updated_at'), str)
+    except Exception as e:
+        log.error(f'Invalid HTTP request payload object: {e}')
+        errors.append(e)
+    try:
+        assert isinstance(payload_object.get('message_inserted_at'), str)
+    except Exception as e:
+        log.error(f'Invalid HTTP request payload object: {e}')
+        errors.append(e)
+    try:
+        assert isinstance(payload_object.get('message_updated_at'), str)
+    except Exception as e:
+        log.error(f'Invalid HTTP request payload object: {e}')
+        errors.append(e)
+    try:
+        assert isinstance(
+            dt.datetime.fromisoformat(payload_object.get('message_inserted_at')),
+            dt.datetime
+        )
+    except Exception as e:
+        log.error(f'Invalid HTTP request payload object: {e}')
+        errors.append(e)
+    try: 
+        isinstance(
+            dt.datetime.fromisoformat(payload_object.get('message_updated_at')),
+            dt.datetime
+        )
+    except Exception as e:
+        log.error(f'Invalid HTTP request payload object: {e}')
+        errors.append(e)
+    return errors
+
 
 def evaluate_message_with_nlu(message_data):
     """ Process a student's message using NLU functions and send the result
@@ -182,14 +263,15 @@ def evaluate_message_with_nlu(message_data):
     log.info(f'Starting evaluate message: {message_data}')
 
     if not payload_is_valid(message_data):
-        return {'type': 'error', 'data': ERROR_CODE, 'confidence': 0}
+        log_payload_errors(message_data)
+        return {'type': 'error', 'data': TOKENS2INT_ERROR_INT, 'confidence': 0}
 
     try:
         message_text = str(message_data.get('message_body', ''))
     except:
         log.error(f'Invalid request payload: {message_data}')
         # use python logging system to do this//
-        return {'type': 'error', 'data': ERROR_CODE, 'confidence': 0}
+        return {'type': 'error', 'data': TOKENS2INT_ERROR_INT, 'confidence': 0}
 
     # Run intent classification only for keywords
     intent_api_response = run_intent_classification(message_text)
@@ -199,7 +281,7 @@ def evaluate_message_with_nlu(message_data):
 
     number_api_resp = text2int(message_text.lower())
 
-    if number_api_resp == ERROR_CODE:
+    if number_api_resp == TOKENS2INT_ERROR_INT:
         # Run intent classification with logistic regression model
         predicted_label = predict_message_intent(message_text)
         if predicted_label['confidence'] > 0.01:
