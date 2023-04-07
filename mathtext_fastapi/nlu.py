@@ -181,8 +181,7 @@ def payload_is_valid(payload_object):
         isinstance(payload_object.get('message_direction'), str) and
         isinstance(payload_object.get('message_id'), str) and
         isinstance(payload_object.get('message_inserted_at'), str) and
-        isinstance(payload_object.get('message_updated_at'), str) and
-        isinstance(payload_object.get('message_inserted_at'), str)       
+        isinstance(payload_object.get('message_updated_at'), str)    
     )
 
 
