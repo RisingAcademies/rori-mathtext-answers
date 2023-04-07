@@ -48,18 +48,21 @@ def run_simulated_request(endpoint, sample_answer, context=None):
     print(f"Case: {sample_answer}")
     b_string = add_message_text_to_sample_object(sample_answer)
 
-    if endpoint == 'sentiment-analysis' or endpoint == 'text2int' or endpoint =='intent-classification':
-        request = requests.post(
-            url=f'http://localhost:7860/{endpoint}',
-            json={'content': sample_answer}
-        ).json()
-    else:
-        request = requests.post(
-            url=f'http://localhost:7860/{endpoint}',
-            data=b_string
-        ).json()
+    print("BSTRING")
+    print(b_string)
 
-    print(request)
+    # if endpoint == 'sentiment-analysis' or endpoint == 'text2int' or endpoint =='intent-classification':
+    #     request = requests.post(
+    #         url=f'http://localhost:7860/{endpoint}',
+    #         json={'content': sample_answer}
+    #     ).json()
+    # else:
+    #     request = requests.post(
+    #         url=f'http://localhost:7860/{endpoint}',
+    #         data=b_string
+    #     ).json()
+
+    # print(request)
 
 
 # run_simulated_request('intent-classification', 'exit')
