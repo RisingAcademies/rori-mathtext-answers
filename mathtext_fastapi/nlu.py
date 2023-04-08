@@ -4,10 +4,10 @@ import datetime as dt
 from dateutil.parser import isoparse
 
 from fuzzywuzzy import fuzz
+from mathtext_fastapi.intent_classification import predict_message_intent
 from mathtext_fastapi.logging import prepare_message_data_for_logging
 from mathtext.sentiment import sentiment
 from mathtext.text2int import text2int, TOKENS2INT_ERROR_INT
-from mathtext_fastapi.intent_classification import predict_message_intent
 
 log = getLogger(__name__)
 
@@ -163,16 +163,15 @@ def payload_is_valid(payload_object):
     """
     try:
         isinstance(
-            isoparse(payload_object.get('message_inserted_at')),
+            isoparse(payload_object.get('message_inserted_at','')),
             dt.datetime
         )
         isinstance(
-            isoparse(payload_object.get('message_updated_at')),
+            isoparse(payload_object.get('message_updated_at','')),
             dt.datetime
         )
     except ValueError:
         return False
-
     return (
         isinstance(payload_object, Mapping) and
         isinstance(payload_object.get('author_id'), str) and

@@ -4,7 +4,9 @@ or
 `python -m uvicorn app:app --reload --host localhost --port 7860`
 """
 import ast
+from json import JSONDecodeError
 import mathactive.microlessons.num_one as num_one_quiz
+import os
 import sentry_sdk
 
 from fastapi import FastAPI, Request
@@ -13,17 +15,15 @@ from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 # from mathtext.sentiment import sentiment
 from mathtext.text2int import text2int
-from pydantic import BaseModel
-
 from mathtext_fastapi.logging import prepare_message_data_for_logging
 from mathtext_fastapi.conversation_manager import manage_conversation_response
 from mathtext_fastapi.v2_conversation_manager import manage_conversation_response
 from mathtext_fastapi.nlu import evaluate_message_with_nlu
 from mathtext_fastapi.nlu import run_intent_classification
+from pydantic import BaseModel
 
-import os
+
 from dotenv import load_dotenv
-
 load_dotenv()
 
 sentry_sdk.init(
@@ -161,8 +161,11 @@ async def evaluate_user_message_with_nlu_api(request: Request):
       {'type':'integer', 'data': '8', 'confidence': 0}
       {'type':'sentiment', 'data': 'negative', 'confidence': 0.99}
     """
-    data_dict = await request.json()
-    message_data = data_dict.get('message_data', '')
+    try:
+        data_dict = await request.json()
+    except JSONDecodeError:
+        data_dict = {}
+    message_data = data_dict.get('message_data', {})
     nlu_response = evaluate_message_with_nlu(message_data)
     return JSONResponse(content=nlu_response)
 
@@ -183,12 +186,10 @@ async def num_one(request: Request):
         'state': 'question'
     }
     """
-    print("STEP 1")
     data_dict = await request.json()
     message_data = ast.literal_eval(data_dict.get('message_data', '').get('message_body', ''))
     user_id = message_data['user_id']
     message_text = message_data['message_text']
-    print("STEP 2")
     return num_one_quiz.process_user_message(user_id, message_text)
     
 
