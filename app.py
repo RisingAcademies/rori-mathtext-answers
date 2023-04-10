@@ -5,6 +5,7 @@ or
 """
 import ast
 from json import JSONDecodeError
+from logging import getLogger
 import mathactive.microlessons.num_one as num_one_quiz
 import os
 import sentry_sdk
@@ -26,8 +27,10 @@ from pydantic import BaseModel
 from dotenv import load_dotenv
 load_dotenv()
 
+log = getLogger(__name__)
+
 sentry_sdk.init(
-    dsn=os.environ.get('SENTRY_DNS'),
+    dsn=os.environ.get('SENTRY_DSN'),
 
     # Set traces_sample_rate to 1.0 to capture 100%
     # of transactions for performance monitoring.
@@ -148,7 +151,7 @@ def intent_classification_ep(content: Text = None):
     content = {"message": ml_response}
     return JSONResponse(content=content)
 
-
+import json
 @app.post("/nlu")
 async def evaluate_user_message_with_nlu_api(request: Request):
     """ Calls nlu evaluation and returns the nlu_response
@@ -161,11 +164,20 @@ async def evaluate_user_message_with_nlu_api(request: Request):
       {'type':'integer', 'data': '8', 'confidence': 0}
       {'type':'sentiment', 'data': 'negative', 'confidence': 0.99}
     """
+    log.info(f'Received request: {request}')
+    log.info(f'Request header: {request.headers}')
+    log.info(f'Request body: {request.body()}')
+
     try:
         data_dict = await request.json()
     except JSONDecodeError:
+        log.error(f'Request.json failed: {dir(request)}')
         data_dict = {}
-    message_data = data_dict.get('message_data', {})
+    message_data = data_dict.get('message_data')
+    
+    if not message_data:
+        log.error(f'Data_dict: {data_dict}')
+        message_data = data_dict.get('message', {})
     nlu_response = evaluate_message_with_nlu(message_data)
     return JSONResponse(content=nlu_response)
 
