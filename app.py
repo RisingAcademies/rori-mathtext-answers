@@ -17,7 +17,7 @@ from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 # from mathtext.sentiment import sentiment
 from mathtext.text2int import text2int
-from mathtext_fastapi.logging import prepare_message_data_for_logging
+from mathtext_fastapi.supabase_logging import prepare_message_data_for_logging
 from mathtext_fastapi.conversation_manager import manage_conversation_response
 from mathtext_fastapi.v2_conversation_manager import manage_conversation_response
 from mathtext_fastapi.nlu import evaluate_message_with_nlu
