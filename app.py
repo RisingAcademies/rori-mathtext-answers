@@ -4,6 +4,7 @@ or
 `python -m uvicorn app:app --reload --host localhost --port 7860`
 """
 import ast
+import json
 from json import JSONDecodeError
 from logging import getLogger
 import mathactive.microlessons.num_one as num_one_quiz
@@ -151,7 +152,7 @@ def intent_classification_ep(content: Text = None):
     content = {"message": ml_response}
     return JSONResponse(content=content)
 
-import json
+
 @app.post("/nlu")
 async def evaluate_user_message_with_nlu_api(request: Request):
     """ Calls nlu evaluation and returns the nlu_response
@@ -166,7 +167,10 @@ async def evaluate_user_message_with_nlu_api(request: Request):
     """
     log.info(f'Received request: {request}')
     log.info(f'Request header: {request.headers}')
-    log.info(f'Request body: {request.body()}')
+    request_body = await request.body()
+    log.info(f'Request body: {request_body}')
+    request_body_str = request_body.decode()
+    log.info(f'Request_body_str: {request_body_str}')
 
     try:
         data_dict = await request.json()

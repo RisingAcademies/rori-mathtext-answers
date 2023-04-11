@@ -71,17 +71,17 @@ def run_full_nlu_endpoint_payload_test(sample_payload):
     print(request)
 
 
-# Case: Wrong key
-run_full_nlu_endpoint_payload_test(b'{"message": {"author_id": "@event.message._vnd.v1.chat.owner", "author_type": "@event.message._vnd.v1.author.type", "contact_uuid": "@event.message._vnd.v1.chat.contact_uuid", "message_body": "@event.message.text.body", "message_direction": "@event.message._vnd.v1.direction", "message_id": "@event.message.id", "message_inserted_at": "@event.message._vnd.v1.chat.inserted_at", "message_updated_at": "@event.message._vnd.v1.chat.updated_at"}}')
+# # Case: Wrong key
+# run_full_nlu_endpoint_payload_test(b'{"message": {"author_id": "@event.message._vnd.v1.chat.owner", "author_type": "@event.message._vnd.v1.author.type", "contact_uuid": "@event.message._vnd.v1.chat.contact_uuid", "message_body": "@event.message.text.body", "message_direction": "@event.message._vnd.v1.direction", "message_id": "@event.message.id", "message_inserted_at": "@event.message._vnd.v1.chat.inserted_at", "message_updated_at": "@event.message._vnd.v1.chat.updated_at"}}')
 
-# Case: Correct payload
-run_full_nlu_endpoint_payload_test(b'{"message_data": {"author_id": "57787919091", "author_type": "OWNER", "contact_uuid": "df78gsdf78df", "message_body": "8", "message_direction": "inbound", "message_id": "dfgha789789ag9ga", "message_inserted_at": "2023-01-10T02:37:28.487319Z", "message_updated_at": "2023-01-10T02:37:28.487319Z"}}')
+# # Case: Correct payload
+# run_full_nlu_endpoint_payload_test(b'{"message_data": {"author_id": "57787919091", "author_type": "OWNER", "contact_uuid": "df78gsdf78df", "message_body": "8", "message_direction": "inbound", "message_id": "dfgha789789ag9ga", "message_inserted_at": "2023-01-10T02:37:28.487319Z", "message_updated_at": "2023-01-10T02:37:28.487319Z"}}')
 
-# Case: Incorrect payload values
-run_full_nlu_endpoint_payload_test(b'{"message_data": {"author_id": "@event.message._vnd.v1.chat.owner", "author_type": "@event.message._vnd.v1.author.type", "contact_uuid": "@event.message._vnd.v1.chat.contact_uuid", "message_body": "@event.message.text.body", "message_direction": "@event.message._vnd.v1.direction", "message_id": "@event.message.id", "message_inserted_at": "@event.message._vnd.v1.chat.inserted_at", "message_updated_at": "@event.message._vnd.v1.chat.updated_at"}}')
+# # Case: Incorrect payload values
+# run_full_nlu_endpoint_payload_test(b'{"message_data": {"author_id": "@event.message._vnd.v1.chat.owner", "author_type": "@event.message._vnd.v1.author.type", "contact_uuid": "@event.message._vnd.v1.chat.contact_uuid", "message_body": "@event.message.text.body", "message_direction": "@event.message._vnd.v1.direction", "message_id": "@event.message.id", "message_inserted_at": "@event.message._vnd.v1.chat.inserted_at", "message_updated_at": "@event.message._vnd.v1.chat.updated_at"}}')
 
 # Case: Wrong payload object
-run_full_nlu_endpoint_payload_test(b'{"message_data": {"_vnd": {"v1": {"author": {"id": 54327547257, "name": "Jin", "type": "OWNER"}, "card_uuid": None, "chat": {"assigned_to": None, "contact_uuid": "f7889-f78dfgb798-f786ah89g7-f78f9a", "inserted_at": "2023-03-28T13:21:47.581221Z", "owner": "+43789789146", "permalink": "", "state": "OPEN", "state_reason": "Re-opened by inbound message.", "unread_count": 97, "updated_at": "2023-04-07T21:05:27.389948Z", "uuid": "dfg9a78-d76a786dghas-78d9fga789g-a78d69a9"}, "direction": "inbound", "faq_uuid": None, "in_reply_to": None, "inserted_at": "2023-04-07T21:05:27.368580Z", "labels": [], "last_status": None, "last_status_timestamp": None, "on_fallback_channel": False, "rendered_content": None, "uuid": "hf78s7s89b-789fb68d9fg-789fb789dfb-f79sfb789"}}, "from": 5475248689, "id": "SBDE4zgAAy7887sfdT35SHFS", "text": {"body": 1000}, "timestamp": 1680901527, "type": "text"}, "type": "message"}')"
+run_full_nlu_endpoint_payload_test(b'{"message_data": {"_vnd": {"v1": {"author": {"id": 54327547257, "name": "Jin", "type": "OWNER"}, "card_uuid": None, "chat": {"assigned_to": None, "contact_uuid": "f7889-f78dfgb798-f786ah89g7-f78f9a", "inserted_at": "2023-03-28T13:21:47.581221Z", "owner": "+43789789146", "permalink": "", "state": "OPEN", "state_reason": "Re-opened by inbound message.", "unread_count": 97, "updated_at": "2023-04-07T21:05:27.389948Z", "uuid": "dfg9a78-d76a786dghas-78d9fga789g-a78d69a9"}, "direction": "inbound", "faq_uuid": None, "in_reply_to": None, "inserted_at": "2023-04-07T21:05:27.368580Z", "labels": [], "last_status": None, "last_status_timestamp": None, "on_fallback_channel": False, "rendered_content": None, "uuid": "hf78s7s89b-789fb68d9fg-789fb789dfb-f79sfb789"}}, "from": 5475248689, "id": "SBDE4zgAAy7887sfdT35SHFS", "text": {"body": 1000}, "timestamp": 1680901527, "type": "text"}, "type": "message"}')
 
 
 # run_simulated_request('intent-classification', 'exit')
