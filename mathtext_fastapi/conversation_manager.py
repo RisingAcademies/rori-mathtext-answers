@@ -14,8 +14,8 @@ from mathtext_fastapi.math_subtraction_fsm import MathSubtractionFSM
 from supabase import create_client
 from transitions import Machine
 
-from scripts.quiz.generators import start_interactive_math
-from scripts.quiz.hints import generate_hint
+from mathactive.generators import start_interactive_math
+from mathactive.hints import generate_hint
 
 load_dotenv()
 
@@ -39,6 +39,7 @@ def create_text_message(message_text, whatsapp_id):
         "preview_url": False,
         "recipient_type": "individual",
         "to": whatsapp_id,
+        # FIXME: Better to use "message_type" (but be careful with refactor)
         "type": "text",
         "text": {
             "body": message_text
@@ -136,6 +137,9 @@ def manage_math_quiz_fsm(user_message, contact_uuid, type):
 
     # Make a completely new entry
     if fsm_check.data == []:
+        # FIXME: Try not to use the Python reserved keyword `type` as a variable name
+        #        It's better to use `kind` or `convo_type` or `convo_name`
+        #        And the variable `type` is not defined here so I don't understand how this is working at all.
         if type == 'addition':
             math_quiz_state_machine = MathQuizFSM()
         else:

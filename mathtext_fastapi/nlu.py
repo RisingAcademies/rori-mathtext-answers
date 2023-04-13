@@ -1,15 +1,32 @@
+from collections.abc import Mapping
+from logging import getLogger
+import datetime as dt
+from dateutil.parser import isoparse
+
 from fuzzywuzzy import fuzz
+from mathtext_fastapi.intent_classification import predict_message_intent
 from mathtext_fastapi.logging import prepare_message_data_for_logging
 from mathtext.sentiment import sentiment
-from mathtext.text2int import text2int
-from mathtext_fastapi.intent_classification import create_intent_classification_model, retrieve_intent_classification_model, predict_message_intent
-import re
+from mathtext.text2int import text2int, TOKENS2INT_ERROR_INT
+
+log = getLogger(__name__)
+
+PAYLOAD_VALUE_TYPES = {
+    'author_id': str,
+    'author_type': str,
+    'contact_uuid': str,
+    'message_body': str,
+    'message_direction': str,
+    'message_id': str,
+    'message_inserted_at': str,
+    'message_updated_at': str,
+    }
 
 
-def build_nlu_response_object(type, data, confidence):
+def build_nlu_response_object(nlu_type, data, confidence):
     """ Turns nlu results into an object to send back to Turn.io
     Inputs
-    - type: str - the type of nlu run (integer or sentiment-analysis)
+    - nlu_type: str - the type of nlu run (integer or sentiment-analysis)
     - data: str/int - the student message
     - confidence: - the nlu confidence score (sentiment) or '' (integer)
 
@@ -19,7 +36,11 @@ def build_nlu_response_object(type, data, confidence):
     >>> build_nlu_response_object('sentiment', 'POSITIVE', 0.99)
     {'type': 'sentiment', 'data': 'POSITIVE', 'confidence': 0.99}
     """
-    return {'type': type, 'data': data, 'confidence': confidence}
+    return {
+        'type': nlu_type,
+        'data': data,
+        'confidence': confidence
+        }
 
 
 # def test_for_float_or_int(message_data, message_text):
@@ -107,6 +128,16 @@ def run_intent_classification(message_text):
         'hint',
         'next',
         'stop',
+        'tired',
+        'tomorrow',
+        'finished',
+        'help',
+        'please',
+        'understand',
+        'question',
+        'easier',
+        'easy',
+        'support'
     ]
     
     for command in commands:
@@ -121,6 +152,70 @@ def run_intent_classification(message_text):
     return nlu_response
 
 
+def payload_is_valid(payload_object):
+    """
+    >>> payload_is_valid({'author_id': '+5555555', 'author_type': 'OWNER', 'contact_uuid': '3246-43ad-faf7qw-zsdhg-dgGdg', 'message_body': 'thirty one', 'message_direction': 'inbound', 'message_id': 'SDFGGwafada-DFASHA4aDGA', 'message_inserted_at': '2022-07-05T04:00:34.03352Z', 'message_updated_at': '2023-04-06T10:08:23.745072Z'})
+    True
+
+    >>> payload_is_valid({"author_id": "@event.message._vnd.v1.chat.owner", "author_type": "@event.message._vnd.v1.author.type", "contact_uuid": "@event.message._vnd.v1.chat.contact_uuid", "message_body": "@event.message.text.body", "message_direction": "@event.message._vnd.v1.direction", "message_id": "@event.message.id", "message_inserted_at": "@event.message._vnd.v1.chat.inserted_at", "message_updated_at": "@event.message._vnd.v1.chat.updated_at"})
+    False
+    """
+    try:
+        isinstance(
+            isoparse(payload_object.get('message_inserted_at','')),
+            dt.datetime
+        )
+        isinstance(
+            isoparse(payload_object.get('message_updated_at','')),
+            dt.datetime
+        )
+    except ValueError:
+        return False
+    return (
+        isinstance(payload_object, Mapping) and
+        isinstance(payload_object.get('author_id'), str) and
+        isinstance(payload_object.get('author_type'), str) and
+        isinstance(payload_object.get('contact_uuid'), str) and
+        isinstance(payload_object.get('message_body'), str) and
+        isinstance(payload_object.get('message_direction'), str) and
+        isinstance(payload_object.get('message_id'), str) and
+        isinstance(payload_object.get('message_inserted_at'), str) and
+        isinstance(payload_object.get('message_updated_at'), str)    
+    )
+
+
+def log_payload_errors(payload_object):
+    errors = []
+    try:
+        assert isinstance(payload_object, Mapping)
+    except Exception as e:
+        log.error(f'Invalid HTTP request payload object: {e}')
+        errors.append(e)
+    for k, typ in PAYLOAD_VALUE_TYPES.items():
+        try:
+            assert isinstance(payload_object.get(k), typ)
+        except Exception as e:
+            log.error(f'Invalid HTTP request payload object: {e}')
+            errors.append(e)
+    try:
+        assert isinstance(
+            dt.datetime.fromisoformat(payload_object.get('message_inserted_at')),
+            dt.datetime
+        )
+    except Exception as e:
+        log.error(f'Invalid HTTP request payload object: {e}')
+        errors.append(e)
+    try: 
+        isinstance(
+            dt.datetime.fromisoformat(payload_object.get('message_updated_at')),
+            dt.datetime
+        )
+    except Exception as e:
+        log.error(f'Invalid HTTP request payload object: {e}')
+        errors.append(e)
+    return errors
+
+
 def evaluate_message_with_nlu(message_data):
     """ Process a student's message using NLU functions and send the result
     
@@ -131,20 +226,19 @@ def evaluate_message_with_nlu(message_data):
     {'type': 'sentiment', 'data': 'NEGATIVE', 'confidence': 0.9997807145118713}
     """
     # Keeps system working with two different inputs - full and filtered @event object
+    # Call validate payload
+    log.info(f'Starting evaluate message: {message_data}')
+
+    if not payload_is_valid(message_data):
+        log_payload_errors(message_data)
+        return {'type': 'error', 'data': TOKENS2INT_ERROR_INT, 'confidence': 0}
+
     try:
-        message_text = str(message_data['message_body'])
-    except KeyError:
-        message_data = {
-            'author_id': message_data['message']['_vnd']['v1']['chat']['owner'],
-            'author_type': message_data['message']['_vnd']['v1']['author']['type'],
-            'contact_uuid': message_data['message']['_vnd']['v1']['chat']['contact_uuid'],
-            'message_body': message_data['message']['text']['body'],
-            'message_direction': message_data['message']['_vnd']['v1']['direction'],
-            'message_id': message_data['message']['id'],
-            'message_inserted_at': message_data['message']['_vnd']['v1']['chat']['inserted_at'],
-            'message_updated_at': message_data['message']['_vnd']['v1']['chat']['updated_at'],
-        }
-        message_text = str(message_data['message_body'])
+        message_text = str(message_data.get('message_body', ''))
+    except:
+        log.error(f'Invalid request payload: {message_data}')
+        # use python logging system to do this//
+        return {'type': 'error', 'data': TOKENS2INT_ERROR_INT, 'confidence': 0}
 
     # Run intent classification only for keywords
     intent_api_response = run_intent_classification(message_text)
@@ -154,7 +248,7 @@ def evaluate_message_with_nlu(message_data):
 
     number_api_resp = text2int(message_text.lower())
 
-    if number_api_resp == 32202:
+    if number_api_resp == TOKENS2INT_ERROR_INT:
         # Run intent classification with logistic regression model
         predicted_label = predict_message_intent(message_text)
         if predicted_label['confidence'] > 0.01:
