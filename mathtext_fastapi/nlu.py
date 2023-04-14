@@ -137,7 +137,9 @@ def run_intent_classification(message_text):
         'question',
         'easier',
         'easy',
-        'support'
+        'support',
+        'skip',
+        'menu'
     ]
     
     for command in commands:
