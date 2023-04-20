@@ -121,7 +121,7 @@ def run_intent_classification(message_text):
     >>> run_intent_classification("hardier") 
     {'type': 'intent', 'data': 'harder', 'confidence': 0.92}
     """
-    label = 'no_match'
+    label = ''
     ratio = 0
     nlu_response = {'type': 'intent', 'data': label, 'confidence': ratio}
     keywords = [
