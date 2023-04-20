@@ -157,7 +157,6 @@ def run_intent_classification(message_text):
             score = 0
 
         if score > 80:
-            print(f"TOK: {tok}, SCORE: {score}")
             nlu_response['data'] = keyword
             nlu_response['confidence'] = score
     
