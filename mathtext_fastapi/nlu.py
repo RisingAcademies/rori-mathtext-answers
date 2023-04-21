@@ -1,9 +1,12 @@
+import re
+
 from collections.abc import Mapping
 from logging import getLogger
 import datetime as dt
 from dateutil.parser import isoparse
 
 from fuzzywuzzy import fuzz
+from fuzzywuzzy import process
 from mathtext_fastapi.intent_classification import predict_message_intent
 from mathtext_fastapi.logging import prepare_message_data_for_logging
 from mathtext.sentiment import sentiment
@@ -121,7 +124,7 @@ def run_intent_classification(message_text):
     label = ''
     ratio = 0
     nlu_response = {'type': 'intent', 'data': label, 'confidence': ratio}
-    commands = [
+    keywords = [
         'easier',
         'exit',
         'harder',
@@ -141,15 +144,21 @@ def run_intent_classification(message_text):
         'skip',
         'menu'
     ]
-    
-    for command in commands:
+
+    try:
+        tokens = re.findall(r"[-a-zA-Z'_]+", message_text.lower())
+    except AttributeError:
+        tokens = ''
+
+    for keyword in keywords:
         try:
-            ratio = fuzz.ratio(command, message_text.lower())
+            tok, score = process.extractOne(keyword, tokens, scorer=fuzz.ratio)
         except:
-            ratio = 0
-        if ratio > 80:
-            nlu_response['data'] = command
-            nlu_response['confidence'] = ratio / 100
+            score = 0
+
+        if score > 80:
+            nlu_response['data'] = keyword
+            nlu_response['confidence'] = score
     
     return nlu_response
 
