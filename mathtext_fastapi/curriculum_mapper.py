@@ -3,12 +3,15 @@ import pandas as pd
 import re
 
 from pathlib import Path
-
+from mathtext_fastapi.constants import DATA_DIR
 
 def read_and_preprocess_spreadsheet(file_name):
     """ Creates a pandas dataframe from the curriculum overview spreadsheet """
-    DATA_DIR = Path(__file__).parent.parent / "mathtext_fastapi" / "data" / file_name
-    script_df = pd.read_excel(DATA_DIR, engine='openpyxl')
+
+    script_df = pd.read_excel(
+        DATA_DIR / file_name,
+        engine='openpyxl'
+    )
     # Ensures the grade level columns are integers instead of floats
     script_df.columns = script_df.columns[:2].tolist() + script_df.columns[2:11].astype(int).astype(str).tolist() + script_df.columns[11:].tolist()
     script_df.fillna('', inplace=True)

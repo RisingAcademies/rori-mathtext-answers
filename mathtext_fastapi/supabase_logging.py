@@ -1,15 +1,7 @@
 import os
 from datetime import datetime
 
-from dotenv import load_dotenv
-from supabase import create_client
-
-load_dotenv()
-
-SUPA = create_client(
-    os.environ.get('SUPABASE_URL'),
-    os.environ.get('SUPABASE_KEY')
-)
+from mathtext_fastapi.constants import SUPA
 
 
 def log_message_data_through_supabase_api(table_name, log_data):

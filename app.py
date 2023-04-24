@@ -25,14 +25,13 @@ from mathtext_fastapi.supabase_logging import prepare_message_data_for_logging
 from mathtext_fastapi.v2_conversation_manager import manage_conversation_response
 from pydantic import BaseModel
 
+from mathtext_fastapi.constants import SENTRY_DSN
 
-from dotenv import load_dotenv
-load_dotenv()
 
 log = getLogger(__name__)
 
 sentry_sdk.init(
-    dsn=os.environ.get('SENTRY_DSN'),
+    dsn=SENTRY_DSN,
 
     # Set traces_sample_rate to 1.0 to capture 100%
     # of transactions for performance monitoring.

@@ -1,20 +1,17 @@
+import joblib
 import numpy as np
 import pandas as pd
 
 from pathlib import Path
 from sentence_transformers import SentenceTransformer
 from sklearn.linear_model import LogisticRegression
-import joblib
 
-from mathtext_fastapi.constants import DATA_DIR
-
-DEFAULT_MODEL_FILENAME="intent_classification_model.joblib"
-DEFAULT_LABELED_DATA="labeled_data.csv"
+from mathtext_fastapi.constants import DATA_DIR, MODEL_PATH, LABELED_DATA_PATH
 
 
 def create_intent_classification_model(
-    model_path=DATA_DIR / DEFAULT_MODEL_FILENAME,
-    labeled_data_path=DATA_DIR / DEFAULT_LABELED_DATA
+    model_path=MODEL_PATH,
+    labeled_data_path=LABELED_DATA_PATH
 ):
     encoder = SentenceTransformer('all-MiniLM-L6-v2')
     # path = list(Path.cwd().glob('*.csv'))
@@ -35,7 +32,7 @@ def create_intent_classification_model(
 
 
 def retrieve_intent_classification_model(
-        model_path=DATA_DIR / DEFAULT_MODEL_FILENAME
+    model_path=MODEL_PATH
 ):
     model = joblib.load(model_path)
     return model
@@ -43,7 +40,7 @@ def retrieve_intent_classification_model(
 
 encoder = SentenceTransformer('all-MiniLM-L6-v2')
 # model = retrieve_intent_classification_model()
-model = joblib.load(DATA_DIR / DEFAULT_MODEL_FILENAME)
+model = joblib.load(MODEL_PATH)
 
 
 def predict_message_intent(message):
@@ -52,4 +49,8 @@ def predict_message_intent(message):
     predicted_probabilities = model.predict_proba(tokenized_utterance)
     confidence_score = predicted_probabilities.max()
 
-    return {"type": "intent", "data": predicted_label[0], "confidence": confidence_score}
+    return {
+        "type": "intent",
+        "data": predicted_label[0],
+        "confidence": confidence_score
+    }

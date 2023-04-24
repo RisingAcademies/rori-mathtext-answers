@@ -34,7 +34,9 @@ def run_simulated_request(endpoint, sample_payload, context=None):
     # Used for testing full message object - deprecated April 7
     b_string = add_message_text_to_sample_object(sample_payload)
 
-    if endpoint == 'intent-recognition' or endpoint == 'keyword-detection' or endpoint == 'text2int':
+    if endpoint == 'intent-recognition' or \
+        endpoint == 'keyword-detection' or \
+        endpoint == 'text2int':
         request = requests.post(
             url=f'http://localhost:7860/{endpoint}',
             json={'content': sample_payload}
@@ -207,26 +209,26 @@ if __name__ == '__main__':
 # NOTE: This is actually a bstring, not a dict
 # simplified_json = {
 #     "context": {
-#         "user": "+57787919091", 
-#         "state": "answer-addition-problem", 
-#         "bot_message": "What is 2+2?", 
+#         "user": "+57787919091",
+#         "state": "answer-addition-problem",
+#         "bot_message": "What is 2+2?",
 #         "user_message": "eight",
 #         "type": "ask"
 #     },
 #     "message_data": {
-#         "author_id": "+57787919091", 
-#         "author_type": "OWNER", 
-#         "contact_uuid": "j43hk26-2hjl-43jk-hnk2-k4ljl46j0ds09", 
-#         "message_body": "eight", 
-#         "message_direction": "inbound", 
-#         "message_id": "4kl209sd0-a7b8-2hj3-8563-3hu4a89b32", 
-#         "message_inserted_at": "2023-01-10T02:37:28.477940Z", 
+#         "author_id": "+57787919091",
+#         "author_type": "OWNER",
+#         "contact_uuid": "j43hk26-2hjl-43jk-hnk2-k4ljl46j0ds09",
+#         "message_body": "eight",
+#         "message_direction": "inbound",
+#         "message_id": "4kl209sd0-a7b8-2hj3-8563-3hu4a89b32",
+#         "message_inserted_at": "2023-01-10T02:37:28.477940Z",
 #         "message_updated_at": "2023-01-10T02:37:28.487319Z"
 #     }
 # }
 
 
-# Full example of event data from Turn.io 
+# Full example of event data from Turn.io
 # simplified_json is built from this in Turn.io
 # full_json = {
 #     'message': {

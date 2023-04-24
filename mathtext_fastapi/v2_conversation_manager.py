@@ -9,7 +9,7 @@ import random
 import requests
 import mathtext_fastapi.global_state_manager as gsm
 
-from dotenv import load_dotenv
+from mathtext_fastapi.constants import SUPA
 from mathtext_fastapi.nlu import evaluate_message_with_nlu
 from mathtext_fastapi.math_quiz_fsm import MathQuizFSM
 from mathtext_fastapi.math_subtraction_fsm import MathSubtractionFSM
@@ -19,13 +19,6 @@ from transitions import Machine
 from mathactive.generators import start_interactive_math
 from mathactive.hints import generate_hint
 from mathactive.microlessons import num_one
-
-load_dotenv()
-
-SUPA = create_client(
-    os.environ.get('SUPABASE_URL'),
-    os.environ.get('SUPABASE_KEY')
-)
 
 
 def pickle_and_encode_state_machine(state_machine):
