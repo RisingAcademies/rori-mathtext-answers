@@ -17,11 +17,12 @@ from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 # from mathtext.sentiment import sentiment
 from mathtext.text2int import text2int
-from mathtext_fastapi.supabase_logging import prepare_message_data_for_logging
 from mathtext_fastapi.conversation_manager import manage_conversation_response
-from mathtext_fastapi.v2_conversation_manager import manage_conversation_response
+from mathtext_fastapi.intent_classification import predict_message_intent
 from mathtext_fastapi.nlu import evaluate_message_with_nlu
-from mathtext_fastapi.nlu import run_intent_classification
+from mathtext_fastapi.nlu import check_for_keywords
+from mathtext_fastapi.supabase_logging import prepare_message_data_for_logging
+from mathtext_fastapi.v2_conversation_manager import manage_conversation_response
 from pydantic import BaseModel
 
 
@@ -146,10 +147,17 @@ async def programmatic_message_manager(request: Request):
     return JSONResponse(context)
 
 
-@app.post("/intent-classification")
-def intent_classification_ep(content: Text = None):
-    ml_response = run_intent_classification(content.content)
-    content = {"message": ml_response}
+@app.post("/keyword-detection")
+def keyword_detection_ep(content: Text = None):
+    ml_response = check_for_keywords(content.content)
+    content = {"content": ml_response}
+    return JSONResponse(content=content)
+
+
+@app.post("/intent-recognition")
+def intent_recognition_ep(content: Text = None):
+    ml_response = predict_message_intent(content.content)
+    content = {"content": ml_response}
     return JSONResponse(content=content)
 
 

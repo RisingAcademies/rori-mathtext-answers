@@ -107,19 +107,21 @@ def run_sentiment_analysis(message_text):
     return sentiment(message_text)
 
 
-def run_intent_classification(message_text):
+def check_for_keywords(message_text):
     """ Process a student's message using basic fuzzy text comparison
 
-    >>> run_intent_classification("exit")
+    >>> check_for_keywords("exit")
     {'type': 'intent', 'data': 'exit', 'confidence': 1.0}
-    >>> run_intent_classification("exi")  # doctest: +ELLIPSIS     
+    >>> check_for_keywords("exi")  # doctest: +ELLIPSIS     
     {'type': 'intent', 'data': 'exit', 'confidence': 0...}
-    >>> run_intent_classification("eas")  # doctest: +ELLIPSIS
+    >>> check_for_keywords("eas")  # doctest: +ELLIPSIS
     {'type': 'intent', 'data': 'easy', 'confidence': 0...}
-    >>> run_intent_classification("hard")
+    >>> check_for_keywords("hard")
     {'type': 'intent', 'data': '', 'confidence': 0}
-    >>> run_intent_classification("hardier")  # doctest: +ELLIPSIS
+    >>> check_for_keywords("hardier")  # doctest: +ELLIPSIS
     {'type': 'intent', 'data': 'harder', 'confidence': 0...}
+    >>> check_for_keywords("I'm tired")  # doctest: +ELLIPSIS
+    {'type': 'intent', 'data': 'tired', 'confidence': 1.0}
     """
     label = ''
     ratio = 0
@@ -252,8 +254,8 @@ def evaluate_message_with_nlu(message_data):
         # use python logging system to do this//
         return {'type': 'error', 'data': TOKENS2INT_ERROR_INT, 'confidence': 0}
 
-    # Run intent classification only for keywords
-    intent_api_response = run_intent_classification(message_text)
+    # Check the student message for pre-defined keywords
+    intent_api_response = check_for_keywords(message_text)
     if intent_api_response['data']:
         prepare_message_data_for_logging(message_data, intent_api_response)
         return intent_api_response
