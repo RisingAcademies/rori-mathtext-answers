@@ -186,7 +186,7 @@ async def evaluate_user_message_with_nlu_api(request: Request):
         log.error(f'Request.json failed: {dir(request)}')
         data_dict = {}
     message_data = data_dict.get('message_data')
-    
+
     if not message_data:
         log.error(f'Data_dict: {data_dict}')
         message_data = data_dict.get('message', {})
@@ -197,30 +197,32 @@ async def evaluate_user_message_with_nlu_api(request: Request):
 @app.post("/num_one")
 async def num_one(request: Request):
     """
-    Input: 
+    Input:
     {
         "user_id": 1,
         "message_text": 5,
     }
     Output:
     {
-        'messages': 
-            ["Let's", 'practice', 'counting', '', '', '46...', '47...', '48...', '49', '', '', 'After', '49,', 'what', 'is', 'the', 'next', 'number', 'you', 'will', 'count?\n46,', '47,', '48,', '49'], 
-        'input_prompt': '50', 
+        'messages':
+            ["Let's", 'practice', 'counting', '', '', '46...', '47...', '48...', '49', '', '', 'After', '49,', 'what', 'is', 'the', 'next', 'number', 'you', 'will', 'count?\n46,', '47,', '48,', '49'],
+        'input_prompt': '50',
         'state': 'question'
     }
     """
     data_dict = await request.json()
-    message_data = ast.literal_eval(data_dict.get('message_data', '').get('message_body', ''))
+    message_data = ast.literal_eval(
+        data_dict.get('message_data', '').get('message_body', '')
+    )
     user_id = message_data['user_id']
     message_text = message_data['message_text']
     return num_one_quiz.process_user_message(user_id, message_text)
-    
+
 
 @app.post("/start")
 async def ask_math_question(request: Request):
     """Generate a question data
-    
+
     Input
     {
         'difficulty': 0.1,
@@ -235,17 +237,21 @@ async def ask_math_question(request: Request):
     }
     """
     data_dict = await request.json()
-    message_data = ast.literal_eval(data_dict.get('message_data', '').get('message_body', ''))
+    message_data = ast.literal_eval(
+        data_dict.get('message_data', '').get('message_body', '')
+    )
     difficulty = message_data['difficulty']
     do_increase = message_data['do_increase']
 
-    return JSONResponse(generators.start_interactive_math(difficulty, do_increase))
+    return JSONResponse(
+        generators.start_interactive_math(difficulty, do_increase)
+    )
 
 
 @app.post("/hint")
 async def get_hint(request: Request):
     """Generate a hint data
-    
+
     Input
     {
         'start': 5,
@@ -261,18 +267,22 @@ async def get_hint(request: Request):
     }
     """
     data_dict = await request.json()
-    message_data = ast.literal_eval(data_dict.get('message_data', '').get('message_body', ''))
+    message_data = ast.literal_eval(
+        data_dict.get('message_data', '').get('message_body', '')
+    )
     start = message_data['start']
     step = message_data['step']
     difficulty = message_data['difficulty']
 
-    return JSONResponse(hints.generate_hint(start, step, difficulty))
+    return JSONResponse(
+        hints.generate_hint(start, step, difficulty)
+    )
 
 
 @app.post("/question")
 async def ask_math_question(request: Request):
     """Generate a question data
-    
+
     Input
     {
         'start': 5,
@@ -289,7 +299,9 @@ async def ask_math_question(request: Request):
     }
     """
     data_dict = await request.json()
-    message_data = ast.literal_eval(data_dict.get('message_data', '').get('message_body', ''))
+    message_data = ast.literal_eval(
+        data_dict.get('message_data', '').get('message_body', '')
+    )
     start = message_data['start']
     step = message_data['step']
     arg_tuple = (start, step)
@@ -299,7 +311,9 @@ async def ask_math_question(request: Request):
     except KeyError:
         pass
 
-    return JSONResponse(questions.generate_question_data(*arg_tuple))
+    return JSONResponse(
+        questions.generate_question_data(*arg_tuple)
+    )
 
 
 @app.post("/difficulty")
@@ -316,11 +330,15 @@ async def get_hint(request: Request):
     0.09
     """
     data_dict = await request.json()
-    message_data = ast.literal_eval(data_dict.get('message_data', '').get('message_body', ''))
+    message_data = ast.literal_eval(
+        data_dict.get('message_data', '').get('message_body', '')
+    )
     difficulty = message_data['difficulty']
     do_increase = message_data['do_increase']
 
-    return JSONResponse(utils.get_next_difficulty(difficulty, do_increase))
+    return JSONResponse(
+        utils.get_next_difficulty(difficulty, do_increase)
+    )
 
 
 @app.post("/start_step")
@@ -337,7 +355,9 @@ async def get_hint(request: Request):
     (5, 1)
     """
     data_dict = await request.json()
-    message_data = ast.literal_eval(data_dict.get('message_data', '').get('message_body', ''))
+    message_data = ast.literal_eval(
+        data_dict.get('message_data', '').get('message_body', '')
+    )
     difficulty = message_data['difficulty']
     arg_tuple = (difficulty,)
     try:
@@ -364,7 +384,9 @@ async def generate_question(request: Request):
     5, 6, 7
     """
     data_dict = await request.json()
-    message_data = ast.literal_eval(data_dict.get('message_data', '').get('message_body', ''))
+    message_data = ast.literal_eval(
+        data_dict.get('message_data', '').get('message_body', '')
+    )
     start = message_data['start']
     step = message_data['step']
     arg_tuple = (start, step)

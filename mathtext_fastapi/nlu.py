@@ -112,7 +112,7 @@ def check_for_keywords(message_text):
 
     >>> check_for_keywords("exit")
     {'type': 'intent', 'data': 'exit', 'confidence': 1.0}
-    >>> check_for_keywords("exi")  # doctest: +ELLIPSIS     
+    >>> check_for_keywords("exi")  # doctest: +ELLIPSIS   
     {'type': 'intent', 'data': 'exit', 'confidence': 0...}
     >>> check_for_keywords("eas")  # doctest: +ELLIPSIS
     {'type': 'intent', 'data': 'easy', 'confidence': 0...}
@@ -161,7 +161,7 @@ def check_for_keywords(message_text):
         if score > 80:
             nlu_response['data'] = keyword
             nlu_response['confidence'] = score / 100
-    
+
     return nlu_response
 
 
@@ -175,11 +175,11 @@ def payload_is_valid(payload_object):
     """
     try:
         isinstance(
-            isoparse(payload_object.get('message_inserted_at','')),
+            isoparse(payload_object.get('message_inserted_at', '')),
             dt.datetime
         )
         isinstance(
-            isoparse(payload_object.get('message_updated_at','')),
+            isoparse(payload_object.get('message_updated_at', '')),
             dt.datetime
         )
     except ValueError:
@@ -193,7 +193,7 @@ def payload_is_valid(payload_object):
         isinstance(payload_object.get('message_direction'), str) and
         isinstance(payload_object.get('message_id'), str) and
         isinstance(payload_object.get('message_inserted_at'), str) and
-        isinstance(payload_object.get('message_updated_at'), str)    
+        isinstance(payload_object.get('message_updated_at'), str)
     )
 
 
@@ -212,15 +212,19 @@ def log_payload_errors(payload_object):
             errors.append(e)
     try:
         assert isinstance(
-            dt.datetime.fromisoformat(payload_object.get('message_inserted_at')),
+            dt.datetime.fromisoformat(
+                payload_object.get('message_inserted_at')
+            ),
             dt.datetime
         )
     except Exception as e:
         log.error(f'Invalid HTTP request payload object: {e}')
         errors.append(e)
-    try: 
+    try:
         isinstance(
-            dt.datetime.fromisoformat(payload_object.get('message_updated_at')),
+            dt.datetime.fromisoformat(
+                payload_object.get('message_updated_at')
+            ),
             dt.datetime
         )
     except Exception as e:
@@ -231,14 +235,14 @@ def log_payload_errors(payload_object):
 
 def evaluate_message_with_nlu(message_data):
     """ Process a student's message using NLU functions and send the result
-    
+
     >>> evaluate_message_with_nlu({"author_id": "57787919091", "author_type": "OWNER", "contact_uuid": "df78gsdf78df", "message_body": "8", "message_direction": "inbound", "message_id": "dfgha789789ag9ga", "message_inserted_at": "2023-01-10T02:37:28.487319Z", "message_updated_at": "2023-01-10T02:37:28.487319Z"})
     {'type': 'integer', 'data': 8, 'confidence': 0}
 
     >>> evaluate_message_with_nlu({"author_id": "57787919091", "author_type": "OWNER", "contact_uuid": "df78gsdf78df", "message_body": "I am tired", "message_direction": "inbound", "message_id": "dfgha789789ag9ga", "message_inserted_at": "2023-01-10T02:37:28.487319Z", "message_updated_at": "2023-01-10T02:37:28.487319Z"})  # doctest: +ELLIPSIS
     {'type': 'intent', 'data': 'tired', 'confidence': 1.0}
     """
-    
+
     # Keeps system working with two different inputs - full and filtered @event object
     # Call validate payload
     log.info(f'Starting evaluate message: {message_data}')
