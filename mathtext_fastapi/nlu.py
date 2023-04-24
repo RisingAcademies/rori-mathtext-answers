@@ -158,7 +158,7 @@ def run_intent_classification(message_text):
 
         if score > 80:
             nlu_response['data'] = keyword
-            nlu_response['confidence'] = score
+            nlu_response['confidence'] = score / 100
     
     return nlu_response
 
@@ -234,7 +234,7 @@ def evaluate_message_with_nlu(message_data):
     {'type': 'integer', 'data': 8, 'confidence': 0}
 
     >>> evaluate_message_with_nlu({"author_id": "57787919091", "author_type": "OWNER", "contact_uuid": "df78gsdf78df", "message_body": "I am tired", "message_direction": "inbound", "message_id": "dfgha789789ag9ga", "message_inserted_at": "2023-01-10T02:37:28.487319Z", "message_updated_at": "2023-01-10T02:37:28.487319Z"})  # doctest: +ELLIPSIS
-    {'type': 'intent', 'data': 'exit', 'confidence': 0...}
+    {'type': 'intent', 'data': 'tired', 'confidence': 1.0}
     """
     
     # Keeps system working with two different inputs - full and filtered @event object
