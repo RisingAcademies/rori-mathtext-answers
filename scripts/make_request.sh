@@ -23,7 +23,7 @@ echo "Data: $data"
 echo "Response: $response"
 echo
 
-ep="/sentiment-analysis"
+ep="/intent-recognition"
 url=$root_url$ep
 data='{"content":"I am happy with it!"}'
 

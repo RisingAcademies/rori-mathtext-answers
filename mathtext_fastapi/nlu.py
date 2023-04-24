@@ -1,16 +1,16 @@
+import datetime as dt
 import re
 
 from collections.abc import Mapping
-from logging import getLogger
-import datetime as dt
 from dateutil.parser import isoparse
-
 from fuzzywuzzy import fuzz
 from fuzzywuzzy import process
+from logging import getLogger
+
+from mathtext.text2int import text2int, TOKENS2INT_ERROR_INT
 from mathtext_fastapi.intent_classification import predict_message_intent
 from mathtext_fastapi.supabase_logging import prepare_message_data_for_logging
-from mathtext.sentiment import sentiment
-from mathtext.text2int import text2int, TOKENS2INT_ERROR_INT
+
 
 log = getLogger(__name__)
 
@@ -29,15 +29,12 @@ PAYLOAD_VALUE_TYPES = {
 def build_nlu_response_object(nlu_type, data, confidence):
     """ Turns nlu results into an object to send back to Turn.io
     Inputs
-    - nlu_type: str - the type of nlu run (integer or sentiment-analysis)
+    - nlu_type: str - the type of nlu run (integer or intent)
     - data: str/int - the student message
-    - confidence: - the nlu confidence score (sentiment) or '' (integer)
+    - confidence: - the nlu confidence score (intent) or '' (integer)
 
     >>> build_nlu_response_object('integer', 8, 0)
     {'type': 'integer', 'data': 8, 'confidence': 0}
-
-    >>> build_nlu_response_object('sentiment', 'POSITIVE', 0.99)
-    {'type': 'sentiment', 'data': 'POSITIVE', 'confidence': 0.99}
     """
     return {
         'type': nlu_type,
@@ -91,20 +88,6 @@ def run_text2int_on_each_list_item(message_text_arr):
         int_api_resp = text2int(student_response.lower())
         student_response_arr.append(int_api_resp)
     return student_response_arr
-
-
-def run_sentiment_analysis(message_text):
-    """ Evaluates the sentiment of a student message
-
-    >>> run_sentiment_analysis("I am tired")
-    [{'label': 'NEGATIVE', 'score': 0.9997807145118713}]
-
-    >>> run_sentiment_analysis("I am full of joy")
-    [{'label': 'POSITIVE', 'score': 0.999882698059082}]
-    """
-    # TODO: Add intent labelling here
-    # TODO: Add logic to determine whether intent labeling or sentiment analysis is more appropriate (probably default to intent labeling)
-    return sentiment(message_text)
 
 
 def check_for_keywords(message_text):
@@ -269,16 +252,7 @@ def evaluate_message_with_nlu(message_data):
     if number_api_resp == TOKENS2INT_ERROR_INT:
         # Run intent classification with logistic regression model
         predicted_label = predict_message_intent(message_text)
-        if predicted_label['confidence'] > 0.01:
-            nlu_response = predicted_label
-        else:
-            # Run sentiment analysis
-            sentiment_api_resp = sentiment(message_text)
-            nlu_response = build_nlu_response_object(
-                'sentiment',
-                sentiment_api_resp[0]['label'],
-                sentiment_api_resp[0]['score']
-            )
+        return predicted_label
     else:
         nlu_response = build_nlu_response_object(
             'integer',

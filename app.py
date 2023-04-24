@@ -15,7 +15,6 @@ from fastapi import FastAPI, Request
 from fastapi.responses import JSONResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
-# from mathtext.sentiment import sentiment
 from mathtext.text2int import text2int
 from mathtext_fastapi.conversation_manager import manage_conversation_response
 from mathtext_fastapi.intent_classification import predict_message_intent
@@ -64,13 +63,6 @@ async def trigger_error():
 def hello(content: Text = None):
     content = {"message": f"Hello {content.content}!"}
     return JSONResponse(content=content)
-
-
-# @app.post("/sentiment-analysis")
-# def sentiment_analysis_ep(content: Text = None):
-#     ml_response = sentiment(content.content)
-#     content = {"message": ml_response}
-#     return JSONResponse(content=content)
 
 
 @app.post("/text2int")
@@ -170,7 +162,6 @@ async def evaluate_user_message_with_nlu_api(request: Request):
     Output
     - int_data_dict or sent_data_dict: dict - the type of NLU run and result
       {'type':'integer', 'data': '8', 'confidence': 0}
-      {'type':'sentiment', 'data': 'negative', 'confidence': 0.99}
     """
     log.info(f'Received request: {request}')
     log.info(f'Request header: {request.headers}')
