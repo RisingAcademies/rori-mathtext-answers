@@ -43,7 +43,7 @@ def retrieve_intent_classification_model(
 
 encoder = SentenceTransformer('all-MiniLM-L6-v2')
 # model = retrieve_intent_classification_model()
-model = joblib.load(model_path=DATA_DIR / DEFAULT_MODEL_FILENAME)
+model = joblib.load(DATA_DIR / DEFAULT_MODEL_FILENAME)
 
 
 def predict_message_intent(message):
