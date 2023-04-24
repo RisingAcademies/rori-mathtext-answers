@@ -77,6 +77,9 @@ def run_full_nlu_endpoint_payload_test(sample_payload):
 # # Case: Correct payload
 # run_full_nlu_endpoint_payload_test(b'{"message_data": {"author_id": "57787919091", "author_type": "OWNER", "contact_uuid": "df78gsdf78df", "message_body": "8", "message_direction": "inbound", "message_id": "dfgha789789ag9ga", "message_inserted_at": "2023-01-10T02:37:28.487319Z", "message_updated_at": "2023-01-10T02:37:28.487319Z"}}')
 
+# Case: Correct payload + extra fields
+run_full_nlu_endpoint_payload_test(b'{"message_data": {"author_id": "57787919091", "author_type": "OWNER", "contact_uuid": "df78gsdf78df", "message_body": "8", "message_direction": "inbound", "message_id": "dfgha789789ag9ga", "message_inserted_at": "2023-01-10T02:37:28.487319Z", "message_updated_at": "2023-01-10T02:37:28.487319Z", "question": "What is next - 2, 6, 8?", "expected_answer": 8}}')
+
 # # Case: Incorrect payload values
 # run_full_nlu_endpoint_payload_test(b'{"message_data": {"author_id": "@event.message._vnd.v1.chat.owner", "author_type": "@event.message._vnd.v1.author.type", "contact_uuid": "@event.message._vnd.v1.chat.contact_uuid", "message_body": "@event.message.text.body", "message_direction": "@event.message._vnd.v1.direction", "message_id": "@event.message.id", "message_inserted_at": "@event.message._vnd.v1.chat.inserted_at", "message_updated_at": "@event.message._vnd.v1.chat.updated_at"}}')
 
