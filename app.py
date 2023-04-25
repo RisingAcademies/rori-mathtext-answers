@@ -7,7 +7,6 @@ import ast
 import json
 from json import JSONDecodeError
 from logging import getLogger
-import mathactive.microlessons.num_one as num_one_quiz
 import os
 import sentry_sdk
 
@@ -15,7 +14,9 @@ from fastapi import FastAPI, Request
 from fastapi.responses import JSONResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
+import mathactive.microlessons.num_one as num_one_quiz
 from mathtext.text2int import text2int
+from mathtext_fastapi.constants import SENTRY_DSN
 from mathtext_fastapi.conversation_manager import manage_conversation_response
 from mathtext_fastapi.intent_classification import predict_message_intent
 from mathtext_fastapi.nlu import evaluate_message_with_nlu
@@ -23,9 +24,6 @@ from mathtext_fastapi.nlu import check_for_keywords
 from mathtext_fastapi.supabase_logging import prepare_message_data_for_logging
 from mathtext_fastapi.v2_conversation_manager import manage_conversation_response
 from pydantic import BaseModel
-
-from mathtext_fastapi.constants import SENTRY_DSN
-
 
 log = getLogger(__name__)
 

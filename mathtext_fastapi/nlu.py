@@ -43,53 +43,6 @@ def build_nlu_response_object(nlu_type, data, confidence):
         }
 
 
-# def test_for_float_or_int(message_data, message_text):
-#     nlu_response = {}
-#     if type(message_text) == int or type(message_text) == float:
-#         nlu_response = build_nlu_response_object('integer', message_text, '')
-#         prepare_message_data_for_logging(message_data, nlu_response)
-#     return nlu_response
-
-
-def test_for_number_sequence(message_text_arr, message_data, message_text):
-    """ Determines if the student's message is a sequence of numbers
-
-    >>> test_for_number_sequence(['1','2','3'], {"author_id": "57787919091", "author_type": "OWNER", "contact_uuid": "df78gsdf78df", "message_body": "I am tired", "message_direction": "inbound", "message_id": "dfgha789789ag9ga", "message_inserted_at": "2023-01-10T02:37:28.487319Z", "message_updated_at": "2023-01-10T02:37:28.487319Z"}, '1, 2, 3')
-    {'type': 'integer', 'data': '1,2,3', 'confidence': 0}
-
-    >>> test_for_number_sequence(['a','b','c'], {"author_id": "57787919091", "author_type": "OWNER", "contact_uuid": "df78gsdf78df", "message_body": "I am tired", "message_direction": "inbound", "message_id": "dfgha789789ag9ga", "message_inserted_at": "2023-01-10T02:37:28.487319Z", "message_updated_at": "2023-01-10T02:37:28.487319Z"}, 'a, b, c')
-    {}
-    """
-    nlu_response = {}
-    if all(ele.isdigit() for ele in message_text_arr):
-        nlu_response = build_nlu_response_object(
-            'integer',
-            ','.join(message_text_arr),
-            0
-        )
-        prepare_message_data_for_logging(message_data, nlu_response)
-    return nlu_response
-
-
-def run_text2int_on_each_list_item(message_text_arr):
-    """ Attempts to convert each list item to an integer
-
-    Input
-    - message_text_arr: list - a set of text extracted from the student message
-
-    Output
-    - student_response_arr: list - a set of integers (32202 for error code)
-
-    >>> run_text2int_on_each_list_item(['1','2','3'])
-    [1, 2, 3]
-    """
-    student_response_arr = []
-    for student_response in message_text_arr:
-        int_api_resp = text2int(student_response.lower())
-        student_response_arr.append(int_api_resp)
-    return student_response_arr
-
-
 def check_for_keywords(message_text):
     """ Process a student's message using basic fuzzy text comparison
 
@@ -120,9 +73,6 @@ def check_for_keywords(message_text):
         'tomorrow',
         'finished',
         'help',
-        'please',
-        'understand',
-        'question',
         'easier',
         'easy',
         'support',
@@ -225,8 +175,6 @@ def evaluate_message_with_nlu(message_data):
     >>> evaluate_message_with_nlu({"author_id": "57787919091", "author_type": "OWNER", "contact_uuid": "df78gsdf78df", "message_body": "I am tired", "message_direction": "inbound", "message_id": "dfgha789789ag9ga", "message_inserted_at": "2023-01-10T02:37:28.487319Z", "message_updated_at": "2023-01-10T02:37:28.487319Z"})  # doctest: +ELLIPSIS
     {'type': 'intent', 'data': 'tired', 'confidence': 1.0}
     """
-
-    # Keeps system working with two different inputs - full and filtered @event object
     # Call validate payload
     log.info(f'Starting evaluate message: {message_data}')
 
@@ -247,6 +195,7 @@ def evaluate_message_with_nlu(message_data):
         prepare_message_data_for_logging(message_data, intent_api_response)
         return intent_api_response
 
+    # Check if the student's message can be converted to a number
     number_api_resp = text2int(message_text.lower())
 
     if number_api_resp == TOKENS2INT_ERROR_INT:
