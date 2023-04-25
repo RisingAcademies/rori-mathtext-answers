@@ -13,6 +13,7 @@ python-Levenshtein
 sentence-transformers
 sentry-sdk[fastapi]
 supabase
+toml
 transitions
 uvicorn
 pandas
