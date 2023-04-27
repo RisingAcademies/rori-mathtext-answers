@@ -77,6 +77,8 @@ nlu_test_cases = [
     'easier',
     'stp',
     '',
+    '11:00 PM',
+    '12:45'
 ]
 
 keyword_test_cases = [
