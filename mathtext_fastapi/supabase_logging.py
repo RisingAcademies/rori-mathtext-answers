@@ -1,12 +1,19 @@
 import os
 from datetime import datetime
-
+from logging import getLogger
 from mathtext_fastapi.constants import SUPA
 
 
-def log_message_data_through_supabase_api(table_name, log_data):
-    return SUPA.table(table_name).insert(log_data).execute()
+log = getLogger(__name__)
 
+def log_message_data_through_supabase_api(table_name, log_data):
+    try:
+        logged_data = SUPA.table(table_name).insert(log_data).execute()
+    except Exception as e:
+        log.error(f'Supabase logging failed: {table_name} : {log_data}')
+        logged_data = []
+    return logged_data
+ 
 
 def format_datetime_in_isoformat(dt):
     return getattr(dt.now(), 'isoformat', lambda x: None)()
@@ -23,19 +30,24 @@ def get_or_create_supabase_entry(table_name, insert_data, check_variable=None):
     Result
     - logged_data - an object with the Supabase data
     """
-    if table_name == 'contact':
-        resp = SUPA.table('contact').select("*").eq(
-            "original_contact_id",
-            insert_data['original_contact_id']
-        ).eq(
-            "project",
-            insert_data['project']
-        ).execute()
-    else:
-        resp = SUPA.table(table_name).select("*").eq(
-            check_variable,
-            insert_data[check_variable]
-        ).execute()
+    try:
+        if table_name == 'contact':
+            resp = SUPA.table('contact').select("*").eq(
+                "original_contact_id",
+                insert_data['original_contact_id']
+            ).eq(
+                "project",
+                insert_data['project']
+            ).execute()
+        else:
+            resp = SUPA.table(table_name).select("*").eq(
+                check_variable,
+                insert_data[check_variable]
+            ).execute()
+    except Exception as e:
+        log.error(f'Supabase entry retrieval failed: {table_name} : {insert_data}')
+        logged_data = []
+        return logged_data
 
     if len(resp.data) == 0:
         logged_data = log_message_data_through_supabase_api(

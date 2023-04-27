@@ -196,7 +196,11 @@ def evaluate_message_with_nlu(message_data):
         return intent_api_response
 
     # Check if the student's message can be converted to a number
-    number_api_resp = text2int(message_text.lower())
+    try:
+        number_api_resp = text2int(message_text.lower())
+    except ValueError:
+        log.error(f'Invalid student message: {message_data}')
+        number_api_resp = TOKENS2INT_ERROR_INT
 
     if number_api_resp == TOKENS2INT_ERROR_INT:
         # Run intent classification with logistic regression model
