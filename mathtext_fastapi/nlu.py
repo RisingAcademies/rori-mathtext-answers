@@ -204,8 +204,7 @@ def evaluate_message_with_nlu(message_data):
 
     if number_api_resp == TOKENS2INT_ERROR_INT:
         # Run intent classification with logistic regression model
-        predicted_label = predict_message_intent(message_text)
-        return predicted_label
+        nlu_response = predict_message_intent(message_text)
     else:
         nlu_response = build_nlu_response_object(
             'integer',
