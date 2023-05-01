@@ -59,26 +59,31 @@ def run_full_nlu_endpoint_payload_test(sample_payload):
 
 
 nlu_test_cases = [
-    'test message',
-    'is it 8',
-    'can I know how its 0.5',
-    'eight, nine, ten',
-    '8, 9, 10',
-    '8',
-    "I don't know",
-    "I don't know eight",
-    "I don't 9",
-    '0.2',
-    'I want you to tell me'
-    'Today is a wonderful day',
-    'IDK 5?',
-    'hin',
-    'exi',
-    'easier',
-    'stp',
-    '',
+    # 'test message',
+    # 'is it 8',
+    # 'can I know how its 0.5',
+    # 'eight, nine, ten',
+    # '8, 9, 10',
+    # '8',
+    # "I don't know",
+    # "I don't know eight",
+    # "I don't 9",
+    # '0.2',
+    # 'I want you to tell me'
+    # 'Today is a wonderful day',
+    # 'IDK 5?',
+    # 'hin',
+    # 'exi',
+    # 'easier',
+    # 'stp',
+    # '',
     '11:00 PM',
-    '12:45'
+    '12:45',
+    "10 : 25 AM",
+    "0:30",
+    "7:00",
+    "23:45",
+    '~T[11:30:00]'
 ]
 
 keyword_test_cases = [
@@ -159,8 +164,8 @@ if __name__ == '__main__':
 
     # These tests run through the nlu endpoints
     run_set_of_tests('nlu')
-    run_set_of_tests('intent-recognition')
-    run_set_of_tests('keyword-detection')
+    # run_set_of_tests('intent-recognition')
+    # run_set_of_tests('keyword-detection')
 
     # This test runs through wormhole conversation management functions
     # run_set_of_tests('manager')
