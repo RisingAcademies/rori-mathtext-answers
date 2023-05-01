@@ -202,9 +202,6 @@ def evaluate_message_with_nlu(message_data):
         log.error(f'Invalid student message: {message_data}')
         number_api_resp = TOKENS2INT_ERROR_INT
 
-    print("AFTER VALUEERROR")
-    print(number_api_resp)
-
     if number_api_resp == TOKENS2INT_ERROR_INT:
         # Run intent classification with logistic regression model
         nlu_response = predict_message_intent(message_text)
@@ -214,9 +211,6 @@ def evaluate_message_with_nlu(message_data):
             number_api_resp,
             0
         )
-
-    print("NLU RESPONSE")
-    print(nlu_response)
 
     prepare_message_data_for_logging(message_data, nlu_response)
     return nlu_response
