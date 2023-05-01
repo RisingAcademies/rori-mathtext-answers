@@ -14,7 +14,7 @@ headers = {"Content-Type": "application/json; charset=utf-8"}
 # base_url = "https://tangibleai-mathtext-fastapi.hf.space/{endpoint}"
 base_url = "http://localhost:7860/run/{endpoint}"
 
-data_list_1 = {
+DATA_LIST = [{
     "endpoint": "text2int",
     "test_data": [
         "one hundred forty five",
@@ -22,10 +22,7 @@ data_list_1 = {
         "one hundred forty five",
         "nine hundred eighty three",
         "five million",
-    ]
-}
-
-data_list_2 = {
+    ]}, {
     "endpoint": "text2int-preprocessed",
     "test_data": [
         "one hundred forty five",
@@ -33,9 +30,7 @@ data_list_2 = {
         "one hundred forty five",
         "nine hundred eighty three",
         "five million",
-    ]
-}
-data_list_3 = {
+    ]}, {
     "endpoint": "sentiment-analysis",
     "test_data": [
         "Totally agree",
@@ -44,7 +39,7 @@ data_list_3 = {
         "I am not sure",
         "Never",
     ]
-}
+}]
 
 
 # async call to endpoint
@@ -67,12 +62,8 @@ async def call_api(url, data, call_number, number_of_calls):
         }
 
 
-data_lists = [data_list_1, data_list_2, data_list_3]
-
-results = []
-
-
-async def main(number_of_calls):
+async def main(number_of_calls=NUMBER_OF_CALLS, data_lists=DATA_LIST):
+    results = []
     for data_list in data_lists:
         calls = []
         for call_number in range(1, number_of_calls + 1):
@@ -81,16 +72,17 @@ async def main(number_of_calls):
             calls.append(call_api(url, data, call_number, number_of_calls))
         r = await asyncio.gather(*calls)
         results.extend(r)
+    return results
 
 
+if __name__ == '__main__':
+    start = time.perf_counter()
+    results = asyncio.run(main())
+    end = time.perf_counter()
+    print(end-start)
+    df = pd.DataFrame(results)
 
-start = time.perf_counter()
-asyncio.run(main(NUMBER_OF_CALLS))
-end = time.perf_counter()
-print(end-start)
-df = pd.DataFrame(results)
-
-if exists("call_history.csv"):
-    df.to_csv(path_or_buf="call_history.csv", mode="a", header=False, index=False)
-else:
-    df.to_csv(path_or_buf="call_history.csv", mode="w", header=True, index=False)
+    if exists("call_history.csv"):
+        df.to_csv(path_or_buf="call_history.csv", mode="a", header=False, index=False)
+    else:
+        df.to_csv(path_or_buf="call_history.csv", mode="w", header=True, index=False)

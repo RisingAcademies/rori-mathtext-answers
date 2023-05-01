@@ -29,9 +29,9 @@ data_list_2() {
   echo "${responses[$1]}"
 }
 
-# endpoints: "text2int" "sentiment-analysis"
+# endpoints: "text2int" "intent-recognition"
 # selected endpoint to test
-endpoint="sentiment-analysis"
+endpoint="intent-recognition"
 
 create_random_delay() {
   # creates a random delay for given arguments

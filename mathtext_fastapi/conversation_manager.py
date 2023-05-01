@@ -8,21 +8,14 @@ import random
 import requests
 
 from dotenv import load_dotenv
+from mathtext_fastapi.constants import SUPA
 from mathtext_fastapi.nlu import evaluate_message_with_nlu
 from mathtext_fastapi.math_quiz_fsm import MathQuizFSM
 from mathtext_fastapi.math_subtraction_fsm import MathSubtractionFSM
-from supabase import create_client
 from transitions import Machine
 
 from mathactive.generators import start_interactive_math
 from mathactive.hints import generate_hint
-
-load_dotenv()
-
-SUPA = create_client(
-    os.environ.get('SUPABASE_URL'),
-    os.environ.get('SUPABASE_KEY')
-)
 
 
 def create_text_message(message_text, whatsapp_id):

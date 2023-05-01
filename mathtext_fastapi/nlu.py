@@ -1,16 +1,16 @@
+import datetime as dt
 import re
 
 from collections.abc import Mapping
-from logging import getLogger
-import datetime as dt
 from dateutil.parser import isoparse
-
 from fuzzywuzzy import fuzz
 from fuzzywuzzy import process
-from mathtext_fastapi.intent_classification import predict_message_intent
-from mathtext_fastapi.logging import prepare_message_data_for_logging
-from mathtext.sentiment import sentiment
+from logging import getLogger
+
 from mathtext.text2int import text2int, TOKENS2INT_ERROR_INT
+from mathtext_fastapi.intent_classification import predict_message_intent
+from mathtext_fastapi.supabase_logging import prepare_message_data_for_logging
+
 
 log = getLogger(__name__)
 
@@ -29,15 +29,12 @@ PAYLOAD_VALUE_TYPES = {
 def build_nlu_response_object(nlu_type, data, confidence):
     """ Turns nlu results into an object to send back to Turn.io
     Inputs
-    - nlu_type: str - the type of nlu run (integer or sentiment-analysis)
+    - nlu_type: str - the type of nlu run (integer or intent)
     - data: str/int - the student message
-    - confidence: - the nlu confidence score (sentiment) or '' (integer)
+    - confidence: - the nlu confidence score (intent) or '' (integer)
 
     >>> build_nlu_response_object('integer', 8, 0)
     {'type': 'integer', 'data': 8, 'confidence': 0}
-
-    >>> build_nlu_response_object('sentiment', 'POSITIVE', 0.99)
-    {'type': 'sentiment', 'data': 'POSITIVE', 'confidence': 0.99}
     """
     return {
         'type': nlu_type,
@@ -46,80 +43,21 @@ def build_nlu_response_object(nlu_type, data, confidence):
         }
 
 
-# def test_for_float_or_int(message_data, message_text):
-#     nlu_response = {}
-#     if type(message_text) == int or type(message_text) == float:
-#         nlu_response = build_nlu_response_object('integer', message_text, '')
-#         prepare_message_data_for_logging(message_data, nlu_response)
-#     return nlu_response
-
-
-def test_for_number_sequence(message_text_arr, message_data, message_text):
-    """ Determines if the student's message is a sequence of numbers
-
-    >>> test_for_number_sequence(['1','2','3'], {"author_id": "57787919091", "author_type": "OWNER", "contact_uuid": "df78gsdf78df", "message_body": "I am tired", "message_direction": "inbound", "message_id": "dfgha789789ag9ga", "message_inserted_at": "2023-01-10T02:37:28.487319Z", "message_updated_at": "2023-01-10T02:37:28.487319Z"}, '1, 2, 3')
-    {'type': 'integer', 'data': '1,2,3', 'confidence': 0}
-
-    >>> test_for_number_sequence(['a','b','c'], {"author_id": "57787919091", "author_type": "OWNER", "contact_uuid": "df78gsdf78df", "message_body": "I am tired", "message_direction": "inbound", "message_id": "dfgha789789ag9ga", "message_inserted_at": "2023-01-10T02:37:28.487319Z", "message_updated_at": "2023-01-10T02:37:28.487319Z"}, 'a, b, c')
-    {}
-    """
-    nlu_response = {}
-    if all(ele.isdigit() for ele in message_text_arr):
-        nlu_response = build_nlu_response_object(
-            'integer',
-            ','.join(message_text_arr),
-            0
-        )
-        prepare_message_data_for_logging(message_data, nlu_response)
-    return nlu_response
-
-
-def run_text2int_on_each_list_item(message_text_arr):
-    """ Attempts to convert each list item to an integer
-
-    Input
-    - message_text_arr: list - a set of text extracted from the student message
-
-    Output
-    - student_response_arr: list - a set of integers (32202 for error code)
-
-    >>> run_text2int_on_each_list_item(['1','2','3'])
-    [1, 2, 3]
-    """
-    student_response_arr = []
-    for student_response in message_text_arr:
-        int_api_resp = text2int(student_response.lower())
-        student_response_arr.append(int_api_resp)
-    return student_response_arr
-
-
-def run_sentiment_analysis(message_text):
-    """ Evaluates the sentiment of a student message
-
-    >>> run_sentiment_analysis("I am tired")
-    [{'label': 'NEGATIVE', 'score': 0.9997807145118713}]
-
-    >>> run_sentiment_analysis("I am full of joy")
-    [{'label': 'POSITIVE', 'score': 0.999882698059082}]
-    """
-    # TODO: Add intent labelling here
-    # TODO: Add logic to determine whether intent labeling or sentiment analysis is more appropriate (probably default to intent labeling)
-    return sentiment(message_text)
-
-
-def run_intent_classification(message_text):
+def check_for_keywords(message_text):
     """ Process a student's message using basic fuzzy text comparison
 
-    >>> run_intent_classification("exit")
+    >>> check_for_keywords("exit")
     {'type': 'intent', 'data': 'exit', 'confidence': 1.0}
-    >>> run_intent_classification("exi")     
-    {'type': 'intent', 'data': 'exit', 'confidence': 0.86}
-    >>> run_intent_classification("eas")
+    >>> check_for_keywords("exi")  # doctest: +ELLIPSIS   
+    {'type': 'intent', 'data': 'exit', 'confidence': 0...}
+    >>> check_for_keywords("eas")  # doctest: +ELLIPSIS
+    {'type': 'intent', 'data': 'easy', 'confidence': 0...}
+    >>> check_for_keywords("hard")
     {'type': 'intent', 'data': '', 'confidence': 0}
-    >>> run_intent_classification("hard")
-    {'type': 'intent', 'data': '', 'confidence': 0}
-    >>> run_intent_classification("hardier") 
-    {'type': 'intent', 'data': 'harder', 'confidence': 0.92}
+    >>> check_for_keywords("hardier")  # doctest: +ELLIPSIS
+    {'type': 'intent', 'data': 'harder', 'confidence': 0...}
+    >>> check_for_keywords("I'm tired")  # doctest: +ELLIPSIS
+    {'type': 'intent', 'data': 'tired', 'confidence': 1.0}
     """
     label = ''
     ratio = 0
@@ -135,9 +73,6 @@ def run_intent_classification(message_text):
         'tomorrow',
         'finished',
         'help',
-        'please',
-        'understand',
-        'question',
         'easier',
         'easy',
         'support',
@@ -158,8 +93,8 @@ def run_intent_classification(message_text):
 
         if score > 80:
             nlu_response['data'] = keyword
-            nlu_response['confidence'] = score
-    
+            nlu_response['confidence'] = score / 100
+
     return nlu_response
 
 
@@ -173,11 +108,11 @@ def payload_is_valid(payload_object):
     """
     try:
         isinstance(
-            isoparse(payload_object.get('message_inserted_at','')),
+            isoparse(payload_object.get('message_inserted_at', '')),
             dt.datetime
         )
         isinstance(
-            isoparse(payload_object.get('message_updated_at','')),
+            isoparse(payload_object.get('message_updated_at', '')),
             dt.datetime
         )
     except ValueError:
@@ -191,7 +126,7 @@ def payload_is_valid(payload_object):
         isinstance(payload_object.get('message_direction'), str) and
         isinstance(payload_object.get('message_id'), str) and
         isinstance(payload_object.get('message_inserted_at'), str) and
-        isinstance(payload_object.get('message_updated_at'), str)    
+        isinstance(payload_object.get('message_updated_at'), str)
     )
 
 
@@ -210,15 +145,19 @@ def log_payload_errors(payload_object):
             errors.append(e)
     try:
         assert isinstance(
-            dt.datetime.fromisoformat(payload_object.get('message_inserted_at')),
+            dt.datetime.fromisoformat(
+                payload_object.get('message_inserted_at')
+            ),
             dt.datetime
         )
     except Exception as e:
         log.error(f'Invalid HTTP request payload object: {e}')
         errors.append(e)
-    try: 
+    try:
         isinstance(
-            dt.datetime.fromisoformat(payload_object.get('message_updated_at')),
+            dt.datetime.fromisoformat(
+                payload_object.get('message_updated_at')
+            ),
             dt.datetime
         )
     except Exception as e:
@@ -229,14 +168,13 @@ def log_payload_errors(payload_object):
 
 def evaluate_message_with_nlu(message_data):
     """ Process a student's message using NLU functions and send the result
-    
+
     >>> evaluate_message_with_nlu({"author_id": "57787919091", "author_type": "OWNER", "contact_uuid": "df78gsdf78df", "message_body": "8", "message_direction": "inbound", "message_id": "dfgha789789ag9ga", "message_inserted_at": "2023-01-10T02:37:28.487319Z", "message_updated_at": "2023-01-10T02:37:28.487319Z"})
     {'type': 'integer', 'data': 8, 'confidence': 0}
 
-    >>> evaluate_message_with_nlu({"author_id": "57787919091", "author_type": "OWNER", "contact_uuid": "df78gsdf78df", "message_body": "I am tired", "message_direction": "inbound", "message_id": "dfgha789789ag9ga", "message_inserted_at": "2023-01-10T02:37:28.487319Z", "message_updated_at": "2023-01-10T02:37:28.487319Z"})
-    {'type': 'sentiment', 'data': 'NEGATIVE', 'confidence': 0.9997807145118713}
+    >>> evaluate_message_with_nlu({"author_id": "57787919091", "author_type": "OWNER", "contact_uuid": "df78gsdf78df", "message_body": "I am tired", "message_direction": "inbound", "message_id": "dfgha789789ag9ga", "message_inserted_at": "2023-01-10T02:37:28.487319Z", "message_updated_at": "2023-01-10T02:37:28.487319Z"})  # doctest: +ELLIPSIS
+    {'type': 'intent', 'data': 'tired', 'confidence': 1.0}
     """
-    # Keeps system working with two different inputs - full and filtered @event object
     # Call validate payload
     log.info(f'Starting evaluate message: {message_data}')
 
@@ -251,27 +189,23 @@ def evaluate_message_with_nlu(message_data):
         # use python logging system to do this//
         return {'type': 'error', 'data': TOKENS2INT_ERROR_INT, 'confidence': 0}
 
-    # Run intent classification only for keywords
-    intent_api_response = run_intent_classification(message_text)
+    # Check the student message for pre-defined keywords
+    intent_api_response = check_for_keywords(message_text)
     if intent_api_response['data']:
         prepare_message_data_for_logging(message_data, intent_api_response)
         return intent_api_response
 
-    number_api_resp = text2int(message_text.lower())
+    # Check if the student's message can be converted to a number
+    try:
+        number_api_resp = text2int(message_text.lower())
+    except ValueError:
+        log.error(f'Invalid student message: {message_data}')
+        number_api_resp = TOKENS2INT_ERROR_INT
 
     if number_api_resp == TOKENS2INT_ERROR_INT:
         # Run intent classification with logistic regression model
         predicted_label = predict_message_intent(message_text)
-        if predicted_label['confidence'] > 0.01:
-            nlu_response = predicted_label
-        else:
-            # Run sentiment analysis
-            sentiment_api_resp = sentiment(message_text)
-            nlu_response = build_nlu_response_object(
-                'sentiment',
-                sentiment_api_resp[0]['label'],
-                sentiment_api_resp[0]['score']
-            )
+        return predicted_label
     else:
         nlu_response = build_nlu_response_object(
             'integer',
