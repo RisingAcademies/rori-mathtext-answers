@@ -184,10 +184,12 @@ def evaluate_message_with_nlu(message_data):
 
     try:
         message_text = str(message_data.get('message_body', ''))
+        expected_answer = str(message_data.get('expected_answer', ''))
     except:
         log.error(f'Invalid request payload: {message_data}')
         # use python logging system to do this//
         return {'type': 'error', 'data': TOKENS2INT_ERROR_INT, 'confidence': 0}
+
 
     # Check the student message for pre-defined keywords
     intent_api_response = check_for_keywords(message_text)
@@ -197,7 +199,10 @@ def evaluate_message_with_nlu(message_data):
 
     # Check if the student's message can be converted to a number
     try:
-        number_api_resp = text2int(message_text.lower())
+        number_api_resp = text2int(
+            message_text.lower(),
+            expected_answer
+        )
     except ValueError:
         log.error(f'Invalid student message: {message_data}')
         number_api_resp = TOKENS2INT_ERROR_INT
