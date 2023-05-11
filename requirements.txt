@@ -18,3 +18,4 @@ transitions
 uvicorn
 pandas
 scipy
+Unidecode
