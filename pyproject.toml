@@ -22,14 +22,17 @@ classifiers = [
 
 [tool.poetry.dependencies]
 # FIXME: We should always load the main branch (not Vlad) branch of mathactive here:
-mathactive = {git = "git@gitlab.com:tangibleai/community/mathactive.git", rev = "vlad"}
-mathtext = {git = "https://gitlab.com/tangibleai/community/mathtext", rev = "hobs-minimal-changes"}
-fastapi = ">=0.90.0"
+mathactive = "0.0.6"
+# mathactive = {git = "git@gitlab.com:tangibleai/community/mathactive.git", rev = "vlad"}
+mathtext = "0.0.6"
+# mathtext = {git = "https://gitlab.com/tangibleai/community/mathtext", rev = "hobs-minimal-changes"}
+fastapi = "*"
 # python = ">=3.9.16" # tested on hobson's virtualenv on linux
 python = ">=3.8"
 requests = "*"
+# httpx = "<0.22,>=0.19"
 supabase = "*"
-uvicorn = ">=0.17"
+uvicorn = "*"
 
 # # Installed by mathtext!!
 # pydantic = "*"
@@ -43,9 +46,8 @@ addopts = "--doctest-modules"
 
 
 [tool.poetry.group.dev.dependencies]
-pytest = "^7.2"
+pytest = "*"
 toml = "*"
-poetry = "*"
 
 [build-system]
 requires = ["poetry-core"]
