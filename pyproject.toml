@@ -5,6 +5,7 @@ authors = [
   "Sebastian Larsen <sebastianlarson22@gmail.com>",
   "Çetin ÇAKIR <cetincakirtr@gmail.com>",
   "Hobson Lane <gitlab@totalgood.com>",
+  "Greg Thompson <greg+pypi@tangibleai.com>",
   ]
 description = "Natural Language Understanding (text processing) for math symbols, digits, and words with a Gradio user interface and REST API."
 readme = "README.md"
@@ -22,7 +23,7 @@ classifiers = [
 [tool.poetry.dependencies]
 # FIXME: We should always load the main branch (not Vlad) branch of mathactive here:
 mathactive = {git = "git@gitlab.com:tangibleai/community/mathactive.git", rev = "vlad"}
-mathtext = {git = "https://gitlab.com/tangibleai/community/mathtext", rev = "main"}
+mathtext = {git = "https://gitlab.com/tangibleai/community/mathtext", rev = "hobs-minimal-changes"}
 fastapi = ">=0.90.0"
 # python = ">=3.9.16" # tested on hobson's virtualenv on linux
 python = ">=3.8"
