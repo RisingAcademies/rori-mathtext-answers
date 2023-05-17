@@ -23,15 +23,16 @@ classifiers = [
 # FIXME: We should always load the main branch (not Vlad) branch of mathactive here:
 mathactive = {git = "git@gitlab.com:tangibleai/community/mathactive.git", rev = "vlad"}
 mathtext = {git = "https://gitlab.com/tangibleai/community/mathtext", rev = "main"}
-fastapi = "^0.90.0"
-pydantic = "*"
+fastapi = ">=0.90.0"
+# python = ">=3.9.16" # tested on hobson's virtualenv on linux
 python = ">=3.8"
 requests = "*"
 supabase = "*"
-uvicorn = "0.17.*"
+uvicorn = ">=0.17"
 
 # # Installed by mathtext!!
-# sentencepiece = "*"
+# pydantic = "*"
+# sentencepiece = "*"  # included in sentencetransformers or transformers
 # pandas = "*"
 # scipy = "*"
 
@@ -42,6 +43,8 @@ addopts = "--doctest-modules"
 
 [tool.poetry.group.dev.dependencies]
 pytest = "^7.2"
+toml = "*"
+poetry = "*"
 
 [build-system]
 requires = ["poetry-core"]
