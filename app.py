@@ -170,7 +170,8 @@ async def evaluate_user_message_with_nlu_api(request: Request):
 
     try:
         data_dict = await request.json()
-    except JSONDecodeError:
+    except JSONDecodeError:  # as e:
+        # log.error(f'JSONDecodeError: {e}')
         log.error(f'Request.json failed: {dir(request)}')
         data_dict = {}
     message_data = data_dict.get('message_data')

@@ -20,17 +20,20 @@ classifiers = [
 
 
 [tool.poetry.dependencies]
+# FIXME: We should always load the main branch (not Vlad) branch of mathactive here:
 mathactive = {git = "git@gitlab.com:tangibleai/community/mathactive.git", rev = "vlad"}
 mathtext = {git = "https://gitlab.com/tangibleai/community/mathtext", rev = "main"}
 fastapi = "^0.90.0"
 pydantic = "*"
-python = "^3.8"
-requests = "2.27.*" 
-sentencepiece = "0.1.*"
+python = ">=3.8"
+requests = "*"
 supabase = "*"
 uvicorn = "0.17.*"
-pandas = "^1.5.3"
-scipy = "^1.10.1"
+
+# # Installed by mathtext!!
+# sentencepiece = "*"
+# pandas = "*"
+# scipy = "*"
 
 [tool.poetry.group.dev.dependencies]
 pytest = "^7.2"
