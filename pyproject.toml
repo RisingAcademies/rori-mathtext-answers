@@ -36,7 +36,7 @@ fastapi = "*"
 # python = ">=3.9.16" # tested on hobson's virtualenv on linux
 python = ">=3.8"
 requests = "*"
-# httpx = "<0.22,>=0.19"
+httpx = "<0.22,>=0.19"
 # supabase = "*"
 uvicorn = "*"
 sqlalchemy = "*"
