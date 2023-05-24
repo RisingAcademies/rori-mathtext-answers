@@ -1,14 +1,14 @@
 import base64
-import dill
+# import dill
 import os
 import json
-import jsonpickle
+# import jsonpickle
 import pickle
 import random
 import requests
 
 from dotenv import load_dotenv
-from mathtext_fastapi.constants import SUPA
+# from mathtext_fastapi.constants import SUPA
 from mathtext_fastapi.nlu import evaluate_message_with_nlu
 from mathtext_fastapi.math_quiz_fsm import MathQuizFSM
 from mathtext_fastapi.math_subtraction_fsm import MathSubtractionFSM
@@ -105,10 +105,11 @@ def pickle_and_encode_state_machine(state_machine):
 
 
 def manage_math_quiz_fsm(user_message, contact_uuid, type):
-    fsm_check = SUPA.table('state_machines').select("*").eq(
-        "contact_uuid",
-        contact_uuid
-    ).execute()
+    # TODO: Swap out database call
+    # fsm_check = SUPA.table('state_machines').select("*").eq(
+    #     "contact_uuid",
+    #     contact_uuid
+    # ).execute()
 
     # This doesn't allow for when one FSM is present and the other is empty
     """
@@ -140,10 +141,12 @@ def manage_math_quiz_fsm(user_message, contact_uuid, type):
         messages = [math_quiz_state_machine.response_text]
         dump_encoded = pickle_and_encode_state_machine(math_quiz_state_machine)
 
-        SUPA.table('state_machines').insert({
-            'contact_uuid': contact_uuid,
-            f'{type}': dump_encoded
-        }).execute()
+
+        # TODO: Swap out database call
+        # SUPA.table('state_machines').insert({
+        #     'contact_uuid': contact_uuid,
+        #     f'{type}': dump_encoded
+        # }).execute()
     # Update an existing record with a new state machine
     elif not fsm_check.data[0][type]:
         if type == 'addition':
@@ -153,11 +156,12 @@ def manage_math_quiz_fsm(user_message, contact_uuid, type):
         messages = [math_quiz_state_machine.response_text]
         dump_encoded = pickle_and_encode_state_machine(math_quiz_state_machine)
 
-        SUPA.table('state_machines').update({
-            f'{type}': dump_encoded
-        }).eq(
-            "contact_uuid", contact_uuid
-        ).execute()      
+        # TODO: Swap out database call
+        # SUPA.table('state_machines').update({
+        #     f'{type}': dump_encoded
+        # }).eq(
+        #     "contact_uuid", contact_uuid
+        # ).execute()      
     # Update an existing record with an existing state machine
     elif fsm_check.data[0][type]:
         undump_encoded = base64.b64decode(
@@ -168,12 +172,13 @@ def manage_math_quiz_fsm(user_message, contact_uuid, type):
         math_quiz_state_machine.student_answer = user_message
         math_quiz_state_machine.correct_answer = str(math_quiz_state_machine.correct_answer)
         messages = math_quiz_state_machine.validate_answer()
-        dump_encoded = pickle_and_encode_state_machine(math_quiz_state_machine)          
-        SUPA.table('state_machines').update({
-            f'{type}': dump_encoded
-        }).eq(
-            "contact_uuid", contact_uuid
-        ).execute()
+        dump_encoded = pickle_and_encode_state_machine(math_quiz_state_machine)
+        # TODO: Swap out database call    
+        # SUPA.table('state_machines').update({
+        #     f'{type}': dump_encoded
+        # }).eq(
+        #     "contact_uuid", contact_uuid
+        # ).execute()
     return messages
 
 

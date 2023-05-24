@@ -100,7 +100,7 @@ def gather_all_vertical_matches(script_df):
     columns = ['1', '2', '3', '4', '5', '6', '7', '8', '9']
 
     for column in columns:
-        for index, value in script_df[column].iteritems():
+        for index, value in script_df[column].items():
             row_num = index + 1
             if value == 'x':
                 # Extract skill code
