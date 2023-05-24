@@ -87,39 +87,39 @@ nlu_test_cases = [
     '1⁰'
 ]
 
-# keyword_test_cases = [
-#     'exit',
-#     "esier",
-#     'easier',
-#     'easy',
-#     'harder',
-#     'hard',
-#     'hint',
-#     'hin',
-#     'stop',
-#     'stp',
-#     'sop',
-#     'please stop',
-#     "I'm not sure about that",
-#     "What should I do?"
-# ]
+keyword_test_cases = [
+    'exit',
+    "esier",
+    'easier',
+    'easy',
+    'harder',
+    'hard',
+    'hint',
+    'hin',
+    'stop',
+    'stp',
+    'sop',
+    'please stop',
+    "I'm not sure about that",
+    "What should I do?"
+]
 
-# intent_test_cases = [
-#     'exit',
-#     "I'm not sure",
-#     'easier',
-#     'easy',
-#     'What is this',
-#     'I want to do some math',
-#     'This sucks',
-#     'fuck you',
-#     "I'm so tired",
-#     "Thanks, Rori.  I'm having fun",
-#     "Maybe it's 8",
-#     'please stop',
-#     "I'm not sure about that",
-#     "What should I do?"
-# ]
+intent_test_cases = [
+    'exit',
+    "I'm not sure",
+    'easier',
+    'easy',
+    'What is this',
+    'I want to do some math',
+    'This sucks',
+    'fuck you',
+    "I'm so tired",
+    "Thanks, Rori.  I'm having fun",
+    "Maybe it's 8",
+    'please stop',
+    "I'm not sure about that",
+    "What should I do?"
+]
 
 wormhole_test_cases = [
     '',
@@ -165,8 +165,8 @@ if __name__ == '__main__':
 
     # These tests run through the nlu endpoints
     run_set_of_tests('nlu')
-    run_set_of_tests('intent-recognition')
-    run_set_of_tests('keyword-detection')
+    # run_set_of_tests('intent-recognition')
+    # run_set_of_tests('keyword-detection')
 
     # This test runs through wormhole conversation management functions
     # run_set_of_tests('manager')
