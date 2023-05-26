@@ -27,6 +27,7 @@ transitions = "*"
 openpyxl = "*"
 psycopg2 = "*"
 asyncpg = "*"
+python-Levenshtein = "*"
 
 mathactive = "0.0.8"
 # mathactive = {git = "git@gitlab.com:tangibleai/community/mathactive.git", rev = "vlad"}

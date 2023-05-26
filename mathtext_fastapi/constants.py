@@ -1,6 +1,5 @@
 import os
 from pathlib import Path
-# from supabase import create_client
 
 from dotenv import load_dotenv
 load_dotenv()
@@ -37,7 +36,8 @@ SENTRY_DSN = os.environ.get('SENTRY_DSN')
 SUPABASE_URL = os.environ.get('SUPABASE_URL')
 SUPABASE_KEY = os.environ.get('SUPABASE_KEY')
 SUPABASE_LINK = os.environ.get('SUPABASE_LINK')
-# SUPA = create_client(
-#     SUPABASE_URL,
-#     SUPABASE_KEY
-# )
+
+PROD_SUPABASE_DB = os.environ.get('PROD_SUPABASE_DB')
+PROD_SUPABASE_DBNAME = os.environ.get('PROD_SUPABASE_DBNAME')
+PROD_SUPABASE_USER = os.environ.get('PROD_SUPABASE_USER')
+PROD_SUPABASE_PW = os.environ.get('PROD_SUPABASE_PW')

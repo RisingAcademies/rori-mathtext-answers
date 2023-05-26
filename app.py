@@ -180,7 +180,7 @@ async def evaluate_user_message_with_nlu_api(request: Request):
     if not message_data:
         log.error(f'Data_dict: {data_dict}')
         message_data = data_dict.get('message', {})
-    nlu_response = evaluate_message_with_nlu(message_data)
+    nlu_response = await evaluate_message_with_nlu(message_data)
     return JSONResponse(content=nlu_response)
 
 

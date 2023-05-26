@@ -1,3 +1,4 @@
+import asyncio
 import datetime as dt
 import re
 
@@ -10,7 +11,9 @@ from logging import getLogger
 from mathtext.text2int import text2int, TOKENS2INT_ERROR_INT
 # from mathtext_fastapi.intent_classification import predict_message_intent
 from mathtext.predict_intent import predict_message_intent
-from mathtext_fastapi.supabase_logging import prepare_message_data_for_logging
+from mathtext_fastapi.supabase_logging_async import prepare_message_data_for_logging
+# from mathtext_fastapi.supabase_logging import prepare_message_data_for_logging
+# from mathtext_fastapi.supabase_logging_psycopg import prepare_message_data_for_logging
 
 
 log = getLogger(__name__)
@@ -167,7 +170,7 @@ def log_payload_errors(payload_object):
     return errors
 
 
-def evaluate_message_with_nlu(message_data):
+async def evaluate_message_with_nlu(message_data):
     """ Process a student's message using NLU functions and send the result
 
     >>> evaluate_message_with_nlu({"author_id": "57787919091", "author_type": "OWNER", "contact_uuid": "df78gsdf78df", "message_body": "8", "message_direction": "inbound", "message_id": "dfgha789789ag9ga", "message_inserted_at": "2023-01-10T02:37:28.487319Z", "message_updated_at": "2023-01-10T02:37:28.487319Z"})
@@ -195,7 +198,8 @@ def evaluate_message_with_nlu(message_data):
     # Check the student message for pre-defined keywords
     intent_api_response = check_for_keywords(message_text)
     if intent_api_response['data']:
-        prepare_message_data_for_logging(message_data, intent_api_response)
+        asyncio.create_task(prepare_message_data_for_logging(message_data, intent_api_response))
+        # prepare_message_data_for_logging(message_data, nlu_response)
         return intent_api_response
 
     # Check if the student's message can be converted to a number
@@ -218,5 +222,6 @@ def evaluate_message_with_nlu(message_data):
             0
         )
 
-    prepare_message_data_for_logging(message_data, nlu_response)
+    asyncio.create_task(prepare_message_data_for_logging(message_data, nlu_response))
+    # prepare_message_data_for_logging(message_data, nlu_response)
     return nlu_response
