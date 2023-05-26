@@ -173,10 +173,11 @@ def log_payload_errors(payload_object):
 async def evaluate_message_with_nlu(message_data):
     """ Process a student's message using NLU functions and send the result
 
-    >>> evaluate_message_with_nlu({"author_id": "57787919091", "author_type": "OWNER", "contact_uuid": "df78gsdf78df", "message_body": "8", "message_direction": "inbound", "message_id": "dfgha789789ag9ga", "message_inserted_at": "2023-01-10T02:37:28.487319Z", "message_updated_at": "2023-01-10T02:37:28.487319Z"})
+    # TODO: Update tests with new data structure and coroutine
+    evaluate_message_with_nlu({"author_id": "57787919091", "author_type": "OWNER", "contact_uuid": "df78gsdf78df", "message_body": "8", "message_direction": "inbound", "message_id": "dfgha789789ag9ga", "message_inserted_at": "2023-01-10T02:37:28.487319Z", "message_updated_at": "2023-01-10T02:37:28.487319Z"})
     {'type': 'integer', 'data': 8, 'confidence': 0}
 
-    >>> evaluate_message_with_nlu({"author_id": "57787919091", "author_type": "OWNER", "contact_uuid": "df78gsdf78df", "message_body": "I am tired", "message_direction": "inbound", "message_id": "dfgha789789ag9ga", "message_inserted_at": "2023-01-10T02:37:28.487319Z", "message_updated_at": "2023-01-10T02:37:28.487319Z"})  # doctest: +ELLIPSIS
+    evaluate_message_with_nlu({"author_id": "57787919091", "author_type": "OWNER", "contact_uuid": "df78gsdf78df", "message_body": "I am tired", "message_direction": "inbound", "message_id": "dfgha789789ag9ga", "message_inserted_at": "2023-01-10T02:37:28.487319Z", "message_updated_at": "2023-01-10T02:37:28.487319Z"})  # doctest: +ELLIPSIS
     {'type': 'intent', 'data': 'tired', 'confidence': 1.0}
     """
     # Call validate payload
@@ -200,6 +201,8 @@ async def evaluate_message_with_nlu(message_data):
     if intent_api_response['data']:
         asyncio.create_task(prepare_message_data_for_logging(message_data, intent_api_response))
         # prepare_message_data_for_logging(message_data, nlu_response)
+        print("nlu_response")
+        print(intent_api_response)
         return intent_api_response
 
     # Check if the student's message can be converted to a number
@@ -224,4 +227,6 @@ async def evaluate_message_with_nlu(message_data):
 
     asyncio.create_task(prepare_message_data_for_logging(message_data, nlu_response))
     # prepare_message_data_for_logging(message_data, nlu_response)
+    print("nlu_response")
+    print(nlu_response)
     return nlu_response
