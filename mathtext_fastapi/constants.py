@@ -23,11 +23,6 @@ if not DATA_DIR.is_dir():
     DATA_DIR = Path.cwd()  # worst case CWD should always exist
 assert DATA_DIR.is_dir()  # without a DATA_DIR this package can't run
 
-DEFAULT_MODEL_FILENAME = "intent_classification_model.joblib"
-DEFAULT_LABELED_DATA = "labeled_data.csv"
-
-MODEL_PATH = DATA_DIR / DEFAULT_MODEL_FILENAME
-LABELED_DATA_PATH = DATA_DIR / DEFAULT_LABELED_DATA
 
 # Sentry monitoring link
 SENTRY_DSN = os.environ.get('SENTRY_DSN')

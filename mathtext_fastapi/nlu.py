@@ -9,7 +9,6 @@ from fuzzywuzzy import process
 from logging import getLogger
 
 from mathtext.text2int import text2int, TOKENS2INT_ERROR_INT
-# from mathtext_fastapi.intent_classification import predict_message_intent
 from mathtext.predict_intent import predict_message_intent
 from mathtext_fastapi.supabase_logging_async import prepare_message_data_for_logging
 # from mathtext_fastapi.supabase_logging import prepare_message_data_for_logging
