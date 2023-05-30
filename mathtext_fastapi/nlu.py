@@ -50,17 +50,17 @@ def check_for_keywords(message_text):
     """ Process a student's message using basic fuzzy text comparison
 
     >>> check_for_keywords("exit")
-    {'type': 'intent', 'data': 'exit', 'confidence': 1.0}
+    {'type': 'keyword', 'data': 'exit', 'confidence': 1.0}
     >>> check_for_keywords("exi")  # doctest: +ELLIPSIS   
-    {'type': 'intent', 'data': 'exit', 'confidence': 0...}
+    {'type': 'keyword', 'data': 'exit', 'confidence': 0...}
     >>> check_for_keywords("eas")  # doctest: +ELLIPSIS
-    {'type': 'intent', 'data': 'easy', 'confidence': 0...}
+    {'type': 'keyword', 'data': 'easy', 'confidence': 0...}
     >>> check_for_keywords("hard")
-    {'type': 'intent', 'data': '', 'confidence': 0}
+    {'type': 'keyword', 'data': '', 'confidence': 0}
     >>> check_for_keywords("hardier")  # doctest: +ELLIPSIS
-    {'type': 'intent', 'data': 'harder', 'confidence': 0...}
+    {'type': 'keyword', 'data': 'harder', 'confidence': 0...}
     >>> check_for_keywords("I'm tired")  # doctest: +ELLIPSIS
-    {'type': 'intent', 'data': 'tired', 'confidence': 1.0}
+    {'type': 'keyword', 'data': 'tired', 'confidence': 1.0}
     """
     label = ''
     ratio = 0
