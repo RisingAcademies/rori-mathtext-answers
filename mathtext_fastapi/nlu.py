@@ -64,7 +64,7 @@ def check_for_keywords(message_text):
     """
     label = ''
     ratio = 0
-    nlu_response = {'type': 'intent', 'data': label, 'confidence': ratio}
+    nlu_response = {'type': 'keyword', 'data': label, 'confidence': ratio}
     keywords = [
         'easier',
         'exit',
@@ -226,6 +226,4 @@ async def evaluate_message_with_nlu(message_data):
 
     asyncio.create_task(prepare_message_data_for_logging(message_data, nlu_response))
     # prepare_message_data_for_logging(message_data, nlu_response)
-    print("nlu_response")
-    print(nlu_response)
     return nlu_response
