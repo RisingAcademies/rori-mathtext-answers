@@ -59,31 +59,31 @@ def run_full_nlu_endpoint_payload_test(sample_payload):
 
 
 nlu_test_cases = [
-    # 'test message',
-    # 'is it 8',
-    # 'can I know how its 0.5',
-    # 'eight, nine, ten',
-    # '8, 9, 10',
-    # '8',
-    # "I don't know",
-    # "I don't know eight",
-    # "I don't 9",
-    # '0.2',
-    # 'I want you to tell me'
-    # 'Today is a wonderful day',
-    # 'IDK 5?',
-    # 'hin',
-    # 'exi',
-    # 'easier',
-    # 'stp',
-    # '',
-    # '11:00 PM',
-    # '12:45',
-    # "10 : 25 AM",
-    # "0:30",
-    # "7:00",
-    # "23:45",
-    # '~T[11:30:00]',
+    'test message',
+    'is it 8',
+    'can I know how its 0.5',
+    'eight, nine, ten',
+    '8, 9, 10',
+    '8',
+    "I don't know",
+    "I don't know eight",
+    "I don't 9",
+    '0.2',
+    'I want you to tell me'
+    'Today is a wonderful day',
+    'IDK 5?',
+    'hin',
+    'exi',
+    'easier',
+    'stp',
+    '',
+    '11:00 PM',
+    '12:45',
+    "10 : 25 AM",
+    "0:30",
+    "7:00",
+    "23:45",
+    '~T[11:30:00]',
     '1⁰'
 ]
 
@@ -152,16 +152,16 @@ if __name__ == '__main__':
 
     # These tests for validation of the payload from Turn.io
     # Case: Wrong key
-    run_full_nlu_endpoint_payload_test(b'{"message": {"author_id": "@event.message._vnd.v1.chat.owner", "author_type": "@event.message._vnd.v1.author.type", "contact_uuid": "@event.message._vnd.v1.chat.contact_uuid", "message_body": "@event.message.text.body", "message_direction": "@event.message._vnd.v1.direction", "message_id": "@event.message.id", "message_inserted_at": "@event.message._vnd.v1.chat.inserted_at", "message_updated_at": "@event.message._vnd.v1.chat.updated_at"}}')
+    # run_full_nlu_endpoint_payload_test(b'{"message": {"author_id": "@event.message._vnd.v1.chat.owner", "author_type": "@event.message._vnd.v1.author.type", "contact_uuid": "@event.message._vnd.v1.chat.contact_uuid", "message_body": "@event.message.text.body", "message_direction": "@event.message._vnd.v1.direction", "message_id": "@event.message.id", "message_inserted_at": "@event.message._vnd.v1.chat.inserted_at", "message_updated_at": "@event.message._vnd.v1.chat.updated_at"}}')
 
     # Case: Correct payload
-    run_full_nlu_endpoint_payload_test(b'{"message_data": {"author_id": "57787919091", "author_type": "OWNER", "contact_uuid": "df78gsdf78df", "message_body": "8", "message_direction": "inbound", "message_id": "dfgha789789ag9ga", "message_inserted_at": "2023-01-10T02:37:28.487319Z", "message_updated_at": "2023-01-10T02:37:28.487319Z"}}')
+    run_full_nlu_endpoint_payload_test(b'{"message_data": {"author_id": "577879190912", "author_type": "OWNER", "contact_uuid": "df78gsdf78df2", "message_body": "9000", "message_direction": "inbound", "message_id": "dfgha789789ag9ga2", "message_inserted_at": "2023-01-10T02:37:28.487319Z", "message_updated_at": "2023-01-10T02:37:28.487319Z"}}')
 
     # Case: Correct payload + extra fields
-    run_full_nlu_endpoint_payload_test(b'{"message_data": {"author_id": "57787919091", "author_type": "OWNER", "contact_uuid": "df78gsdf78df", "message_body": "8", "message_direction": "inbound", "message_id": "dfgha789789ag9ga", "message_inserted_at": "2023-01-10T02:37:28.487319Z", "message_updated_at": "2023-01-10T02:37:28.487319Z", "question": "What is next - 2, 6, 8?", "expected_answer": 8}}')
+    # run_full_nlu_endpoint_payload_test(b'{"message_data": {"author_id": "57787919091", "author_type": "OWNER", "contact_uuid": "df78gsdf78df", "message_body": "8", "message_direction": "inbound", "message_id": "dfgha789789ag9ga", "message_inserted_at": "2023-01-10T02:37:28.487319Z", "message_updated_at": "2023-01-10T02:37:28.487319Z", "question": "What is next - 2, 6, 8?", "expected_answer": 8}}')
 
-    # Case: Incorrect payload values
-    run_full_nlu_endpoint_payload_test(b'{"message_data": {"author_id": "@event.message._vnd.v1.chat.owner", "author_type": "@event.message._vnd.v1.author.type", "contact_uuid": "@event.message._vnd.v1.chat.contact_uuid", "message_body": "@event.message.text.body", "message_direction": "@event.message._vnd.v1.direction", "message_id": "@event.message.id", "message_inserted_at": "@event.message._vnd.v1.chat.inserted_at", "message_updated_at": "@event.message._vnd.v1.chat.updated_at"}}')
+    # # Case: Incorrect payload values
+    # run_full_nlu_endpoint_payload_test(b'{"message_data": {"author_id": "@event.message._vnd.v1.chat.owner", "author_type": "@event.message._vnd.v1.author.type", "contact_uuid": "@event.message._vnd.v1.chat.contact_uuid", "message_body": "@event.message.text.body", "message_direction": "@event.message._vnd.v1.direction", "message_id": "@event.message.id", "message_inserted_at": "@event.message._vnd.v1.chat.inserted_at", "message_updated_at": "@event.message._vnd.v1.chat.updated_at"}}')
 
     # These tests run through the nlu endpoints
     run_set_of_tests('nlu')

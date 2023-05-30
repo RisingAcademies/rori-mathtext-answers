@@ -16,12 +16,12 @@ from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 import mathactive.microlessons.num_one as num_one_quiz
 from mathtext.text2int import text2int
+from mathtext.predict_intent import predict_message_intent
 from mathtext_fastapi.constants import SENTRY_DSN
 from mathtext_fastapi.conversation_manager import manage_conversation_response
-from mathtext_fastapi.intent_classification import predict_message_intent
 from mathtext_fastapi.nlu import evaluate_message_with_nlu
 from mathtext_fastapi.nlu import check_for_keywords
-from mathtext_fastapi.supabase_logging import prepare_message_data_for_logging
+# from mathtext_fastapi.supabase_logging import prepare_message_data_for_logging
 from mathtext_fastapi.v2_conversation_manager import manage_conversation_response
 from pydantic import BaseModel
 
@@ -170,7 +170,8 @@ async def evaluate_user_message_with_nlu_api(request: Request):
 
     try:
         data_dict = await request.json()
-    except JSONDecodeError:
+    except JSONDecodeError as e:
+        log.error(f'JSONDecodeError: {e}')
         log.error(f'Request.json failed: {dir(request)}')
         data_dict = {}
     message_data = data_dict.get('message_data')
@@ -178,7 +179,7 @@ async def evaluate_user_message_with_nlu_api(request: Request):
     if not message_data:
         log.error(f'Data_dict: {data_dict}')
         message_data = data_dict.get('message', {})
-    nlu_response = evaluate_message_with_nlu(message_data)
+    nlu_response = await evaluate_message_with_nlu(message_data)
     return JSONResponse(content=nlu_response)
 
 
