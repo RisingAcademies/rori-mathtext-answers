@@ -3,7 +3,11 @@ To run locally use 'uvicorn app:app --host localhost --port 7860'
 or
 `python -m uvicorn app:app --reload --host localhost --port 7860`
 """
+import asyncio
 import ast
+import datetime as dt
+from dateutil.parser import isoparse
+from collections.abc import Mapping
 import json
 from json import JSONDecodeError
 from logging import getLogger
@@ -14,27 +18,31 @@ from fastapi import FastAPI, Request
 from fastapi.responses import JSONResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
+from pydantic import BaseModel
+
 import mathactive.microlessons.num_one as num_one_quiz
-from mathtext.text2int import text2int
 from mathtext.predict_intent import predict_message_intent
+from mathtext.text2int import text2int
+from mathtext.text2int import TOKENS2INT_ERROR_INT
 from mathtext_fastapi.constants import SENTRY_DSN
 from mathtext_fastapi.conversation_manager import manage_conversation_response
-from mathtext_fastapi.nlu import evaluate_message_with_nlu
-from mathtext_fastapi.nlu import check_for_keywords
-# from mathtext_fastapi.supabase_logging import prepare_message_data_for_logging
+from mathtext_fastapi.nlu import evaluate_message_with_nlu, run_keyword_evaluation
+from mathtext_fastapi.supabase_logging_async import prepare_message_data_for_logging
 from mathtext_fastapi.v2_conversation_manager import manage_conversation_response
-from pydantic import BaseModel
+
+
+ERROR_RESPONSE_DICT = {'type': 'error', 'data': TOKENS2INT_ERROR_INT, 'confidence': 0}
 
 log = getLogger(__name__)
 
-sentry_sdk.init(
-    dsn=SENTRY_DSN,
+# sentry_sdk.init(
+#     dsn=SENTRY_DSN,
 
-    # Set traces_sample_rate to 1.0 to capture 100%
-    # of transactions for performance monitoring.
-    # We recommend adjusting this value in production,
-    traces_sample_rate=1.0,
-)
+#     # Set traces_sample_rate to 1.0 to capture 100%
+#     # of transactions for performance monitoring.
+#     # We recommend adjusting this value in production,
+#     traces_sample_rate=1.0,
+# )
 
 app = FastAPI()
 
@@ -138,7 +146,7 @@ async def programmatic_message_manager(request: Request):
 
 @app.post("/keyword-detection")
 def keyword_detection_ep(content: Text = None):
-    ml_response = check_for_keywords(content.content)
+    ml_response = run_keyword_evaluation(content.content)
     content = {"content": ml_response}
     return JSONResponse(content=content)
 
@@ -148,6 +156,90 @@ def intent_recognition_ep(content: Text = None):
     ml_response = predict_message_intent(content.content)
     content = {"content": ml_response}
     return JSONResponse(content=content)
+
+
+PAYLOAD_VALUE_TYPES = {
+    'author_id': str,
+    'author_type': str,
+    'contact_uuid': str,
+    'message_body': str,
+    'message_direction': str,
+    'message_id': str,
+    'message_inserted_at': str,
+    'message_updated_at': str,
+    }
+
+
+def payload_is_valid(payload_object):
+    """
+    >>> payload_is_valid({'author_id': '+5555555', 'author_type': 'OWNER', 'contact_uuid': '3246-43ad-faf7qw-zsdhg-dgGdg', 'message_body': 'thirty one', 'message_direction': 'inbound', 'message_id': 'SDFGGwafada-DFASHA4aDGA', 'message_inserted_at': '2022-07-05T04:00:34.03352Z', 'message_updated_at': '2023-04-06T10:08:23.745072Z'})
+    True
+
+    >>> payload_is_valid({"author_id": "@event.message._vnd.v1.chat.owner", "author_type": "@event.message._vnd.v1.author.type", "contact_uuid": "@event.message._vnd.v1.chat.contact_uuid", "message_body": "@event.message.text.body", "message_direction": "@event.message._vnd.v1.direction", "message_id": "@event.message.id", "message_inserted_at": "@event.message._vnd.v1.chat.inserted_at", "message_updated_at": "@event.message._vnd.v1.chat.updated_at"})
+    False
+    """
+    try:
+        isinstance(
+            isoparse(payload_object.get('message_inserted_at', '')),
+            dt.datetime
+        )
+        isinstance(
+            isoparse(payload_object.get('message_updated_at', '')),
+            dt.datetime
+        )
+    except ValueError:
+        return False
+    return (
+        isinstance(payload_object, Mapping) and
+        isinstance(payload_object.get('author_id'), str) and
+        isinstance(payload_object.get('author_type'), str) and
+        isinstance(payload_object.get('contact_uuid'), str) and
+        isinstance(payload_object.get('message_body'), str) and
+        isinstance(payload_object.get('message_direction'), str) and
+        isinstance(payload_object.get('message_id'), str) and
+        isinstance(payload_object.get('message_inserted_at'), str) and
+        isinstance(payload_object.get('message_updated_at'), str)
+    )
+
+
+def log_payload_errors(payload_object):
+    errors = []
+    try:
+        assert isinstance(payload_object, Mapping)
+    except Exception as e:
+        log.error(f'Invalid HTTP request payload object: {e}')
+        errors.append(e)
+    for k, typ in PAYLOAD_VALUE_TYPES.items():
+        try:
+            assert isinstance(payload_object.get(k), typ)
+        except Exception as e:
+            log.error(f'Invalid HTTP request payload object: {e}')
+            errors.append(e)
+    try:
+        assert isinstance(
+            dt.datetime.fromisoformat(
+                payload_object.get('message_inserted_at')
+            ),
+            dt.datetime
+        )
+    except Exception as e:
+        log.error(f'Invalid HTTP request payload object: {e}')
+        errors.append(e)
+    try:
+        isinstance(
+            dt.datetime.fromisoformat(
+                payload_object.get('message_updated_at')
+            ),
+            dt.datetime
+        )
+    except Exception as e:
+        log.error(f'Invalid HTTP request payload object: {e}')
+        errors.append(e)
+    return errors
+
+
+def truncate_long_message_text(message_text):
+    return message_text[0:150]
 
 
 @app.post("/nlu")
@@ -165,21 +257,31 @@ async def evaluate_user_message_with_nlu_api(request: Request):
     log.info(f'Request header: {request.headers}')
     request_body = await request.body()
     log.info(f'Request body: {request_body}')
-    request_body_str = request_body.decode()
-    log.info(f'Request_body_str: {request_body_str}')
 
     try:
-        data_dict = await request.json()
+        payload = await request.json()
     except JSONDecodeError as e:
         log.error(f'JSONDecodeError: {e}')
         log.error(f'Request.json failed: {dir(request)}')
-        data_dict = {}
-    message_data = data_dict.get('message_data')
+        payload = {}
+    message_dict = payload.get('message_data')
+    log.info(f'Request json: {payload}')
 
-    if not message_data:
-        log.error(f'Data_dict: {data_dict}')
-        message_data = data_dict.get('message', {})
-    nlu_response = await evaluate_message_with_nlu(message_data)
+    if not message_dict:
+        log.error(f'Payload: {payload}')
+        message_dict = payload.get('message', {})
+
+    if not payload_is_valid(message_dict):
+        log_payload_errors(message_dict)
+        return ERROR_RESPONSE_DICT
+
+    message_text = str(message_dict.get('message_body', ''))
+    message_text = truncate_long_message_text(message_text)
+    expected_answer = str(message_dict.get('expected_answer', ''))
+    nlu_response = await evaluate_message_with_nlu(message_text, expected_answer)
+
+    asyncio.create_task(prepare_message_data_for_logging(message_dict, nlu_response))
+
     return JSONResponse(content=nlu_response)
 
 
