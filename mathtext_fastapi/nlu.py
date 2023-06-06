@@ -10,7 +10,7 @@ from logging import getLogger
 
 from mathtext.text2int import text2int, TOKENS2INT_ERROR_INT
 from mathtext.predict_intent import predict_message_intent
-
+# from mathtext_fastapi.cache import get_or_create_redis_entry
 
 log = getLogger(__name__)
 
@@ -42,7 +42,7 @@ def build_nlu_response_object(nlu_type, data, confidence):
         'confidence': confidence
         }
 
-
+# @get_or_create_redis_entry("run_keyword_evaluation")
 def run_keyword_evaluation(message_text):
     """ Process a student's message using basic fuzzy text comparison
 
@@ -61,7 +61,11 @@ def run_keyword_evaluation(message_text):
     """
     label = ''
     ratio = 0
-    nlu_response = {'type': 'keyword', 'data': label, 'confidence': ratio}
+    nlu_response = {
+        'type': 'keyword',
+        'data': label,
+        'confidence': ratio
+    }
     keywords = [
         'easier',
         'exit',
@@ -98,6 +102,7 @@ def run_keyword_evaluation(message_text):
     return nlu_response
 
 
+# @get_or_create_redis_entry("run_text2int_evaluation")
 def run_text2int_evaluation(message_text, expected_answer):
     try:
         number_api_resp = text2int(
@@ -107,9 +112,14 @@ def run_text2int_evaluation(message_text, expected_answer):
     except ValueError:
         log.error(f'Invalid student message: {message_text}')
         number_api_resp = TOKENS2INT_ERROR_INT
-    return {'type': 'integer', 'data': number_api_resp, 'confidence': 0} 
+    return {
+        'type': 'integer',
+        'data': number_api_resp,
+        'confidence': 0
+    } 
 
 
+# @get_or_create_redis_entry("run_intent_evaluation")
 def run_intent_evaluation(message_text):
     nlu_response = predict_message_intent(message_text)
     return nlu_response
@@ -139,8 +149,7 @@ async def evaluate_message_with_nlu(message_text, expected_answer):
         expected_answer
     )
 
-    # if nlu_response['data'] == TOKENS2INT_ERROR_INT:
-    if True:
+    if nlu_response['data'] == TOKENS2INT_ERROR_INT:
         # Run intent classification with logistic regression model
         nlu_response = run_intent_evaluation(message_text)
 
