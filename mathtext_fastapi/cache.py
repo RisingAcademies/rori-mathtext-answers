@@ -2,15 +2,13 @@ import json
 import os
 import redis
 import functools
-
-from dotenv import load_dotenv
-load_dotenv()
+from mathtext_fastapi.constants import REDIS_RESPONSE_CACHE_URL
 
 from logging import getLogger
 log = getLogger(__name__)
 
 r = redis.StrictRedis.from_url(
-    os.environ.get('REDIS_RESPONSE_CACHE_URL')
+    REDIS_RESPONSE_CACHE_URL
 )
 
 
