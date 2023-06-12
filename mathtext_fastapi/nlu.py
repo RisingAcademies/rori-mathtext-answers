@@ -137,19 +137,20 @@ async def evaluate_message_with_nlu(message_text, expected_answer):
     """
     # Call validate payload
     log.info(f'Starting evaluate message: {message_text}')
+    nlu_response = {}
+    if len(message_text) < 50:
+        # Check the student message for pre-defined keywords
+        nlu_response = run_keyword_evaluation(message_text)
+        if nlu_response['data']:
+            return nlu_response
+        
+        # Check if the student's message can be converted to a number
+        nlu_response = run_text2int_evaluation(
+            message_text,
+            expected_answer
+        )
 
-    # Check the student message for pre-defined keywords
-    nlu_response = run_keyword_evaluation(message_text)
-    if nlu_response['data']:
-        return nlu_response
-    
-    # Check if the student's message can be converted to a number
-    nlu_response = run_text2int_evaluation(
-        message_text,
-        expected_answer
-    )
-
-    if nlu_response['data'] == TOKENS2INT_ERROR_INT:
+    if nlu_response.get('data') == TOKENS2INT_ERROR_INT:
         # Run intent classification with logistic regression model
         nlu_response = run_intent_evaluation(message_text)
 
