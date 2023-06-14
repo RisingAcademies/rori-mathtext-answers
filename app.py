@@ -286,9 +286,12 @@ async def evaluate_user_message_with_nlu_api(request: Request):
     else:
         timeout = 10
         try:
-            nlu_response = await asyncio.wait_for(evaluate_message_with_nlu(message_text, expected_answer), timeout)
+            nlu_response = await asyncio.wait_for(
+                evaluate_message_with_nlu(message_text, expected_answer), timeout
+            )
         except asyncio.TimeoutError:
-            return {'type': 'timeout', 'data': 32202, 'confidence': 0}
+            result = {'type': 'timeout', 'data': 32202, 'confidence': 0}
+            nlu_response = result | {'intents': [result, result, result]}
 
     asyncio.create_task(prepare_message_data_for_logging(message_dict, nlu_response))
 
