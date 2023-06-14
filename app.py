@@ -279,7 +279,12 @@ async def evaluate_user_message_with_nlu_api(request: Request):
     message_text = str(message_dict.get('message_body', ''))
     message_text = truncate_long_message_text(message_text)
     expected_answer = str(message_dict.get('expected_answer', ''))
-    nlu_response = await evaluate_message_with_nlu(message_text, expected_answer)
+
+    if expected_answer.lower().strip() == message_text.lower().strip():
+        result = {'type': 'comparison', 'data': expected_answer, 'confidence': 1}
+        nlu_response = result | {'intents': [result, result, result]}
+    else:
+        nlu_response = await evaluate_message_with_nlu(message_text, expected_answer)
 
     asyncio.create_task(prepare_message_data_for_logging(message_dict, nlu_response))
 
