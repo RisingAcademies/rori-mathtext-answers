@@ -141,20 +141,20 @@ async def evaluate_message_with_nlu(message_text, expected_answer):
         log.info(f'Starting evaluate message: {message_text}')
         nlu_response = {}
         
-        # if len(message_text) < 50:
-        #     # Check the student message for pre-defined keywords
+        if len(message_text) < 50:
+            # Check the student message for pre-defined keywords
         
-        with sentry_sdk.start_span(description="Keyword Evaluation"):
-            nlu_response = run_keyword_evaluation(message_text)
-            if nlu_response['data']:
-                return nlu_response
-            
-        # Check if the student's message can be converted to a number
-        with sentry_sdk.start_span(description="Answer Evaluation"):
-            nlu_response = run_text2int_evaluation(
-                message_text,
-                expected_answer
-            )
+            with sentry_sdk.start_span(description="Keyword Evaluation"):
+                nlu_response = run_keyword_evaluation(message_text)
+                if nlu_response['data']:
+                    return nlu_response
+                
+            # Check if the student's message can be converted to a number
+            with sentry_sdk.start_span(description="Answer Evaluation"):
+                nlu_response = run_text2int_evaluation(
+                    message_text,
+                    expected_answer
+                )
 
         with sentry_sdk.start_span(description="Model Evaluation"):
             if nlu_response.get('data') == TOKENS2INT_ERROR_INT:
