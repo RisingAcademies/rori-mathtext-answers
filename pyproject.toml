@@ -5,6 +5,7 @@ authors = [
   "Sebastian Larsen <sebastianlarson22@gmail.com>",
   "Çetin ÇAKIR <cetincakirtr@gmail.com>",
   "Hobson Lane <gitlab@totalgood.com>",
+  "Greg Thompson <greg+pypi@tangibleai.com>",
   ]
 description = "Natural Language Understanding (text processing) for math symbols, digits, and words with a Gradio user interface and REST API."
 readme = "README.md"
@@ -20,17 +21,37 @@ classifiers = [
 
 
 [tool.poetry.dependencies]
-mathactive = {git = "git@gitlab.com:tangibleai/community/mathactive.git", rev = "vlad"}
-mathtext = {git = "https://gitlab.com/tangibleai/community/mathtext", rev = "main"}
-fastapi = "^0.90.0"
-pydantic = "*"
-python = "^3.8"
-requests = "2.27.*" 
-sentencepiece = "0.1.*"
-supabase = "*"
-uvicorn = "0.17.*"
-pandas = "^1.5.3"
-scipy = "^1.10.1"
+# FIXME: We should always load the main branch (not Vlad) branch of mathactive here:
+fuzzywuzzy = "*"
+transitions = "*"
+openpyxl = "*"
+psycopg2 = "*"
+asyncpg = "*"
+python-Levenshtein = "*"
+
+mathactive = "0.0.8"
+# mathactive = {git = "git@gitlab.com:tangibleai/community/mathactive.git", rev = "vlad"}
+mathtext = "0.0.8"
+# mathtext = {git = "https://gitlab.com/tangibleai/community/mathtext", rev = "hobs-minimal-changes"}
+fastapi = "*"
+# python = ">=3.9.16" # tested on hobson's virtualenv on linux
+python = ">=3.8"
+redis = "*"
+requests = "*"
+httpx = "<0.22,>=0.19"
+# supabase = "*"
+uvicorn = "*"
+sqlalchemy = "*"
+sentry_sdk = "*"
+
+# # Installed by mathtext!!
+# pydantic = "*"
+# sentencepiece = "*"  # included in sentencetransformers or transformers
+# pandas = "*"
+# scipy = "*"
+
+[tool.poetry.dependencies.en_core_web_sm]
+url = "https://github.com/explosion/spacy-models/releases/download/en_core_web_sm-3.4.1/en_core_web_sm-3.4.1.tar.gz"
 
 # TODO: Add a pytest section doctest: +ELLIPSIS
 [tool.pytest.ini_options]
@@ -38,7 +59,8 @@ addopts = "--doctest-modules"
 
 
 [tool.poetry.group.dev.dependencies]
-pytest = "^7.2"
+pytest = "*"
+toml = "*"
 
 [build-system]
 requires = ["poetry-core"]

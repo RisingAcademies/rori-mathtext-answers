@@ -1,63 +1,114 @@
 import os
 from datetime import datetime
 from logging import getLogger
-from mathtext_fastapi.constants import SUPA
+from mathtext_fastapi.constants import SUPABASE_LINK
 
+from sqlalchemy import create_engine
+from sqlalchemy import (
+    Column,
+    DateTime,   
+    ForeignKey,
+    Integer,
+    Text
+)
+from sqlalchemy.ext.declarative import declarative_base
+from sqlalchemy.dialects.postgresql import JSONB
+from sqlalchemy.orm import sessionmaker
 
 log = getLogger(__name__)
 
-
-def log_message_data_through_supabase_api(table_name, log_data):
-    try:
-        logged_data = SUPA.table(table_name).insert(log_data).execute()
-    except Exception as e:
-        log.error(f'Supabase logging failed: {table_name} : {log_data}')
-        logged_data = []
-    return logged_data
+engine = create_engine(SUPABASE_LINK)
+SessionLocal = sessionmaker(
+    autocommit=False,
+    autoflush=False,
+    bind=engine
+)
+Base = declarative_base()
 
 
 def format_datetime_in_isoformat(dt):
     return getattr(dt.now(), 'isoformat', lambda x: None)()
 
 
-def get_or_create_supabase_entry(table_name, insert_data, check_variable=None):
-    """ Checks if project or contact exists and adds entry if not found
+class Project(Base):
+    __tablename__ = "project"
+    id = Column(Integer, primary_key=True, index=True)
+    name = Column(Text)
+    # created_at = Column(DateTime(timezone=True))
+    # modified_at = Column(DateTime(timezone=True))
 
-    Input:
-    - table_name: str- the name of the table in Supabase that is being examined
-    - insert_data: json - the data to insert
-    - check_variable: str/None - the specific field to check for existing match
 
-    Result
-    - logged_data - an object with the Supabase data
-    """
+class Contact(Base):
+    __tablename__ = "contact"
+    id = Column(Integer, primary_key=True, index=True)
+    project = Column(Integer, ForeignKey("project.id"))
+    original_contact_id = Column(Text)
+    urn = Column(Text)
+    language_code = Column(Text)
+    contact_inserted_at = Column(DateTime(timezone=True))
+    # created_at = Column(DateTime(timezone=True))
+    # modified_at = Column(DateTime(timezone=True))
+
+
+class Message(Base):
+    __tablename__ = "message"
+    id = Column(Integer, primary_key=True, index=True)
+    contact = Column(Integer, ForeignKey("contact.id"))
+    original_message_id = Column(Text)
+    text = Column(Text)
+    direction = Column(Text)
+    sender_type = Column(Text)
+    channel_type = Column(Text)
+    message_inserted_at = Column(DateTime(timezone=True))
+    message_modified_at = Column(DateTime(timezone=True))
+    message_sent_at = Column(DateTime(timezone=True))
+    # created_at = Column(DateTime(timezone=True))
+    # modified_at = Column(DateTime(timezone=True))
+    nlu_response = Column(JSONB)
+    request_object = Column(JSONB)
+
+
+def get_or_create_record(
+    table_name,
+    insert_data,
+    check_variable=None
+    ):
+    # Query the database to check if the user exists
     try:
-        if table_name == 'contact':
-            resp = SUPA.table('contact').select("*").eq(
-                "original_contact_id",
-                insert_data['original_contact_id']
-            ).eq(
-                "project",
-                insert_data['project']
-            ).execute()
-        else:
-            resp = SUPA.table(table_name).select("*").eq(
-                check_variable,
-                insert_data[check_variable]
-            ).execute()
-    except Exception as e:
-        log.error(f'Supabase entry retrieval failed: {table_name} : {insert_data}')
-        logged_data = []
-        return logged_data
+        session = SessionLocal()
+        # session = create_database_session()
+    except:
+        log.error(f'Failed to create a database session: {table_name} : {insert_data}')
+        return []
 
-    if len(resp.data) == 0:
-        logged_data = log_message_data_through_supabase_api(
-            table_name,
-            insert_data
-        )
-    else:
-        logged_data = resp
-    return logged_data
+    record = None
+    try:
+        if table_name == 'project':
+            record = session.query(Project).filter(Project.name == insert_data['name']).first()
+        elif table_name == 'contact':
+            record = session.query(Contact).filter(Contact.original_contact_id == insert_data['original_contact_id']).first()
+        else:
+            pass
+    except Exception as e:
+        log.error(f'Supabase entry retrieval failed: {table_name} : {message_data} / {e}')
+        return []
+
+    # If the user exists, return the existing record
+    if record:
+        return record
+
+    # If the user doesn't exist, create a new record
+    if table_name == 'project':
+        new_record = Project(**insert_data)
+    elif table_name == 'contact':
+        new_record = Contact(**insert_data)
+    elif table_name == 'message':
+        new_record = Message(**insert_data)
+    session.add(new_record)
+    session.commit()
+    session.refresh(new_record)
+
+    return new_record
 
 
 def prepare_message_data_for_logging(message_data, nlu_response):
@@ -70,7 +121,7 @@ def prepare_message_data_for_logging(message_data, nlu_response):
         'name': "Rori",
         # Autogenerated fields: id, created_at, modified_at
     }
-    project_data_log = get_or_create_supabase_entry(
+    project_data_log = get_or_create_record(
         'project',
         project_data,
         'name'
@@ -78,24 +129,24 @@ def prepare_message_data_for_logging(message_data, nlu_response):
 
     try:
         contact_data = {
-            'project': project_data_log.data[0]['id'],  # FK
+            'project': project_data_log.id,  # FK
             'original_contact_id': message_data['contact_uuid'],
             'urn': "",
             'language_code': "en",
             'contact_inserted_at': format_datetime_in_isoformat(datetime.now())
             # Autogenerated fields: id, created_at, modified_at
         }
-    except AttributeError:
-        log.error(f'Build contact_data object for Supabase failed: {project_data_log} / {message_data}')
+    except AttributeError as e:
+        log.error(f'Build contact_data object for Supabase failed: {project_data_log} / {message_data} / {e}')
         return False
 
-    contact_data_log = get_or_create_supabase_entry('contact', contact_data)
+    contact_data_log = get_or_create_record('contact', contact_data)
 
     del message_data['author_id']
 
     try:
         message_data = {
-            'contact': contact_data_log.data[0]['id'],  # FK
+            'contact': contact_data_log.id,  # FK
             'original_message_id': message_data['message_id'],
             'text': message_data['message_body'],
             'direction': message_data['message_direction'],
@@ -108,11 +159,8 @@ def prepare_message_data_for_logging(message_data, nlu_response):
             'request_object': message_data
             # Autogenerated fields: created_at, modified_at
         }
-    except AttributeError:
-        log.error(f'Build message_data object for Supabase failed: {contact_data_log} / {message_data}')
+    except AttributeError as e:
+        log.error(f'Build message_data object for Supabase failed: {contact_data_log} / {message_data} / {e}')
         return False
 
-    message_data_log = log_message_data_through_supabase_api(
-        'message',
-        message_data
-    )
+    message_data_log = get_or_create_record('message', message_data)
