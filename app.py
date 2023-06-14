@@ -24,7 +24,7 @@ import mathactive.microlessons.num_one as num_one_quiz
 from mathtext.predict_intent import predict_message_intent
 from mathtext.text2int import text2int
 from mathtext.text2int import TOKENS2INT_ERROR_INT
-from mathtext_fastapi.constants import SENTRY_DSN, SENTRY_TRACES_SAMPLE_RATE
+from mathtext_fastapi.constants import SENTRY_DSN, SENTRY_TRACES_SAMPLE_RATE, SENTRY_PROFILES_SAMPLE_RATE
 from mathtext_fastapi.conversation_manager import manage_conversation_response
 from mathtext_fastapi.nlu import evaluate_message_with_nlu, run_keyword_evaluation
 from mathtext_fastapi.supabase_logging_async import prepare_message_data_for_logging
@@ -42,6 +42,7 @@ sentry_sdk.init(
     # of transactions for performance monitoring.
     # We recommend adjusting this value in production,
     traces_sample_rate=SENTRY_TRACES_SAMPLE_RATE,
+    profiles_sample_rate=SENTRY_PROFILES_SAMPLE_RATE
 )
 
 app = FastAPI()

@@ -1,6 +1,7 @@
 import asyncio
 import datetime as dt
 import re
+import sentry_sdk
 
 from collections.abc import Mapping
 from dateutil.parser import isoparse
@@ -135,23 +136,29 @@ async def evaluate_message_with_nlu(message_text, expected_answer):
     evaluate_message_with_nlu({"author_id": "57787919091", "author_type": "OWNER", "contact_uuid": "df78gsdf78df", "message_body": "I am tired", "message_direction": "inbound", "message_id": "dfgha789789ag9ga", "message_inserted_at": "2023-01-10T02:37:28.487319Z", "message_updated_at": "2023-01-10T02:37:28.487319Z"})  # doctest: +ELLIPSIS
     {'type': 'intent', 'data': 'tired', 'confidence': 1.0}
     """
-    # Call validate payload
-    log.info(f'Starting evaluate message: {message_text}')
-    nlu_response = {}
-    if len(message_text) < 50:
-        # Check the student message for pre-defined keywords
-        nlu_response = run_keyword_evaluation(message_text)
-        if nlu_response['data']:
-            return nlu_response
+    with sentry_sdk.start_transaction(op="task", name="NLU Evaluation"):
+        # Call validate payload
+        log.info(f'Starting evaluate message: {message_text}')
+        nlu_response = {}
         
+        # if len(message_text) < 50:
+        #     # Check the student message for pre-defined keywords
+        
+        with sentry_sdk.start_span(description="Keyword Evaluation"):
+            nlu_response = run_keyword_evaluation(message_text)
+            if nlu_response['data']:
+                return nlu_response
+            
         # Check if the student's message can be converted to a number
-        nlu_response = run_text2int_evaluation(
-            message_text,
-            expected_answer
-        )
+        with sentry_sdk.start_span(description="Answer Evaluation"):
+            nlu_response = run_text2int_evaluation(
+                message_text,
+                expected_answer
+            )
 
-    if nlu_response.get('data') == TOKENS2INT_ERROR_INT:
-        # Run intent classification with logistic regression model
-        nlu_response = run_intent_evaluation(message_text)
+        with sentry_sdk.start_span(description="Model Evaluation"):
+            if nlu_response.get('data') == TOKENS2INT_ERROR_INT:
+                # Run intent classification with logistic regression model
+                nlu_response = run_intent_evaluation(message_text)
 
     return nlu_response

@@ -26,7 +26,8 @@ assert DATA_DIR.is_dir()  # without a DATA_DIR this package can't run
 
 # Sentry monitoring link
 SENTRY_DSN = os.environ.get('SENTRY_DSN')
-SENTRY_TRACES_SAMPLE_RATE = os.environ.get('SENTRY_TRACES_SAMPLE_RATE')
+SENTRY_TRACES_SAMPLE_RATE = float(os.environ.get('SENTRY_TRACES_SAMPLE_RATE'))
+SENTRY_PROFILES_SAMPLE_RATE = float(os.environ.get('SENTRY_PROFILES_SAMPLE_RATE'))
 
 # Supabase logging via sdk
 SUPABASE_URL = os.environ.get('SUPABASE_URL')
