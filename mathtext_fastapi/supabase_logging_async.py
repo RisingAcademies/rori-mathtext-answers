@@ -90,11 +90,11 @@ async def log_batch(batch, retry_attempts=0):
                 request_batch.requests.extend(batch)
         except Exception as e:
             # Undo changes to the database session
-            session.rollback()
+            await session.rollback()
             # Add the data back to preserve it
             request_batch.requests.extend(batch)
         finally:
-            session.close()
+            await session.close()
 
 
 async def prepare_message_data_for_logging(message_data, nlu_response):
