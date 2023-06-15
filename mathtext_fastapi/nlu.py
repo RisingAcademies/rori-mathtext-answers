@@ -144,6 +144,11 @@ async def evaluate_message_with_nlu(message_text, expected_answer):
         if len(message_text) < 50:
             # Check the student message for pre-defined keywords
         
+            with sentry_sdk.start_span(description="Comparison Evaluation"):
+                if expected_answer.lower().strip() == message_text.lower().strip():
+                    result = {'type': 'comparison', 'data': expected_answer, 'confidence': 1}
+                    return result | {'intents': [result, result, result]}
+
             with sentry_sdk.start_span(description="Keyword Evaluation"):
                 nlu_response = run_keyword_evaluation(message_text)
                 if nlu_response['data']:

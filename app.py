@@ -280,18 +280,28 @@ async def evaluate_user_message_with_nlu_api(request: Request):
     message_text = truncate_long_message_text(message_text)
     expected_answer = str(message_dict.get('expected_answer', ''))
 
-    if expected_answer.lower().strip() == message_text.lower().strip():
-        result = {'type': 'comparison', 'data': expected_answer, 'confidence': 1}
+    # if expected_answer.lower().strip() == message_text.lower().strip():
+    #     result = {'type': 'comparison', 'data': expected_answer, 'confidence': 1}
+    #     nlu_response = result | {'intents': [result, result, result]}
+    # else:
+    #     timeout = TIMEOUT_THRESHOLD
+    #     try:
+    #         nlu_response = await asyncio.wait_for(
+    #             evaluate_message_with_nlu(message_text, expected_answer), timeout
+    #         )
+    #     except asyncio.TimeoutError:
+    #         result = {'type': 'timeout', 'data': 32202, 'confidence': 0}
+    #         nlu_response = result | {'intents': [result, result, result]}
+
+    timeout = TIMEOUT_THRESHOLD
+    try:
+        nlu_response = await asyncio.wait_for(
+            evaluate_message_with_nlu(message_text, expected_answer),
+            timeout
+        )
+    except asyncio.TimeoutError:
+        result = {'type': 'timeout', 'data': 32202, 'confidence': 0}
         nlu_response = result | {'intents': [result, result, result]}
-    else:
-        timeout = TIMEOUT_THRESHOLD
-        try:
-            nlu_response = await asyncio.wait_for(
-                evaluate_message_with_nlu(message_text, expected_answer), timeout
-            )
-        except asyncio.TimeoutError:
-            result = {'type': 'timeout', 'data': 32202, 'confidence': 0}
-            nlu_response = result | {'intents': [result, result, result]}
 
     asyncio.create_task(prepare_message_data_for_logging(message_dict, nlu_response))
 
