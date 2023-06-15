@@ -140,7 +140,7 @@ async def evaluate_message_with_nlu(message_text, expected_answer):
         # Call validate payload
         log.info(f'Starting evaluate message: {message_text}')
         nlu_response = {}
-        
+
         if len(message_text) < 50:
             # Check the student message for pre-defined keywords
         
