@@ -240,7 +240,7 @@ def log_payload_errors(payload_object):
 
 
 def truncate_long_message_text(message_text):
-    return message_text[0:150]
+    return message_text[0:100]
 
 
 @app.post("/nlu")
