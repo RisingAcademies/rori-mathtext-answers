@@ -295,8 +295,6 @@ async def evaluate_user_message_with_nlu_api(request: Request):
 
     asyncio.create_task(prepare_message_data_for_logging(message_dict, nlu_response))
 
-    print(nlu_response)
-
     return JSONResponse(content=nlu_response)
 
 
