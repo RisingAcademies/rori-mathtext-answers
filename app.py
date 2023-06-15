@@ -24,7 +24,7 @@ import mathactive.microlessons.num_one as num_one_quiz
 from mathtext.predict_intent import predict_message_intent
 from mathtext.text2int import text2int
 from mathtext.text2int import TOKENS2INT_ERROR_INT
-from mathtext_fastapi.constants import SENTRY_DSN, SENTRY_TRACES_SAMPLE_RATE, SENTRY_PROFILES_SAMPLE_RATE
+from mathtext_fastapi.constants import SENTRY_DSN, SENTRY_TRACES_SAMPLE_RATE, SENTRY_PROFILES_SAMPLE_RATE, TIMEOUT_THRESHOLD
 from mathtext_fastapi.conversation_manager import manage_conversation_response
 from mathtext_fastapi.nlu import evaluate_message_with_nlu, run_keyword_evaluation
 from mathtext_fastapi.supabase_logging_async import prepare_message_data_for_logging
@@ -284,7 +284,7 @@ async def evaluate_user_message_with_nlu_api(request: Request):
         result = {'type': 'comparison', 'data': expected_answer, 'confidence': 1}
         nlu_response = result | {'intents': [result, result, result]}
     else:
-        timeout = 10
+        timeout = TIMEOUT_THRESHOLD
         try:
             nlu_response = await asyncio.wait_for(
                 evaluate_message_with_nlu(message_text, expected_answer), timeout
@@ -294,6 +294,8 @@ async def evaluate_user_message_with_nlu_api(request: Request):
             nlu_response = result | {'intents': [result, result, result]}
 
     asyncio.create_task(prepare_message_data_for_logging(message_dict, nlu_response))
+
+    print(nlu_response)
 
     return JSONResponse(content=nlu_response)
 

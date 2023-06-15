@@ -41,3 +41,6 @@ PROD_SUPABASE_PW = os.environ.get('PROD_SUPABASE_PW')
 
 # Cache for NLU Response
 REDIS_RESPONSE_CACHE_URL = os.environ.get('REDIS_RESPONSE_CACHE_URL')
+
+# Cutoff time for NLU endpoint
+TIMEOUT_THRESHOLD = int(os.environ.get('TIMEOUT_THRESHOLD'))
