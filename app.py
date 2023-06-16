@@ -259,6 +259,8 @@ async def evaluate_user_message_with_nlu_api(request: Request):
     request_body = await request.body()
     log.info(f'Request body: {request_body}')
 
+    await asyncio.sleep(30)
+
     try:
         payload = await request.json()
     except JSONDecodeError as e:
