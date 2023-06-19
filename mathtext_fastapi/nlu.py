@@ -2,6 +2,7 @@ import asyncio
 import datetime as dt
 import re
 import sentry_sdk
+import math
 
 from collections.abc import Mapping
 from dateutil.parser import isoparse
@@ -113,6 +114,10 @@ def run_text2int_evaluation(message_text, expected_answer):
     except ValueError:
         log.error(f'Invalid student message: {message_text}')
         number_api_resp = TOKENS2INT_ERROR_INT
+
+    if number_api_resp == math.inf or number_api_resp == -math.inf:
+        number_api_resp = 32202
+
     return {
         'type': 'integer',
         'data': number_api_resp,
