@@ -81,19 +81,22 @@ async def log_batch(batch, retry_attempts=0):
             # Commit the changes to the db and close the async session
             await session.commit()
         except ConnectionDoesNotExistError as e:
+            log.error(f'Experienced a connection does not exist error --- {e}')
             retry_limit = 3
             if retry_attempts < retry_limit:
                 await log_batch(batch, retry_attempts + 1)
             else:
                 log.error(f'Retry attempts for logging failed --- {e}')
-                # Add the data back to preserve it
+                # Add the data back to the batch to preserve it
                 request_batch.requests.extend(batch)
         except Exception as e:
+            log.error(f'Error during log_batch --- {e}')
             # Undo changes to the database session
             await session.rollback()
             # Add the data back to preserve it
             request_batch.requests.extend(batch)
         finally:
+            log.info(f'Triggered finally --- {e}')
             await session.close()
 
 
