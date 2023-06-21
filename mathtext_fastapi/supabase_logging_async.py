@@ -96,7 +96,7 @@ async def log_batch(batch, retry_attempts=0):
             # Add the data back to preserve it
             request_batch.requests.extend(batch)
         finally:
-            log.info(f'Triggered finally --- {e}')
+            log.info(f'Triggered finally statement')
             await session.close()
 
 
