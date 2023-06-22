@@ -1,27 +1,28 @@
-import os
+import asyncio
+from asyncpg.exceptions import ConnectionDoesNotExistError
+from collections import deque
 from datetime import datetime, timezone
 from logging import getLogger
+from typing import Deque
 
-from sqlalchemy import (
-    Column,
-    Text,
-    Integer,
-    DateTime,
-    ForeignKey
-)
+from mathtext_fastapi.constants import SUPABASE_LINK
+from sqlalchemy import Column, Integer
 from sqlalchemy.dialects.postgresql import JSONB
 from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.future import select
 from sqlalchemy.orm import sessionmaker
 
-from mathtext_fastapi.constants import SUPABASE_LINK
+async def pre_ping_function(conn):
+    await conn.execute("SELECT 1")
 
 log = getLogger(__name__)
 async_engine = create_async_engine(
     SUPABASE_LINK,
-    pool_size=30,
-    pool_timeout=90
+    pool_size=20,
+    pool_timeout=30,
+    pool_pre_ping=True,
+    pool_recycle=1800
 )
 async_session = sessionmaker(
     bind=async_engine,
@@ -29,95 +30,71 @@ async_session = sessionmaker(
     autoflush=False,
     class_=AsyncSession
 )
+
+# Just used for seeing how many connections are in the pool
+pool = async_session().get_bind().pool
 Base = declarative_base()
 
-
-async def format_datetime_in_isoformat(dt):
-    return getattr(dt.now(), 'isoformat', lambda x: None)()
-
-
-async def get_current_date():
-    current_datetimetz = datetime.now(timezone.utc)
-    formated_datetimetz = current_datetimetz.strftime('%Y-%m-%dT%H:%M:%S.%fZ')
-    return datetime.strptime(formated_datetimetz, '%Y-%m-%dT%H:%M:%S.%fZ')
-
-class Project(Base):
-    __tablename__ = "project"
-    id = Column(Integer, primary_key=True, index=True)
-    name = Column(Text)
-    # created_at = Column(DateTime(timezone=True))
-    # modified_at = Column(DateTime(timezone=True))
+# Database logging will happen when the batch reaches this value
+BATCH_SIZE = 30
 
 
-class Contact(Base):
-    __tablename__ = "contact"
-    id = Column(Integer, primary_key=True, index=True)
-    project = Column(Integer, ForeignKey("project.id"))
-    original_contact_id = Column(Text)
-    urn = Column(Text)
-    language_code = Column(Text)
-    contact_inserted_at = Column(DateTime(timezone=True))
-    # created_at = Column(DateTime(timezone=True))
-    # modified_at = Column(DateTime(timezone=True))
+class RequestBatch:
+    """ Manages a double-ended queue (d e que) that stores request objects and the nlu evaluation results """
+    def __init__(self):
+        self.requests: Deque[dict] = deque()
+
+    def add_request(self, request: dict):
+        self.requests.append(request)
+
+    def is_full(self) -> bool:
+        return len(self.requests) >= BATCH_SIZE
+
+    def empty_requests(self):
+        self.requests.clear()
+
+
+request_batch = RequestBatch()
 
 
 class Message(Base):
+    """ A minimal example of the 'message' table in the db.  
+    
+    Decomposition of the request_object to otherfields happens during ETL outside of API """
     __tablename__ = "message"
     id = Column(Integer, primary_key=True, index=True)
-    contact = Column(Integer, ForeignKey("contact.id"))
-    original_message_id = Column(Text)
-    text = Column(Text)
-    direction = Column(Text)
-    sender_type = Column(Text)
-    channel_type = Column(Text)
-    message_inserted_at = Column(DateTime(timezone=True))
-    message_modified_at = Column(DateTime(timezone=True))
-    message_sent_at = Column(DateTime(timezone=True))
-    # created_at = Column(DateTime(timezone=True))
-    # modified_at = Column(DateTime(timezone=True))
     nlu_response = Column(JSONB)
     request_object = Column(JSONB)
 
 
-async def get_or_create_record(
-    table_name,
-    insert_data,
-    check_variable=None
-    ):
-    # Query the database to check if the user exists
+async def log_batch(batch, retry_attempts=0):
+    """ Bulk uploads a set of request/response entries to the database """
     async with async_session() as session:
-        record = None
+        for request in batch:
+            # Add the request data to the db session
+            log_entry = Message(
+                nlu_response=request["nlu_response"],
+                request_object=request["request_object"]
+            )
+            session.add(log_entry)
         try:
-            if table_name == 'project':
-                statement = select(Project).where(Project.name == insert_data['name'])
-                result = await session.execute(statement)
-                record = result.scalar_one_or_none()
-            elif table_name == 'contact':
-                statement = select(Contact).where(Contact.original_contact_id == insert_data['original_contact_id'])
-                result = await session.execute(statement)
-                record = result.scalar_one_or_none()
+            # Commit the changes to the db and close the async session
+            await session.commit()
+        except ConnectionDoesNotExistError as e:
+            retry_limit = 3
+            if retry_attempts < retry_limit:
+                await log_batch(batch, retry_attempts + 1)
             else:
-                pass
+                log.error(f'Retry attempts for logging failed --- {e}')
+                # Add the data back to preserve it
+                request_batch.requests.extend(batch)
         except Exception as e:
-            log.error(f'Supabase entry retrieval failed: {table_name} : {insert_data} / {e}')
-            return []
-
-        # If the user exists, return the existing record
-        if record:
-            return record
-
-        # If the user doesn't exist, create a new record
-        if table_name == 'project':
-            new_record = Project(**insert_data)
-        elif table_name == 'contact':
-            new_record = Contact(**insert_data)
-        elif table_name == 'message':
-            new_record = Message(**insert_data)
-        session.add(new_record)
-        await session.commit()
-        await session.refresh(new_record)
-
-        return new_record
+            # Undo changes to the database session
+            await session.rollback()
+            # Add the data back to preserve it
+            request_batch.requests.extend(batch)
+        finally:
+            await session.close()
 
 
 async def prepare_message_data_for_logging(message_data, nlu_response):
@@ -126,56 +103,22 @@ async def prepare_message_data_for_logging(message_data, nlu_response):
     Input:
     - message_data: an object with the full message data from Turn.io/Whatsapp
     """
-    project_data = {
-        'name': "Rori",
-        # Autogenerated fields: id, created_at, modified_at
-    }
-    project_data_log = await get_or_create_record(
-        'project',
-        project_data,
-        'name'
-    )
-    try:
-        contact_data = {
-            'project': project_data_log.id,  # FK
-            'original_contact_id': message_data['contact_uuid'],
-            'urn': "",
-            'language_code': "en",
-            'contact_inserted_at': await get_current_date()
-            # Autogenerated fields: id, created_at, modified_at
-        }
-    except AttributeError as e:
-        log.error(f'Build contact_data object for Supabase failed: {project_data_log} / {message_data} / {e}')
-        return False
-
-    contact_data_log = await get_or_create_record(
-        'contact',
-        contact_data
-    )
-
+    # Remove phone number from logging
     del message_data['author_id']
 
     try:
         message_data = {
-            'contact': contact_data_log.id,  # FK
-            'original_message_id': message_data['message_id'],
-            'text': message_data['message_body'],
-            'direction': message_data['message_direction'],
-            'sender_type': message_data['author_type'],
-            'channel_type': "whatsapp / turn.io",
-            'message_inserted_at': datetime.strptime(message_data['message_inserted_at'], '%Y-%m-%dT%H:%M:%S.%fZ'),
-            'message_modified_at': datetime.strptime(message_data['message_updated_at'], '%Y-%m-%dT%H:%M:%S.%fZ'),
-            'message_sent_at': await get_current_date(),
             'nlu_response': nlu_response,
             'request_object': message_data
-            # Autogenerated fields: created_at, modified_at
         }
     except AttributeError as e:
-        log.error(f'Build message_data object for Supabase failed: {contact_data_log} / {e}')
+        log.error(f'Build message_data object for Supabase failed: {message_data} / {e}')
         return False
 
-    message_data_log = await get_or_create_record(
-        'message',
-        message_data
-    )
+    request_batch.add_request(message_data)
+    if request_batch.is_full():
+        batch = request_batch.requests.copy()
+        request_batch.empty_requests()
+        asyncio.create_task(log_batch(batch))
+    # print("Current number of connections:", pool.checkedin())
 
