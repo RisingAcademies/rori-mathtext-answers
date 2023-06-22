@@ -176,11 +176,14 @@ async def evaluate_message_with_nlu(message_text, expected_answer):
         log.info(f'Starting evaluate message: {message_text}')
         nlu_response = {}
 
+        expected_answer = expected_answer.lower().replace(',','')
+        message_text = message_text.lower().replace(',','')
+
         if len(message_text) < 50:
             # Check the student message for pre-defined keywords
         
             with sentry_sdk.start_span(description="Comparison Evaluation"):
-                if expected_answer.lower().strip().replace(',','') == message_text.lower().strip().replace(',',''):
+                if expected_answer.strip() == message_text.strip():
                     nlu_response = format_nlu_response(
                         'comparison',
                         expected_answer,
