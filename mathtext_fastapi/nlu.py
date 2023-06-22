@@ -13,6 +13,8 @@ from logging import getLogger
 from mathtext.text2int import text2int, TOKENS2INT_ERROR_INT
 from mathtext.predict_intent import predict_message_intent
 # from mathtext_fastapi.cache import get_or_create_redis_entry
+from mathtext.text2int import format_answer_to_expected_answer_type, format_int_or_float_answer
+
 
 log = getLogger(__name__)
 
@@ -131,6 +133,34 @@ def run_intent_evaluation(message_text):
     return nlu_response
 
 
+def format_nlu_response(eval_type, result, confidence=0, intents=None):
+    """ Formats the result of an evaluation or error to the format Rori expects
+    
+    >>> format_nlu_response('answer_extraction', 'Yes')
+    {'type': 'answer_extraction', 'data': 'Yes', 'confidence': 0, 'intents': [], 'extracted_answer': [], 'numerical_answer': []}
+    """
+    result_obj = {
+        'type': eval_type,
+        'data': result,
+        'confidence': confidence,
+    }
+    result_list = []
+    if eval_type == 'timeout' or eval_type == 'error':
+        result_list = [
+            result_obj.copy() for i in range(3)
+        ]
+    
+    nlu_response = {
+        'type': eval_type,
+        'data': result,
+        'confidence': confidence,
+        'intents': result_list,
+        'extracted_answer': [],
+        'numerical_answer': []
+    }
+    return nlu_response
+
+
 async def evaluate_message_with_nlu(message_text, expected_answer):
     """ Process a student's message using NLU functions and send the result
 
@@ -151,24 +181,39 @@ async def evaluate_message_with_nlu(message_text, expected_answer):
         
             with sentry_sdk.start_span(description="Comparison Evaluation"):
                 if expected_answer.lower().strip() == message_text.lower().strip():
-                    result = {'type': 'comparison', 'data': expected_answer, 'confidence': 1}
-                    return result | {'intents': [result, result, result]}
+                    nlu_response = format_nlu_response(
+                        'comparison',
+                        expected_answer,
+                        1
+                    )
+                    return nlu_response
 
             with sentry_sdk.start_span(description="Keyword Evaluation"):
-                nlu_response = run_keyword_evaluation(message_text)
-                if nlu_response['data']:
+                result = run_keyword_evaluation(message_text)
+                if result['data']:
+                    nlu_response = format_nlu_response(
+                        'keyword',
+                        result['data'],
+                        result['confidence']
+                    )
                     return nlu_response
-                
-            # Check if the student's message can be converted to a number
-            with sentry_sdk.start_span(description="Answer Evaluation"):
-                nlu_response = run_text2int_evaluation(
-                    message_text,
-                    expected_answer
-                )
+
+            # Check if the student's message can be converted to match the expected answer's format
+            with sentry_sdk.start_span(description="Text Answer Evaluation"):
+                result = format_answer_to_expected_answer_type(message_text, expected_answer)
+                if result != TOKENS2INT_ERROR_INT:
+                    nlu_response = format_nlu_response('answer_extraction', result)
+                    return nlu_response
+
+            # Check if the student's message can be converted to a float or int
+            with sentry_sdk.start_span(description="Number Evaluation"):
+                result = format_int_or_float_answer(message_text)
+                if result != TOKENS2INT_ERROR_INT:
+                    nlu_response = format_nlu_response('number_extraction', result)
+                    return nlu_response
 
         with sentry_sdk.start_span(description="Model Evaluation"):
-            if nlu_response.get('data') == TOKENS2INT_ERROR_INT:
+            if nlu_response == TOKENS2INT_ERROR_INT:
                 # Run intent classification with logistic regression model
                 nlu_response = run_intent_evaluation(message_text)
-
     return nlu_response

@@ -29,9 +29,9 @@ from mathtext_fastapi.conversation_manager import manage_conversation_response
 from mathtext_fastapi.nlu import evaluate_message_with_nlu, run_keyword_evaluation
 from mathtext_fastapi.supabase_logging_async import prepare_message_data_for_logging
 from mathtext_fastapi.v2_conversation_manager import manage_conversation_response
+from mathtext_fastapi.nlu import format_nlu_response
 
-
-ERROR_RESPONSE_DICT = {'type': 'error', 'data': TOKENS2INT_ERROR_INT, 'confidence': 0}
+ERROR_RESPONSE_DICT = format_nlu_response('error', 32202)
 
 log = getLogger(__name__)
 
@@ -287,8 +287,7 @@ async def evaluate_user_message_with_nlu_api(request: Request):
             TIMEOUT_THRESHOLD
         )
     except asyncio.TimeoutError:
-        result = {'type': 'timeout', 'data': 32202, 'confidence': 0}
-        nlu_response = result | {'intents': [result, result, result]}
+        nlu_response = format_nlu_response('timeout', 32202)
 
     asyncio.create_task(prepare_message_data_for_logging(message_dict, nlu_response))
 
