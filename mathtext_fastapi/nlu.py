@@ -133,7 +133,7 @@ def run_intent_evaluation(message_text):
     return nlu_response
 
 
-def format_nlu_response(eval_type, result, confidence=0, intents=None):
+def format_nlu_response(eval_type, result, confidence=0, intents=[]):
     """ Formats the result of an evaluation or error to the format Rori expects
     
     >>> format_nlu_response('answer_extraction', 'Yes')
@@ -144,9 +144,9 @@ def format_nlu_response(eval_type, result, confidence=0, intents=None):
         'data': result,
         'confidence': confidence,
     }
-    result_list = []
+
     if eval_type == 'timeout' or eval_type == 'error':
-        result_list = [
+        intents = [
             result_obj.copy() for i in range(3)
         ]
     
@@ -154,7 +154,7 @@ def format_nlu_response(eval_type, result, confidence=0, intents=None):
         'type': eval_type,
         'data': result,
         'confidence': confidence,
-        'intents': result_list,
+        'intents': intents,
         'extracted_answer': [],
         'numerical_answer': []
     }
@@ -213,7 +213,12 @@ async def evaluate_message_with_nlu(message_text, expected_answer):
                     return nlu_response
 
         with sentry_sdk.start_span(description="Model Evaluation"):
-            if nlu_response == TOKENS2INT_ERROR_INT:
-                # Run intent classification with logistic regression model
-                nlu_response = run_intent_evaluation(message_text)
+            # Run intent classification with logistic regression model
+            result = run_intent_evaluation(message_text)
+            nlu_response = format_nlu_response(
+                'intent',
+                result['data'],
+                result['confidence'],
+                result['intents']
+            )
     return nlu_response
