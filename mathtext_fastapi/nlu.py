@@ -211,6 +211,8 @@ async def evaluate_message_with_nlu(message_text, expected_answer):
             # Check if the student's message can be converted to a float or int
             with sentry_sdk.start_span(description="Number Evaluation"):
                 result = format_int_or_float_answer(message_text)
+                if result == math.inf or result == -math.inf:
+                    result = TOKENS2INT_ERROR_INT
                 if result != TOKENS2INT_ERROR_INT:
                     nlu_response = format_nlu_response('number_extraction', result)
                     return nlu_response
