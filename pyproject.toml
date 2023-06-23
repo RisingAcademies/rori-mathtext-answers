@@ -43,6 +43,7 @@ httpx = "<0.22,>=0.19"
 uvicorn = "*"
 sqlalchemy = "*"
 sentry_sdk = "*"
+gunicorn = "*"
 
 # # Installed by mathtext!!
 # pydantic = "*"
