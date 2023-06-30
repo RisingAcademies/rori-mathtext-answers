@@ -262,14 +262,13 @@ async def evaluate_user_message_with_nlu_api(request: Request):
     try:
         payload = await request.json()
     except JSONDecodeError as e:
-        log.error(f'JSONDecodeError: {e}')
+        log.info(f'JSONDecodeError: {e}')
         return ERROR_RESPONSE_DICT
     
     message_dict = payload.get('message_data')
     log.info(f'Request json: {payload}')
 
     if not message_dict:
-        log.error(f'Payload: {payload}')
         message_dict = payload.get('message', {})
 
     if not payload_is_valid(message_dict):
