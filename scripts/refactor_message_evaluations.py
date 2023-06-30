@@ -197,7 +197,7 @@ def normalize_message_and_answer(student_message, expected_answer):
     >>> normalize_message_and_answer("Maybe 5000", "5,000")
     ('maybe 5000', '5000')
     >>> normalize_message_and_answer("Yeah I think so", "Yes")
-    ("yeah i think so", "yes")
+    ('yeah i think so', 'yes')
     """
     normalized_student_message = str(student_message).strip().replace(',','').lower()[0:100] 
     normalized_expected_answer = str(expected_answer).strip().replace(',','').lower()
@@ -215,7 +215,7 @@ def extract_approved_response_from_phrase(
     >>> extract_approved_response_from_phrase(['*menu*', 'y'], 'yes', 'Yes')   
     'Yes'
     >>> extract_approved_response_from_phrase(['maybe', '5000'], '5000', '5000')   
-    5000
+    '5000'
     """
     answer_dict = copy.deepcopy(APPROVED_RESPONSES_BY_TYPE)
     if not answer_dict.get(normalized_expected_answer,''):
@@ -266,9 +266,9 @@ def extract_numbers_with_regex(
     >>> extract_numbers_with_regex("maybe 5000", "5000", "5,000")
     '5,000'
     >>> extract_numbers_with_regex("maybe it's 2.5 or 3.5", "5", "5")
-    None
+    
     >>> extract_numbers_with_regex("maybe", "5", "5")
-    None
+    
     """
     result = re.search(r"\d+(?:\.\d+)?|\d", normalized_student_message)  
     is_num_expected_answer = is_number(normalized_expected_answer)
