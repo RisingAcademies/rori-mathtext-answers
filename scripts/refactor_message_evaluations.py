@@ -379,5 +379,4 @@ def simulate_evaluation(spreadsheet='rori_student_responses.xlsx'):
     print(f"Total Cases: {total_cases}")
     print(f"Evaluation Matches: {evaluation_matches}")
 
-simulate_evaluation()
 
