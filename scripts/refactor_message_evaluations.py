@@ -169,8 +169,8 @@ NUMBER_MAP = {
 
 def regex_evaluation(normalized_student_message):
     """
-    >>> regex_evaluation('it's 11:30')
-    11:30
+    >>> regex_evaluation("it's 11:30")
+    '11:30'
     >>> regex_evaluation('maybe 1/2')
     '1/2'
     """
@@ -195,9 +195,9 @@ def regex_evaluation(normalized_student_message):
 def normalize_message_and_answer(student_message, expected_answer):
     """
     >>> normalize_message_and_answer("Maybe 5000", "5,000")
-    "maybe 5000", "5000"
+    ('maybe 5000', '5000')
     >>> normalize_message_and_answer("Yeah I think so", "Yes)
-    "yeah I think so", "yes"
+    ("yeah I think so", "yes")
     """
     normalized_student_message = str(student_message).strip().replace(',','').lower()[0:100] 
     normalized_expected_answer = str(expected_answer).strip().replace(',','').lower()
@@ -211,9 +211,9 @@ def extract_approved_response_from_phrase(
 ):
     """
     >>> extract_approved_response_from_phrase(['maybe', 'y'], 'yes', 'Yes')   
-    Yes
+    'Yes'
     >>> extract_approved_response_from_phrase(['*menu*', 'y'], 'yes', 'Yes')   
-    menu
+    'menu'
     >>> extract_approved_response_from_phrase(['maybe', '5000'], '5000', '5000')   
     None
     """
@@ -254,27 +254,6 @@ def is_number(normalized_student_message):
             return True
     except ValueError:
         pass
-    return False
-
-
-def is_answer_type_different(
-    normalized_student_message, normalized_expected_answer
-):
-    """
-    >>> is_answer_type_different("2", "B")
-    True
-    >>> is_answer_type_different("2", "2.5")
-    False
-    >>> is_answer_type_different("B", "Yes")
-    True
-    """
-    is_num_student_message = is_number(normalized_student_message)
-    is_text_student_message = normalized_student_message in TEXT_ANSWER_LOOKUP
-    is_num_expected_answer = is_number(normalized_student_message)
-    is_text_expected_answer = normalized_expected_answer in TEXT_ANSWER_LOOKUP
-
-    if is_num_student_message and is_text_expected_answer or is_text_student_message and is_num_expected_answer:
-        return True
     return False
 
 
