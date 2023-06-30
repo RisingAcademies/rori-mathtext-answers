@@ -196,7 +196,7 @@ def normalize_message_and_answer(student_message, expected_answer):
     """
     >>> normalize_message_and_answer("Maybe 5000", "5,000")
     ('maybe 5000', '5000')
-    >>> normalize_message_and_answer("Yeah I think so", "Yes)
+    >>> normalize_message_and_answer("Yeah I think so", "Yes")
     ("yeah I think so", "yes")
     """
     normalized_student_message = str(student_message).strip().replace(',','').lower()[0:100] 
@@ -213,7 +213,7 @@ def extract_approved_response_from_phrase(
     >>> extract_approved_response_from_phrase(['maybe', 'y'], 'yes', 'Yes')   
     'Yes'
     >>> extract_approved_response_from_phrase(['*menu*', 'y'], 'yes', 'Yes')   
-    'menu'
+    'Yes'
     >>> extract_approved_response_from_phrase(['maybe', '5000'], '5000', '5000')   
     None
     """
@@ -263,7 +263,7 @@ def extract_numbers_with_regex(
     expected_answer
 ):
     """
-    >>> extract_numbers_with_regex("maybe 5000", "5000", 5,000")
+    >>> extract_numbers_with_regex("maybe 5000", "5000", "5,000")
     '5,000'
     >>> extract_numbers_with_regex("maybe it's 2.5 or 3.5", "5", "5")
     None
