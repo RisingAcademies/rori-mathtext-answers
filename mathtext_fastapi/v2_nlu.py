@@ -228,7 +228,7 @@ async def v2_evaluate_message_with_nlu(message_text, expected_answer):
                 normalized_message_text = message_text.lower()
                 if normalized_expected_answer.strip() == normalized_message_text.strip():
                     return format_single_event_nlu_response(
-                        'confidence',
+                        'comparison',
                         expected_answer
                     )
 
