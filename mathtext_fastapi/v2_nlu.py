@@ -133,11 +133,13 @@ def run_intent_evaluation(message_text):
     return nlu_response
 
 
-def format_nlu_response(eval_type, result, confidence=0, intents=[]):
-    """ Formats the result of an evaluation or error to the format Rori expects
+def format_single_event_nlu_response(eval_type, result, confidence=1, intents=[]):
+    """ Formats the result of a single event to the standard nlu response format
+
+    Currently applies to comparison evaluation, timeout, and error responses
     
-    >>> format_nlu_response('answer_extraction', 'Yes')
-    {'type': 'answer_extraction', 'data': 'Yes', 'confidence': 0, 'intents': [], 'extracted_answer': [], 'numerical_answer': []}
+    >>> format_single_event_nlu_response('comparison', '25')
+    {'type': 'confidence', 'data': '25', 'confidence': 1, 'intents': [{'type': 'confidence', 'data': '25', 'confidence': 1}, {'type': 'confidence', 'data': '25', 'confidence': 1}, {'type': 'confidence', 'data': '25', 'confidence': 1}]}
     """
     result_obj = {
         'type': eval_type,
@@ -154,18 +156,22 @@ def format_nlu_response(eval_type, result, confidence=0, intents=[]):
         'data': result,
         'confidence': confidence,
         'intents': intents,
-        # 'extracted_answer': [],
-        # 'numerical_answer': []
     }
     return nlu_response
 
 
-def build_nlu_response_object(results):
+def build_evaluation_sequence_nlu_response_object(results):
+    """ Builds a response that based on the outcome of all the evaluations 
+    
+    >>> build_evaluation_sequence_nlu_response_object({'keyword': None, 'answer_extraction': 'Yes', 'numerical_extraction': None, 'intents': {'data': 'yes', 'confidence': 0.7285137685012592, 'intents': [{'type': 'intent', 'data': 
+    'yes', 'confidence': 0.7285137685012592}, {'type': 'intent', 'data': 'next_lesson', 'confidence': 0.43764260237929115}, {'type': 'intent', 'data': 'spam', 'confidence': 0.39586822881508865}]}})
+    {'type': 'answer_extraction', 'data': 'Yes', 'confidence': 0, 'intents': [{'type': 'intent', 'data': 'yes', 'confidence': 0.7285137685012592}, {'type': 'intent', 'data': 'next_lesson', 'confidence': 0.43764260237929115}, {'type': 'intent', 'data': 'spam', 'confidence': 0.39586822881508865}]}
+    """
     nlu_response = {
         'type': '',
         'data': '',
         'confidence': 0,
-        'intents': results['intents']['intents']
+        'intents': results.get('intents', []).get('intents', '')
     }
 
     if results.get('answer_extraction', ''):
@@ -222,7 +228,7 @@ async def v2_evaluate_message_with_nlu(message_text, expected_answer):
                 normalized_expected_answer = expected_answer.lower()
                 normalized_message_text = message_text.lower()
                 if normalized_expected_answer.strip() == normalized_message_text.strip():
-                    return format_nlu_response(
+                    return format_single_event_nlu_response(
                         'confidence',
                         expected_answer
                     )
@@ -230,12 +236,10 @@ async def v2_evaluate_message_with_nlu(message_text, expected_answer):
             with sentry_sdk.start_span(description="V2 Keyword Evaluation"):
                 result = v2_run_keyword_evaluation(message_text)
                 if result['data']:
-                    nlu_response = format_nlu_response(
-                        'keyword',
-                        result['data'],
-                        result['confidence']
-                    )
-                    nlu_responses['keyword'] = nlu_response
+                    nlu_responses['keyword'] = {
+                        'data': result['data'],
+                        'confidence': result['confidence']
+                    }
 
             # Check if the student's message can be converted to match the expected answer's format
             with sentry_sdk.start_span(description="V2 Text Answer Evaluation"):
@@ -255,14 +259,12 @@ async def v2_evaluate_message_with_nlu(message_text, expected_answer):
         with sentry_sdk.start_span(description="V2 Model Evaluation"):
             # Run intent classification with logistic regression model
             result = run_intent_evaluation(message_text)
-            nlu_response = format_nlu_response(
-                'intent',
-                result['data'],
-                result['confidence'],
-                result['intents']
-            )
-            nlu_responses['intents'] = nlu_response
+            nlu_responses['intents'] = {
+                'data': result['data'],
+                'confidence': result['confidence'],
+                'intents': result['intents']
+            }
 
-    nlu_response = build_nlu_response_object(nlu_responses)
+    nlu_response = build_evaluation_sequence_nlu_response_object(nlu_responses)
 
     return nlu_response
