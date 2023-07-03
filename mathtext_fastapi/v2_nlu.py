@@ -205,7 +205,7 @@ async def v2_evaluate_message_with_nlu(message_text, expected_answer):
     evaluate_message_with_nlu({"author_id": "57787919091", "author_type": "OWNER", "contact_uuid": "df78gsdf78df", "message_body": "I am tired", "message_direction": "inbound", "message_id": "dfgha789789ag9ga", "message_inserted_at": "2023-01-10T02:37:28.487319Z", "message_updated_at": "2023-01-10T02:37:28.487319Z"})  # doctest: +ELLIPSIS
     {'type': 'intent', 'data': 'tired', 'confidence': 1.0}
     """
-    with sentry_sdk.start_transaction(op="task", name="NLU Evaluation"):
+    with sentry_sdk.start_transaction(op="task", name="V2 NLU Evaluation"):
         # Call validate payload
         log.info(f'Starting evaluate message: {message_text}')
         nlu_responses = {
@@ -224,13 +224,13 @@ async def v2_evaluate_message_with_nlu(message_text, expected_answer):
         if len(message_text) < 50:
             # Check the student message for pre-defined keywords
             
-            with sentry_sdk.start_span(description="Comparison Evaluation"):
+            with sentry_sdk.start_span(description="V2 Comparison Evaluation"):
                 normalized_expected_answer = expected_answer.lower()
                 normalized_message_text = message_text.lower()
                 if normalized_expected_answer.strip() == normalized_message_text.strip():
                     nlu_responses['comparison'] = expected_answer
 
-            with sentry_sdk.start_span(description="Keyword Evaluation"):
+            with sentry_sdk.start_span(description="V2 Keyword Evaluation"):
                 result = v2_run_keyword_evaluation(message_text)
                 if result['data']:
                     nlu_response = format_nlu_response(
@@ -241,13 +241,13 @@ async def v2_evaluate_message_with_nlu(message_text, expected_answer):
                     nlu_responses['keyword'] = nlu_response
 
             # Check if the student's message can be converted to match the expected answer's format
-            with sentry_sdk.start_span(description="Text Answer Evaluation"):
+            with sentry_sdk.start_span(description="V2 Text Answer Evaluation"):
                 result = format_answer_to_expected_answer_type(message_text, expected_answer)
                 if result != TOKENS2INT_ERROR_INT:
                     nlu_responses['answer_extraction'] = result
 
             # Check if the student's message can be converted to a float or int
-            with sentry_sdk.start_span(description="Number Evaluation"):
+            with sentry_sdk.start_span(description="V2 Number Evaluation"):
                 result = format_int_or_float_answer(message_text)
                 if result == math.inf or result == -math.inf:
                     result = TOKENS2INT_ERROR_INT
@@ -255,7 +255,7 @@ async def v2_evaluate_message_with_nlu(message_text, expected_answer):
                 if result != TOKENS2INT_ERROR_INT:
                     nlu_responses['number_extraction'] = result
 
-        with sentry_sdk.start_span(description="Model Evaluation"):
+        with sentry_sdk.start_span(description="V2 Model Evaluation"):
             # Run intent classification with logistic regression model
             result = run_intent_evaluation(message_text)
             nlu_response = format_nlu_response(
