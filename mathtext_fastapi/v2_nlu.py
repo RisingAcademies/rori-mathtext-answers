@@ -145,18 +145,17 @@ def format_nlu_response(eval_type, result, confidence=0, intents=[]):
         'confidence': confidence,
     }
 
-    if eval_type == 'timeout' or eval_type == 'error':
-        intents = [
-            result_obj.copy() for i in range(3)
-        ]
+    intents = [
+        result_obj.copy() for i in range(3)
+    ]
     
     nlu_response = {
         'type': eval_type,
         'data': result,
         'confidence': confidence,
         'intents': intents,
-        'extracted_answer': [],
-        'numerical_answer': []
+        # 'extracted_answer': [],
+        # 'numerical_answer': []
     }
     return nlu_response
 
@@ -169,11 +168,7 @@ def build_nlu_response_object(results):
         'intents': results['intents']['intents']
     }
 
-    if results.get('comparison', ''):
-        nlu_response['type'] = 'comparison'
-        nlu_response['data'] = results.get('comparison', '')
-        nlu_response['confidence'] = 1
-    elif results.get('answer_extraction', ''):
+    if results.get('answer_extraction', ''):
         nlu_response['type'] = 'answer_extraction'
         nlu_response['data'] = results.get('answer_extraction', '')
     elif results.get('number_extraction', ''):
@@ -209,7 +204,6 @@ async def v2_evaluate_message_with_nlu(message_text, expected_answer):
         # Call validate payload
         log.info(f'Starting evaluate message: {message_text}')
         nlu_responses = {
-            'comparison': None,
             'keyword': None,
             'answer_extraction': None,
             'numerical_extraction': None,
@@ -228,7 +222,10 @@ async def v2_evaluate_message_with_nlu(message_text, expected_answer):
                 normalized_expected_answer = expected_answer.lower()
                 normalized_message_text = message_text.lower()
                 if normalized_expected_answer.strip() == normalized_message_text.strip():
-                    nlu_responses['comparison'] = expected_answer
+                    return format_nlu_response(
+                        'confidence',
+                        expected_answer
+                    )
 
             with sentry_sdk.start_span(description="V2 Keyword Evaluation"):
                 result = v2_run_keyword_evaluation(message_text)
