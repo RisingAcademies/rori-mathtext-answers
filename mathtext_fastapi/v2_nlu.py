@@ -139,7 +139,7 @@ def format_single_event_nlu_response(eval_type, result, confidence=1, intents=[]
     Currently applies to comparison evaluation, timeout, and error responses
     
     >>> format_single_event_nlu_response('comparison', '25')
-    {'type': 'confidence', 'data': '25', 'confidence': 1, 'intents': [{'type': 'confidence', 'data': '25', 'confidence': 1}, {'type': 'confidence', 'data': '25', 'confidence': 1}, {'type': 'confidence', 'data': '25', 'confidence': 1}]}
+    {'type': 'comparison', 'data': '25', 'confidence': 1, 'intents': [{'type': 'comparison', 'data': '25', 'confidence': 1}, {'type': 'comparison', 'data': '25', 'confidence': 1}, {'type': 'comparison', 'data': '25', 'confidence': 1}]}
     """
     result_obj = {
         'type': eval_type,
@@ -163,8 +163,7 @@ def format_single_event_nlu_response(eval_type, result, confidence=1, intents=[]
 def build_evaluation_sequence_nlu_response_object(results):
     """ Builds a response that based on the outcome of all the evaluations 
     
-    >>> build_evaluation_sequence_nlu_response_object({'keyword': None, 'answer_extraction': 'Yes', 'numerical_extraction': None, 'intents': {'data': 'yes', 'confidence': 0.7285137685012592, 'intents': [{'type': 'intent', 'data': 
-    'yes', 'confidence': 0.7285137685012592}, {'type': 'intent', 'data': 'next_lesson', 'confidence': 0.43764260237929115}, {'type': 'intent', 'data': 'spam', 'confidence': 0.39586822881508865}]}})
+    >>> build_evaluation_sequence_nlu_response_object({'keyword': None, 'answer_extraction': 'Yes', 'numerical_extraction': None, 'intents': {'data': 'yes', 'confidence': 0.7285137685012592, 'intents': [{'type': 'intent', 'data': 'yes', 'confidence': 0.7285137685012592}, {'type': 'intent', 'data': 'next_lesson', 'confidence': 0.43764260237929115}, {'type': 'intent', 'data': 'spam', 'confidence': 0.39586822881508865}]}})
     {'type': 'answer_extraction', 'data': 'Yes', 'confidence': 0, 'intents': [{'type': 'intent', 'data': 'yes', 'confidence': 0.7285137685012592}, {'type': 'intent', 'data': 'next_lesson', 'confidence': 0.43764260237929115}, {'type': 'intent', 'data': 'spam', 'confidence': 0.39586822881508865}]}
     """
     nlu_response = {
