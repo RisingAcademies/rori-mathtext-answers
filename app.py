@@ -32,7 +32,7 @@ from mathtext_fastapi.v2_conversation_manager import manage_conversation_respons
 from mathtext_fastapi.nlu import format_nlu_response
 
 from mathtext_fastapi.v2_nlu import v2_evaluate_message_with_nlu
-
+from mathtext_fastapi.v3_nlu import v3_evaluate_message_with_nlu
 
 ERROR_RESPONSE_DICT = format_nlu_response('error', 32202)
 
@@ -342,6 +342,57 @@ async def evaluate_user_message_with_nlu_api(request: Request):
     asyncio.create_task(prepare_message_data_for_logging(message_dict, nlu_response))
 
     return JSONResponse(content=nlu_response)
+
+
+
+@app.post("/v3/nlu")
+async def evaluate_user_message_with_nlu_api(request: Request):
+    """ Calls nlu evaluation and returns the nlu_response
+
+    Input
+    - request.body: json - message data for the most recent user response
+
+    Output
+    - int_data_dict or sent_data_dict: dict - the type of NLU run and result
+      {'type':'integer', 'data': '8', 'confidence': 0}
+    """
+    log.info(f'Received request: {request}')
+    log.info(f'Request header: {request.headers}')
+    request_body = await request.body()
+    log.info(f'Request body: {request_body}')
+
+    try:
+        payload = await request.json()
+    except JSONDecodeError as e:
+        log.info(f'JSONDecodeError: {e}')
+        return ERROR_RESPONSE_DICT
+    
+    message_dict = payload.get('message_data')
+    log.info(f'Request json: {payload}')
+
+    if not message_dict:
+        message_dict = payload.get('message', {})
+
+    if not payload_is_valid(message_dict):
+        log_payload_errors(message_dict)
+        return ERROR_RESPONSE_DICT
+
+    message_text = str(message_dict.get('message_body', ''))
+    message_text = truncate_long_message_text(message_text)
+    expected_answer = str(message_dict.get('expected_answer', ''))
+
+    try:
+        nlu_response = await asyncio.wait_for(
+            v3_evaluate_message_with_nlu(message_text, expected_answer),
+            TIMEOUT_THRESHOLD
+        )
+    except asyncio.TimeoutError:
+        nlu_response = format_nlu_response('timeout', 32202)
+
+    asyncio.create_task(prepare_message_data_for_logging(message_dict, nlu_response))
+
+    return JSONResponse(content=nlu_response)
+
 
 
 
