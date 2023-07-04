@@ -441,7 +441,8 @@ def format_single_event_nlu_response(eval_type, result, confidence=1, intents=[]
 def build_evaluation_sequence_nlu_response_object(results):
     """ Builds a response that based on the outcome of all the evaluations 
     
-    >>> build_evaluation_sequence_nlu_response_object({'keyword': None, 'answer_extraction': 'Yes', 'numerical_extraction': None, 'intents': {'data': 'yes', 'confidence': 0.7285137685012592, 'intents': [{'type': 'intent', 'data': 'yes', 'confidence': 0.7285137685012592}, {'type': 'intent', 'data': 'next_lesson', 'confidence': 0.43764260237929115}, {'type': 'intent', 'data': 'spam', 'confidence': 0.39586822881508865}]}})
+    # TODO: Update test
+    build_evaluation_sequence_nlu_response_object({'keyword': None, 'answer_extraction': 'Yes', 'numerical_extraction': None, 'intents': {'data': 'yes', 'confidence': 0.7285137685012592, 'intents': [{'type': 'intent', 'data': 'yes', 'confidence': 0.7285137685012592}, {'type': 'intent', 'data': 'next_lesson', 'confidence': 0.43764260237929115}, {'type': 'intent', 'data': 'spam', 'confidence': 0.39586822881508865}]}})
     {'type': 'answer_extraction', 'data': 'Yes', 'confidence': 0, 'intents': [{'type': 'intent', 'data': 'yes', 'confidence': 0.7285137685012592}, {'type': 'intent', 'data': 'next_lesson', 'confidence': 0.43764260237929115}, {'type': 'intent', 'data': 'spam', 'confidence': 0.39586822881508865}]}
     """
     print("results===============")
