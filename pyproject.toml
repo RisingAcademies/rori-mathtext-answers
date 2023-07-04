@@ -29,10 +29,8 @@ psycopg2 = "*"
 asyncpg = "*"
 python-Levenshtein = "*"
 
-mathactive = "0.0.12"
-# mathactive = {git = "git@gitlab.com:tangibleai/community/mathactive.git", rev = "vlad"}
-mathtext = "0.0.12"
-# mathtext = {git = "https://gitlab.com/tangibleai/community/mathtext", rev = "hobs-minimal-changes"}
+mathactive = "0.0.13"
+mathtext = "0.0.13"
 fastapi = "*"
 # python = ">=3.9.16" # tested on hobson's virtualenv on linux
 python = ">=3.8"
