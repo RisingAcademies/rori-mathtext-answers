@@ -14,6 +14,7 @@ import logging
 from logging import getLogger
 import os
 import sentry_sdk
+from sentry_sdk import add_breadcrumb
 from sentry_sdk.integrations.logging import LoggingIntegration
 
 from fastapi import FastAPI, Request
@@ -257,7 +258,7 @@ def log_payload_errors(payload_object):
 def truncate_long_message_text(message_text):
     return message_text[0:100]
 
-from sentry_sdk import add_breadcrumb
+
 @app.post("/nlu")
 async def evaluate_user_message_with_nlu_api(request: Request):
     """ Calls nlu evaluation and returns the nlu_response
