@@ -10,10 +10,10 @@ from fuzzywuzzy import fuzz
 from fuzzywuzzy import process
 from logging import getLogger
 
-from mathtext.text2int import text2int, TOKENS2INT_ERROR_INT
+from mathtext.constants import TOKENS2INT_ERROR_INT
 from mathtext.predict_intent import predict_message_intent
 # from mathtext_fastapi.cache import get_or_create_redis_entry
-from mathtext.text2int import format_answer_to_expected_answer_type, format_int_or_float_answer
+from mathtext.v1_text_processing import format_answer_to_expected_answer_type, format_int_or_float_answer
 
 
 log = getLogger(__name__)
@@ -104,27 +104,6 @@ def run_keyword_evaluation(message_text):
             nlu_response['confidence'] = score / 100
 
     return nlu_response
-
-
-# @get_or_create_redis_entry("run_text2int_evaluation")
-def run_text2int_evaluation(message_text, expected_answer):
-    try:
-        number_api_resp = text2int(
-            message_text.lower(),
-            expected_answer
-        )
-    except ValueError:
-        log.error(f'Invalid student message: {message_text}')
-        number_api_resp = TOKENS2INT_ERROR_INT
-
-    if number_api_resp == math.inf or number_api_resp == -math.inf:
-        number_api_resp = TOKENS2INT_ERROR_INT
-
-    return {
-        'type': 'integer',
-        'data': number_api_resp,
-        'confidence': 0
-    } 
 
 
 # @get_or_create_redis_entry("run_intent_evaluation")

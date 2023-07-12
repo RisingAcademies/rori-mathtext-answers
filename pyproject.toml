@@ -29,8 +29,8 @@ psycopg2 = "*"
 asyncpg = "*"
 python-Levenshtein = "*"
 
-mathactive = "0.0.13"
-mathtext = "0.0.13"
+mathactive = "0.0.14"
+mathtext = "0.0.15"
 fastapi = "*"
 # python = ">=3.9.16" # tested on hobson's virtualenv on linux
 python = ">=3.8"

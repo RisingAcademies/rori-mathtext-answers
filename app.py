@@ -6,54 +6,40 @@ or
 import asyncio
 import ast
 import datetime as dt
-from dateutil.parser import isoparse
-from collections.abc import Mapping
-import json
-from json import JSONDecodeError
-import logging
-from logging import getLogger
-import os
 import sentry_sdk
-from sentry_sdk import add_breadcrumb
-from sentry_sdk.integrations.logging import LoggingIntegration
 
+from collections.abc import Mapping
+from dateutil.parser import isoparse
 from fastapi import FastAPI, Request
 from fastapi.responses import JSONResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
+from json import JSONDecodeError
+from logging import getLogger
 from pydantic import BaseModel
+from sentry_sdk import add_breadcrumb
 
 import mathactive.microlessons.num_one as num_one_quiz
+from mathtext.constants import TOKENS2INT_ERROR_INT
 from mathtext.predict_intent import predict_message_intent
-from mathtext.text2int import text2int
-from mathtext.text2int import TOKENS2INT_ERROR_INT
 from mathtext_fastapi.constants import SENTRY_DSN, SENTRY_TRACES_SAMPLE_RATE, SENTRY_PROFILES_SAMPLE_RATE, TIMEOUT_THRESHOLD
+# TODO: Simplify conversation_manager code
 from mathtext_fastapi.conversation_manager import manage_conversation_response
-from mathtext_fastapi.nlu import evaluate_message_with_nlu, run_keyword_evaluation
+from mathtext_fastapi.nlu import (
+    evaluate_message_with_nlu,
+    run_keyword_evaluation,
+    format_nlu_response
+)
 from mathtext_fastapi.supabase_logging_async import prepare_message_data_for_logging
 from mathtext_fastapi.v2_conversation_manager import manage_conversation_response
-from mathtext_fastapi.nlu import format_nlu_response
-
 from mathtext_fastapi.v2_nlu import v2_evaluate_message_with_nlu
-from mathtext_fastapi.v3_nlu import v3_evaluate_message_with_nlu
 
-ERROR_RESPONSE_DICT = format_nlu_response('error', 32202)
+ERROR_RESPONSE_DICT = format_nlu_response('error', TOKENS2INT_ERROR_INT)
 
 log = getLogger(__name__)
 
-# Uncomment for INFO-level event logging
-# sentry_logging = LoggingIntegration(
-#     level=logging.INFO,
-#     event_level=logging.INFO
-
-# )
-
 sentry_sdk.init(
     dsn=SENTRY_DSN,
-
-    # integrations=[
-    #     sentry_logging
-    # ],
 
     # Set traces_sample_rate to 1.0 to capture 100%
     # of transactions for performance monitoring.
@@ -91,10 +77,10 @@ def hello(content: Text = None):
 
 @app.post("/text2int")
 def text2int_ep(content: Text = None):
-    ml_response = text2int(content.content)
-    content = {"message": ml_response}
-    return JSONResponse(content=content)
-
+    # ml_response = text2int(content.content)
+    # content = {"message": ml_response}
+    # return JSONResponse(content=content)
+    return JSONResponse(content={})
 
 @app.post("/v1/manager")
 async def programmatic_message_manager(request: Request):
@@ -271,13 +257,6 @@ async def evaluate_user_message_with_nlu_api(request: Request):
     - int_data_dict or sent_data_dict: dict - the type of NLU run and result
       {'type':'integer', 'data': '8', 'confidence': 0}
     """
-    # request_body = await request.body()
-    # add_breadcrumb(
-    #     category="request",
-    #     message=f"Request Headers: {request.headers}",
-    #     level='info'
-    # )
-
     try:
         payload = await request.json()
     except JSONDecodeError as e:
@@ -298,41 +277,21 @@ async def evaluate_user_message_with_nlu_api(request: Request):
     message_text = truncate_long_message_text(message_text)
     expected_answer = str(message_dict.get('expected_answer', ''))
 
-    # add_breadcrumb(
-    #     category="request",
-    #     message=f"Request Question Info: Student Message: {message_text} / Answer: {expected_answer} / Question: {message_dict.get('question_micro_lesson','')} / Contact UUID: {message_dict.get('contact_uuid','')}",
-    #     level='info'
-    # )
-
     try:
         nlu_response = await asyncio.wait_for(
             evaluate_message_with_nlu(message_text, expected_answer),
             TIMEOUT_THRESHOLD
         )
     except asyncio.TimeoutError:
-        nlu_response = format_nlu_response('timeout', 32202)
+        nlu_response = format_nlu_response('timeout', TOKENS2INT_ERROR_INT)
 
     asyncio.create_task(prepare_message_data_for_logging(message_dict, nlu_response))
 
     return JSONResponse(content=nlu_response)
 
 
-@app.post("/v2/nlu")
-async def evaluate_user_message_with_nlu_api(request: Request):
-    """ Calls nlu evaluation and returns the nlu_response
-
-    Input
-    - request.body: json - message data for the most recent user response
-
-    Output
-    - int_data_dict or sent_data_dict: dict - the type of NLU run and result
-      {'type':'integer', 'data': '8', 'confidence': 0}
-    """
-    log.info(f'Received request: {request}')
-    log.info(f'Request header: {request.headers}')
-    request_body = await request.body()
-    log.info(f'Request body: {request_body}')
-
+async def parse_nlu_api_request_for_message(request):
+    """ Extracts the message data from a request sent to the /nlu endpoint """
     try:
         payload = await request.json()
     except JSONDecodeError as e:
@@ -347,6 +306,22 @@ async def evaluate_user_message_with_nlu_api(request: Request):
 
     if not payload_is_valid(message_dict):
         log_payload_errors(message_dict)
+        return ERROR_RESPONSE_DICT
+    return message_dict    
+
+
+@app.post("/v2/nlu")
+async def v2_evaluate_user_message_with_nlu_api(request: Request):
+    """ Calls nlu evaluation and returns the nlu_response
+
+    Input
+    - request.body: json - message data for the most recent user response
+
+    Output
+    - int_data_dict or sent_data_dict: dict - the type of NLU run and result
+    """
+    message_dict = await parse_nlu_api_request_for_message(request)
+    if message_dict == ERROR_RESPONSE_DICT:
         return ERROR_RESPONSE_DICT
 
     message_text = str(message_dict.get('message_body', ''))
@@ -359,64 +334,11 @@ async def evaluate_user_message_with_nlu_api(request: Request):
             TIMEOUT_THRESHOLD
         )
     except asyncio.TimeoutError:
-        nlu_response = format_nlu_response('timeout', 32202)
+        nlu_response = format_nlu_response('timeout', TOKENS2INT_ERROR_INT)
 
     asyncio.create_task(prepare_message_data_for_logging(message_dict, nlu_response))
 
     return JSONResponse(content=nlu_response)
-
-
-
-@app.post("/v3/nlu")
-async def evaluate_user_message_with_nlu_api(request: Request):
-    """ Calls nlu evaluation and returns the nlu_response
-
-    Input
-    - request.body: json - message data for the most recent user response
-
-    Output
-    - int_data_dict or sent_data_dict: dict - the type of NLU run and result
-      {'type':'integer', 'data': '8', 'confidence': 0}
-    """
-    log.info(f'Received request: {request}')
-    log.info(f'Request header: {request.headers}')
-    request_body = await request.body()
-    log.info(f'Request body: {request_body}')
-
-    try:
-        payload = await request.json()
-    except JSONDecodeError as e:
-        log.info(f'JSONDecodeError: {e}')
-        return ERROR_RESPONSE_DICT
-    
-    message_dict = payload.get('message_data')
-    log.info(f'Request json: {payload}')
-
-    if not message_dict:
-        message_dict = payload.get('message', {})
-
-    if not payload_is_valid(message_dict):
-        log_payload_errors(message_dict)
-        return ERROR_RESPONSE_DICT
-
-    message_text = str(message_dict.get('message_body', ''))
-    message_text = truncate_long_message_text(message_text)
-    expected_answer = str(message_dict.get('expected_answer', ''))
-
-    try:
-        nlu_response = await asyncio.wait_for(
-            v3_evaluate_message_with_nlu(message_text, expected_answer),
-            TIMEOUT_THRESHOLD
-        )
-    except asyncio.TimeoutError:
-        nlu_response = format_nlu_response('timeout', 32202)
-
-    asyncio.create_task(prepare_message_data_for_logging(message_dict, nlu_response))
-
-    return JSONResponse(content=nlu_response)
-
-
-
 
 
 @app.post("/num_one")
