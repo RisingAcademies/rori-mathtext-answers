@@ -60,6 +60,7 @@ def build_evaluation_response_object(results):
     if results.get('text_extraction', ''):
         nlu_response['type'] = 'text_extraction'
         nlu_response['data'] = results.get('text_extraction', '')
+        nlu_response['confidence'] = 1
     elif results.get('regex_answer_extraction', ''):
         nlu_response['type'] = 'regex_answer_extraction'
         nlu_response['data'] = results.get('regex_answer_extraction', '')
