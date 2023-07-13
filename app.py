@@ -246,7 +246,7 @@ def truncate_long_message_text(message_text):
     return message_text[0:100]
 
 
-@app.post("/nlu")
+@app.post("/v1/nlu")
 async def evaluate_user_message_with_nlu_api(request: Request):
     """ Calls nlu evaluation and returns the nlu_response
 
@@ -310,7 +310,8 @@ async def parse_nlu_api_request_for_message(request):
     return message_dict    
 
 
-@app.post("/v2/nlu")
+# @app.post("/v2/nlu")
+@app.post("/nlu")
 async def v2_evaluate_user_message_with_nlu_api(request: Request):
     """ Calls nlu evaluation and returns the nlu_response
 
