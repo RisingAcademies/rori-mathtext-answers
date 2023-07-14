@@ -1,50 +1,18 @@
-import asyncio
-import datetime as dt
 import re
 import sentry_sdk
 import math
 
-from collections.abc import Mapping
-from dateutil.parser import isoparse
-from fuzzywuzzy import fuzz
-from fuzzywuzzy import process
+from fuzzywuzzy import fuzz, process
 from logging import getLogger
 
 from mathtext.constants import TOKENS2INT_ERROR_INT
 from mathtext.predict_intent import predict_message_intent
 # from mathtext_fastapi.cache import get_or_create_redis_entry
 from mathtext.v1_text_processing import format_answer_to_expected_answer_type, format_int_or_float_answer
-
+from mathtext_fastapi.response_formaters import build_single_event_nlu_response, build_evaluation_response_object
 
 log = getLogger(__name__)
 
-PAYLOAD_VALUE_TYPES = {
-    'author_id': str,
-    'author_type': str,
-    'contact_uuid': str,
-    'message_body': str,
-    'message_direction': str,
-    'message_id': str,
-    'message_inserted_at': str,
-    'message_updated_at': str,
-    }
-
-
-def build_nlu_response_object(nlu_type, data, confidence):
-    """ Turns nlu results into an object to send back to Turn.io
-    Inputs
-    - nlu_type: str - the type of nlu run (integer or intent)
-    - data: str/int - the student message
-    - confidence: - the nlu confidence score (intent) or '' (integer)
-
-    >>> build_nlu_response_object('integer', 8, 0)
-    {'type': 'integer', 'data': 8, 'confidence': 0}
-    """
-    return {
-        'type': nlu_type,
-        'data': data,
-        'confidence': confidence
-        }
 
 # @get_or_create_redis_entry("run_keyword_evaluation")
 def run_keyword_evaluation(message_text):
@@ -112,34 +80,6 @@ def run_intent_evaluation(message_text):
     return nlu_response
 
 
-def format_nlu_response(eval_type, result, confidence=0, intents=[]):
-    """ Formats the result of an evaluation or error to the format Rori expects
-    
-    >>> format_nlu_response('answer_extraction', 'Yes')
-    {'type': 'answer_extraction', 'data': 'Yes', 'confidence': 0, 'intents': [], 'extracted_answer': [], 'numerical_answer': []}
-    """
-    result_obj = {
-        'type': eval_type,
-        'data': result,
-        'confidence': confidence,
-    }
-
-    if eval_type == 'timeout' or eval_type == 'error':
-        intents = [
-            result_obj.copy() for i in range(3)
-        ]
-    
-    nlu_response = {
-        'type': eval_type,
-        'data': result,
-        'confidence': confidence,
-        'intents': intents,
-        'extracted_answer': [],
-        'numerical_answer': []
-    }
-    return nlu_response
-
-
 async def evaluate_message_with_nlu(message_text, expected_answer):
     """ Process a student's message using NLU functions and send the result
 
@@ -151,6 +91,12 @@ async def evaluate_message_with_nlu(message_text, expected_answer):
     {'type': 'intent', 'data': 'tired', 'confidence': 1.0}
     """
     with sentry_sdk.start_transaction(op="task", name="NLU Evaluation"):
+        nlu_responses = {
+            'keyword': None,
+            'answer_extraction': None,
+            'number_extraction': None,
+            'intents': None
+        }
         # Call validate payload
         log.info(f'Starting evaluate message: {message_text}')
         nlu_response = {}
@@ -167,7 +113,7 @@ async def evaluate_message_with_nlu(message_text, expected_answer):
                 normalized_expected_answer = expected_answer.lower()
                 normalized_message_text = message_text.lower()
                 if normalized_expected_answer.strip() == normalized_message_text.strip():
-                    nlu_response = format_nlu_response(
+                    nlu_response = build_single_event_nlu_response(
                         'comparison',
                         expected_answer,
                         1
@@ -177,19 +123,16 @@ async def evaluate_message_with_nlu(message_text, expected_answer):
             with sentry_sdk.start_span(description="Keyword Evaluation"):
                 result = run_keyword_evaluation(message_text)
                 if result['data']:
-                    nlu_response = format_nlu_response(
-                        'keyword',
-                        result['data'],
-                        result['confidence']
-                    )
-                    return nlu_response
+                    nlu_responses['keyword'] = {
+                        'result': result['data'],
+                        'confidence': result['confidence']
+                    }
 
             # Check if the student's message can be converted to match the expected answer's format
             with sentry_sdk.start_span(description="Text Answer Evaluation"):
                 result = format_answer_to_expected_answer_type(message_text, expected_answer)
                 if result != TOKENS2INT_ERROR_INT:
-                    nlu_response = format_nlu_response('answer_extraction', result)
-                    return nlu_response
+                    nlu_responses['answer_extraction'] = {'result': result, 'confidence': 0}
 
             # Check if the student's message can be converted to a float or int
             with sentry_sdk.start_span(description="Number Evaluation"):
@@ -197,16 +140,16 @@ async def evaluate_message_with_nlu(message_text, expected_answer):
                 if result == math.inf or result == -math.inf:
                     result = TOKENS2INT_ERROR_INT
                 if result != TOKENS2INT_ERROR_INT:
-                    nlu_response = format_nlu_response('number_extraction', result)
-                    return nlu_response
+                    nlu_responses['number_extraction'] = {'result': result, 'confidence': 0}
 
         with sentry_sdk.start_span(description="Model Evaluation"):
             # Run intent classification with logistic regression model
             result = run_intent_evaluation(message_text)
-            nlu_response = format_nlu_response(
-                'intent',
-                result['data'],
-                result['confidence'],
-                result['intents']
-            )
+            nlu_responses['intents'] = result['intents']
+
+    nlu_response = build_evaluation_response_object(
+        nlu_responses,
+        evals=['keyword', 'answer_extraction', 'number_extraction', 'intents']
+    )
+
     return nlu_response

@@ -5,36 +5,41 @@ or
 """
 import asyncio
 import ast
-import datetime as dt
+# import datetime as dt
 import sentry_sdk
 
-from collections.abc import Mapping
-from dateutil.parser import isoparse
+# from collections.abc import Mapping
+# from dateutil.parser import isoparse
 from fastapi import FastAPI, Request
 from fastapi.responses import JSONResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
-from json import JSONDecodeError
+# from json import JSONDecodeError
 from logging import getLogger
 from pydantic import BaseModel
-from sentry_sdk import add_breadcrumb
 
 import mathactive.microlessons.num_one as num_one_quiz
-from mathtext.constants import TOKENS2INT_ERROR_INT
 from mathtext.predict_intent import predict_message_intent
-from mathtext_fastapi.constants import SENTRY_DSN, SENTRY_TRACES_SAMPLE_RATE, SENTRY_PROFILES_SAMPLE_RATE, TIMEOUT_THRESHOLD
+from mathtext_fastapi.constants import (
+    ERROR_RESPONSE_DICT,
+    SENTRY_DSN,
+    SENTRY_TRACES_SAMPLE_RATE,
+    SENTRY_PROFILES_SAMPLE_RATE,
+    TIMEOUT_RESPONSE_DICT,
+    TIMEOUT_THRESHOLD,
+)
 # TODO: Simplify conversation_manager code
 from mathtext_fastapi.conversation_manager import manage_conversation_response
 from mathtext_fastapi.nlu import (
     evaluate_message_with_nlu,
     run_keyword_evaluation,
-    format_nlu_response
 )
 from mathtext_fastapi.supabase_logging_async import prepare_message_data_for_logging
+from mathtext_fastapi.request_validators import truncate_long_message_text, parse_nlu_api_request_for_message
 from mathtext_fastapi.v2_conversation_manager import manage_conversation_response
 from mathtext_fastapi.v2_nlu import v2_evaluate_message_with_nlu
 
-ERROR_RESPONSE_DICT = format_nlu_response('error', TOKENS2INT_ERROR_INT)
+
 
 log = getLogger(__name__)
 
@@ -162,90 +167,6 @@ def intent_recognition_ep(content: Text = None):
     return JSONResponse(content=content)
 
 
-PAYLOAD_VALUE_TYPES = {
-    'author_id': str,
-    'author_type': str,
-    'contact_uuid': str,
-    'message_body': str,
-    'message_direction': str,
-    'message_id': str,
-    'message_inserted_at': str,
-    'message_updated_at': str,
-    }
-
-
-def payload_is_valid(payload_object):
-    """
-    >>> payload_is_valid({'author_id': '+5555555', 'author_type': 'OWNER', 'contact_uuid': '3246-43ad-faf7qw-zsdhg-dgGdg', 'message_body': 'thirty one', 'message_direction': 'inbound', 'message_id': 'SDFGGwafada-DFASHA4aDGA', 'message_inserted_at': '2022-07-05T04:00:34.03352Z', 'message_updated_at': '2023-04-06T10:08:23.745072Z'})
-    True
-
-    >>> payload_is_valid({"author_id": "@event.message._vnd.v1.chat.owner", "author_type": "@event.message._vnd.v1.author.type", "contact_uuid": "@event.message._vnd.v1.chat.contact_uuid", "message_body": "@event.message.text.body", "message_direction": "@event.message._vnd.v1.direction", "message_id": "@event.message.id", "message_inserted_at": "@event.message._vnd.v1.chat.inserted_at", "message_updated_at": "@event.message._vnd.v1.chat.updated_at"})
-    False
-    """
-    try:
-        isinstance(
-            isoparse(payload_object.get('message_inserted_at', '')),
-            dt.datetime
-        )
-        isinstance(
-            isoparse(payload_object.get('message_updated_at', '')),
-            dt.datetime
-        )
-    except ValueError:
-        return False
-    return (
-        isinstance(payload_object, Mapping) and
-        isinstance(payload_object.get('author_id'), str) and
-        isinstance(payload_object.get('author_type'), str) and
-        isinstance(payload_object.get('contact_uuid'), str) and
-        isinstance(payload_object.get('message_body'), str) and
-        isinstance(payload_object.get('message_direction'), str) and
-        isinstance(payload_object.get('message_id'), str) and
-        isinstance(payload_object.get('message_inserted_at'), str) and
-        isinstance(payload_object.get('message_updated_at'), str)
-    )
-
-
-def log_payload_errors(payload_object):
-    errors = []
-    try:
-        assert isinstance(payload_object, Mapping)
-    except Exception as e:
-        log.error(f'Invalid HTTP request payload object: {e}')
-        errors.append(e)
-    for k, typ in PAYLOAD_VALUE_TYPES.items():
-        try:
-            assert isinstance(payload_object.get(k), typ)
-        except Exception as e:
-            log.error(f'Invalid HTTP request payload object: {e}')
-            errors.append(e)
-    try:
-        assert isinstance(
-            dt.datetime.fromisoformat(
-                payload_object.get('message_inserted_at')
-            ),
-            dt.datetime
-        )
-    except Exception as e:
-        log.error(f'Invalid HTTP request payload object: {e}')
-        errors.append(e)
-    try:
-        isinstance(
-            dt.datetime.fromisoformat(
-                payload_object.get('message_updated_at')
-            ),
-            dt.datetime
-        )
-    except Exception as e:
-        log.error(f'Invalid HTTP request payload object: {e}')
-        errors.append(e)
-    return errors
-
-
-def truncate_long_message_text(message_text):
-    return message_text[0:100]
-
-
 @app.post("/nlu")
 async def evaluate_user_message_with_nlu_api(request: Request):
     """ Calls nlu evaluation and returns the nlu_response
@@ -257,20 +178,8 @@ async def evaluate_user_message_with_nlu_api(request: Request):
     - int_data_dict or sent_data_dict: dict - the type of NLU run and result
       {'type':'integer', 'data': '8', 'confidence': 0}
     """
-    try:
-        payload = await request.json()
-    except JSONDecodeError as e:
-        log.info(f'JSONDecodeError: {e}')
-        return ERROR_RESPONSE_DICT
-    
-    message_dict = payload.get('message_data')
-    log.info(f'Request json: {payload}')
-
-    if not message_dict:
-        message_dict = payload.get('message', {})
-
-    if not payload_is_valid(message_dict):
-        log_payload_errors(message_dict)
+    message_dict = await parse_nlu_api_request_for_message(request)
+    if message_dict == ERROR_RESPONSE_DICT:
         return ERROR_RESPONSE_DICT
 
     message_text = str(message_dict.get('message_body', ''))
@@ -283,31 +192,11 @@ async def evaluate_user_message_with_nlu_api(request: Request):
             TIMEOUT_THRESHOLD
         )
     except asyncio.TimeoutError:
-        nlu_response = format_nlu_response('timeout', TOKENS2INT_ERROR_INT)
+        nlu_response = TIMEOUT_RESPONSE_DICT
 
     asyncio.create_task(prepare_message_data_for_logging(message_dict, nlu_response))
 
     return JSONResponse(content=nlu_response)
-
-
-async def parse_nlu_api_request_for_message(request):
-    """ Extracts the message data from a request sent to the /nlu endpoint """
-    try:
-        payload = await request.json()
-    except JSONDecodeError as e:
-        log.info(f'JSONDecodeError: {e}')
-        return ERROR_RESPONSE_DICT
-    
-    message_dict = payload.get('message_data')
-    log.info(f'Request json: {payload}')
-
-    if not message_dict:
-        message_dict = payload.get('message', {})
-
-    if not payload_is_valid(message_dict):
-        log_payload_errors(message_dict)
-        return ERROR_RESPONSE_DICT
-    return message_dict    
 
 
 @app.post("/v2/nlu")
@@ -335,7 +224,7 @@ async def v2_evaluate_user_message_with_nlu_api(request: Request):
             TIMEOUT_THRESHOLD
         )
     except asyncio.TimeoutError:
-        nlu_response = format_nlu_response('timeout', TOKENS2INT_ERROR_INT)
+        nlu_response = TIMEOUT_RESPONSE_DICT
 
     asyncio.create_task(prepare_message_data_for_logging(message_dict, nlu_response))
 
