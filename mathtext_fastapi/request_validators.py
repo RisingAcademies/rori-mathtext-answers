@@ -105,4 +105,7 @@ async def parse_nlu_api_request_for_message(request):
     if not payload_is_valid(message_dict):
         log_payload_errors(message_dict)
         return ERROR_RESPONSE_DICT
-    return message_dict 
+    return message_dict
+
+def truncate_long_message_text(message_text):
+    return message_text[0:100]

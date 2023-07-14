@@ -30,13 +30,12 @@ from mathtext_fastapi.constants import (
 )
 # TODO: Simplify conversation_manager code
 from mathtext_fastapi.conversation_manager import manage_conversation_response
-from mathtext_fastapi.formaters import truncate_long_message_text
 from mathtext_fastapi.nlu import (
     evaluate_message_with_nlu,
     run_keyword_evaluation,
 )
 from mathtext_fastapi.supabase_logging_async import prepare_message_data_for_logging
-from mathtext_fastapi.validators import parse_nlu_api_request_for_message
+from mathtext_fastapi.request_validators import truncate_long_message_text, parse_nlu_api_request_for_message
 from mathtext_fastapi.v2_conversation_manager import manage_conversation_response
 from mathtext_fastapi.v2_nlu import v2_evaluate_message_with_nlu
 
@@ -44,15 +43,15 @@ from mathtext_fastapi.v2_nlu import v2_evaluate_message_with_nlu
 
 log = getLogger(__name__)
 
-# sentry_sdk.init(
-#     dsn=SENTRY_DSN,
+sentry_sdk.init(
+    dsn=SENTRY_DSN,
 
-#     # Set traces_sample_rate to 1.0 to capture 100%
-#     # of transactions for performance monitoring.
-#     # We recommend adjusting this value in production,
-#     traces_sample_rate=SENTRY_TRACES_SAMPLE_RATE,
-#     profiles_sample_rate=SENTRY_PROFILES_SAMPLE_RATE
-# )
+    # Set traces_sample_rate to 1.0 to capture 100%
+    # of transactions for performance monitoring.
+    # We recommend adjusting this value in production,
+    traces_sample_rate=SENTRY_TRACES_SAMPLE_RATE,
+    profiles_sample_rate=SENTRY_PROFILES_SAMPLE_RATE
+)
 
 app = FastAPI()
 
