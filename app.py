@@ -23,8 +23,8 @@ from mathtext.predict_intent import predict_message_intent
 from mathtext_fastapi.constants import (
     ERROR_RESPONSE_DICT,
     SENTRY_DSN,
-    SENTRY_TRACES_SAMPLE_RATE,
     SENTRY_PROFILES_SAMPLE_RATE,
+    SENTRY_TRACES_SAMPLE_RATE,
     TIMEOUT_RESPONSE_DICT,
     TIMEOUT_THRESHOLD,
 )
@@ -163,8 +163,8 @@ def keyword_detection_ep(content: Text = None):
 @app.post("/intent-recognition")
 def intent_recognition_ep(content: Text = None):
     ml_response = predict_message_intent(content.content)
-    content = {"content": ml_response}
-    return JSONResponse(content=content)
+    # content = {"content": ml_response}
+    return JSONResponse(content=ml_response)
 
 
 @app.post("/nlu")
@@ -194,7 +194,7 @@ async def evaluate_user_message_with_nlu_api(request: Request):
     except asyncio.TimeoutError:
         nlu_response = TIMEOUT_RESPONSE_DICT
 
-    asyncio.create_task(prepare_message_data_for_logging(message_dict, nlu_response))
+    # asyncio.create_task(prepare_message_data_for_logging(message_dict, nlu_response))
 
     return JSONResponse(content=nlu_response)
 
