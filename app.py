@@ -194,7 +194,7 @@ async def evaluate_user_message_with_nlu_api(request: Request):
     except asyncio.TimeoutError:
         nlu_response = TIMEOUT_RESPONSE_DICT
 
-    # asyncio.create_task(prepare_message_data_for_logging(message_dict, nlu_response))
+    asyncio.create_task(prepare_message_data_for_logging(message_dict, nlu_response))
 
     return JSONResponse(content=nlu_response)
 
