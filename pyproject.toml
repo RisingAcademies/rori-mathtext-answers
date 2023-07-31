@@ -30,7 +30,7 @@ asyncpg = "*"
 python-Levenshtein = "*"
 
 mathactive = "0.0.14"
-mathtext = "0.0.16"
+mathtext = "0.0.17"
 fastapi = "*"
 # python = ">=3.9.16" # tested on hobson's virtualenv on linux
 python = ">=3.8"
