@@ -17,5 +17,5 @@ deploy:
     - feature-dockerize-repo
   script:
     - gcloud auth activate-service-account --key-file=$GOOGLE_CLOUD_BUILD_SERVICE_KEY
-    - gcloud config set project $GOOGLE_CLOUD_PROJECT_ID
+    - gcloud config set project $PROJECT_ID
     - gcloud builds submit --config=cloudbuild.yaml .
