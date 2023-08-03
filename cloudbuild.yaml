@@ -1,0 +1,9 @@
+steps:
+  - name: 'gcr.io/cloud-builders/docker'
+    args: ['build', '-t', 'gcr.io/$GCLOUD_PROJECT_ID/$GOOGLE_CLOUD_INSTANCE_NAME:latest', '.']
+
+  - name: 'gcr.io/cloud-builders/docker'
+    args: ['push', 'gcr.io/$GCLOUD_PROJECT_ID/$GOOGLE_CLOUD_INSTANCE_NAME:latest']
+
+  - name: 'gcr.io/cloud-builders/gcloud'
+    args: ['run', 'deploy', '$GOOGLE_CLOUD_INSTANCE_NAME', '--image', 'gcr.io/$GCLOUD_PROJECT_ID/$GOOGLE_CLOUD_INSTANCE_NAME:latest', '--platform', 'managed', '--region', 'us-central1', '--allow-unauthenticated']

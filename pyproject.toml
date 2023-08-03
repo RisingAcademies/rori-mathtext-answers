@@ -30,17 +30,17 @@ asyncpg = "*"
 python-Levenshtein = "*"
 
 mathactive = "0.0.14"
-mathtext = "0.0.17"
+mathtext = "0.0.18"
 fastapi = "*"
 # python = ">=3.9.16" # tested on hobson's virtualenv on linux
-python = ">=3.8"
+python = ">=3.9.16,<4.0"
 redis = "*"
 requests = "*"
 httpx = "<0.22,>=0.19"
 # supabase = "*"
 uvicorn = "*"
 sqlalchemy = "*"
-'sentry_sdk[fastapi]' = "*"
+sentry_sdk = {extras = ["fastapi"], version = "*"}
 
 # # Installed by mathtext!!
 # pydantic = "*"
