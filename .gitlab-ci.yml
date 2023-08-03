@@ -14,7 +14,7 @@ deploy:
   image: google/cloud-sdk:alpine
   stage: deploy
   only:
-    - staging
+    - feature-dockerize-repo
   script:
     - gcloud auth activate-service-account --key-file=$GOOGLE_CLOUD_BUILD_SERVICE_KEY
     - gcloud config set project $GOOGLE_CLOUD_PROJECT_ID
