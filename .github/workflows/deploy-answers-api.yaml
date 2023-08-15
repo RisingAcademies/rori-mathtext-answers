@@ -8,8 +8,8 @@ jobs:
     runs-on: ubuntu-latest
 
     env:
-      PROJECT_ID: starlit-vim-394704
-      ARTIFACT_REPOSITORY: test-docker-containers
+      PROJECT_ID: ${{ secrets.GOOGLE_CLOUD_PROJECT_ID }}
+      ARTIFACT_REPOSITORY: ${{ secrets.GOOGLE_CLOUD_ARTIFACT_REPOSITORY }}
       IMAGE_NAME: test-mathtext-api
       TAG: latest
 
