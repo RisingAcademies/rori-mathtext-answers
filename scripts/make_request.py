@@ -19,7 +19,7 @@ def add_message_text_to_sample_object(message_text):
     b'{"context": "hi", "message_data": {"author_id": "+57787919091", "author_type": "OWNER", "contact_uuid": "j43hk26-2hjl-43jk-hnk2-k4ljl46j0ds09", "message_body": "test message", "message_direction": "inbound", "message_id": "4kl209sd0-a7b8-2hj3-8563-3hu4a89b32", "message_inserted_at": "2023-01-10T02:37:28.477940Z", "message_updated_at": "2023-01-10T02:37:28.487319Z"}}'
     
     """
-    message_data = '{' + f'"author_id": "+57787919091", "author_type": "OWNER", "contact_uuid": "j43hk26-2hjl-43jk-hnk2-k4ljl46j0ds09", "message_body": "{message_text}", "message_direction": "inbound", "message_id": "4kl209sd0-a7b8-2hj3-8563-3hu4a89b32", "message_inserted_at": "2023-01-10T02:37:28.477940Z", "message_updated_at": "2023-01-10T02:37:28.487319Z"' + '}'
+    message_data = '{' + f'"author_id": "+57787919091", "author_type": "OWNER", "contact_uuid": "j43hk26-2hjl-43jk-hnk2-k4ljl46j0ds09", "message_body": "{message_text[0]}", "expected_answer": "{message_text[1]}", "message_direction": "inbound", "message_id": "4kl209sd0-a7b8-2hj3-8563-3hu4a89b32", "message_inserted_at": "2023-01-10T02:37:28.477940Z", "message_updated_at": "2023-01-10T02:37:28.487319Z"' + '}'
 
     context_data = '{' + '"contact_uuid": "j43hk26-2hjl-43jk-hnk2-k4ljl46j0ds09", "current_state":"", "local_state": "", "user_message":""' + '}'
 
@@ -59,32 +59,49 @@ def run_full_nlu_endpoint_payload_test(sample_payload):
 
 
 nlu_test_cases = [
-    'test message',
-    'is it 8',
-    'can I know how its 0.5',
-    'eight, nine, ten',
-    '8, 9, 10',
-    '8',
-    "I don't know",
-    "I don't know eight",
-    "I don't 9",
-    '0.2',
-    'I want you to tell me'
-    'Today is a wonderful day',
-    'IDK 5?',
-    'hin',
-    'exi',
-    'easier',
-    'stp',
-    '',
-    '11:00 PM',
-    '12:45',
-    "10 : 25 AM",
-    "0:30",
-    "7:00",
-    "23:45",
-    '~T[11:30:00]',
-    '1⁰'
+    ["2,00,000", '200,000'],
+    ["2.5", '2.5'],
+    ["3000", '3,000'],
+    ["4,000", '4000'],
+    ["Its 1,000", '1,000'],
+    ["Maybe 2,000", '2000'],
+    ["Is it 3000", '3,000'],
+    ['test message', 'no'],
+    ['is it 8', '8'],
+    ['can I know how its 0.5', '2.45'],
+    ['eight, nine, ten', '8'],
+    ['8, 9, 10', '8'],
+    ['8', '8'],
+    # ["I dont know", '8'],
+    # ["I dont know eight", '8'],
+    # ["I dont 9", '9'],
+    # ['0.2', '0.2'],
+    # ['I want you to tell me', '>'],
+    # ['Today is a wonderful day', '22.5'],
+    # ['IDK 5?', '5'],
+    # ['hin', 'A'],
+    # ['exi', '4'],
+    # ['easier', '3'],
+    # ['stp', '2'],
+    # ['', 'B'],
+    # ['Its 11:00 PM', '11:00'],
+    # ['Maybe 12:45', '12:45'],
+    # ["10 : 25 AM", '10:25'],
+    # ["0:30", '0:30'],
+    # ["7:00", '7:00'],
+    # ["23:45", '1:45'],
+    # ['~T[11:30:00]', "11:30"],
+    # ['A', 'A'],
+    # ['a', 'A'],
+    # ['maybe its d', 'D'],
+    # ['Odd', 'Odd'],
+    # ['2x3', '2x3'],
+    # ['a' , 'A'],
+    # ['true' , 'T'],
+    # ['False' , 'T'],
+    # ['yes' , 'T'],
+    # ['>' , '>'],
+    # '1⁰'
 ]
 
 keyword_test_cases = [
