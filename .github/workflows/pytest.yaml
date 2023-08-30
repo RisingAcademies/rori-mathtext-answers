@@ -31,3 +31,9 @@ jobs:
 
     - name: Run pytest
       run: pytest
+      env:
+        CURRENT_MODEL_FILENAME: ${{ env.CURRENT_MODEL_FILENAME }}
+        CURRENT_MODEL_VERSION: ${{ env.CURRENT_MODEL_VERSION }}
+        SENTRY_PROFILES_SAMPLE_RATE: ${{ env.SENTRY_PROFILES_SAMPLE_RATE }}
+        SENTRY_TRACES_SAMPLE_RATE: ${{ env.SENTRY_TRACES_SAMPLE_RATE }}
+        TIMEOUT_THRESHOLD: ${{ env.TIMEOUT_THRESHOLD }}
