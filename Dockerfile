@@ -1,7 +1,7 @@
 # https://huggingface.co/docs/hub/spaces-sdks-docker-first-demo
 
 # Install / Upgrade Python
-FROM python:3.9
+FROM python:3.10
 RUN python3 -m pip install --no-cache-dir --upgrade poetry pip virtualenv
 
 # Switch into app folder and install dependencies
