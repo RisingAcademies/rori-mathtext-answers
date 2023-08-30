@@ -45,3 +45,15 @@ ERROR_RESPONSE_DICT = build_single_event_nlu_response("error", TOKENS2INT_ERROR_
 TIMEOUT_RESPONSE_DICT = build_single_event_nlu_response(
     "timeout", TOKENS2INT_ERROR_INT, 0
 )
+
+APPROVED_KEYWORDS = ["help", "menu", "stop", "next", "support"]
+
+APPROVED_INTENTS = [
+    "change_topic",
+    "help",
+    "stop",
+    "content_question",
+    "math_answer",
+]
+
+APPROVED_INTENT_CONFIDENCE_THRESHOLD = 0.5
