@@ -117,6 +117,29 @@ def extract_integers_and_floats_with_regex(message_text, expected_answer):
     return {}
 
 
+def check_for_yes_answer_in_intents(intents_results, normalized_expected_answer):
+    if normalized_expected_answer == "yes":
+        result = next(
+            (
+                {
+                    "data": intent.get("data", ""),
+                    "confidence": intent.get("confidence", 0),
+                }
+                for intent in intents_results.get("intents", [])
+                if intent.get("data", "") == "yes"
+                and intent.get("confidence", 0) > APPROVED_INTENT_CONFIDENCE_THRESHOLD
+            ),
+            None,
+        )
+        if result:
+            return build_single_event_nlu_response(
+                "correct_answer",
+                result.get("data", "yes"),
+                result.get("confidence", 0),
+            )
+    return None
+
+
 async def v2_evaluate_message_with_nlu(message_text, expected_answer):
     """Process a student's message using NLU functions and send the result"""
     with sentry_sdk.start_transaction(op="task", name="V2 NLU Evaluation"):
@@ -192,5 +215,12 @@ async def v2_evaluate_message_with_nlu(message_text, expected_answer):
         approved_intent = check_approved_intent_confidence(intents_results)
         if approved_intent:
             return approved_intent
+
+        # Evaluation 8 - Final check for "yes" answer
+        yes_intent_as_answer = check_for_yes_answer_in_intents(
+            intents_results, normalized_expected_answer
+        )
+        if yes_intent_as_answer:
+            return yes_intent_as_answer
 
     return build_single_event_nlu_response("out_of_scope", message_text, 0)
