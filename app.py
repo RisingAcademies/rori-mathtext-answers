@@ -5,6 +5,7 @@ or
 """
 import asyncio
 import ast
+
 # import datetime as dt
 import sentry_sdk
 
@@ -14,6 +15,7 @@ from fastapi import FastAPI, Request
 from fastapi.responses import JSONResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
+
 # from json import JSONDecodeError
 from logging import getLogger
 from pydantic import BaseModel
@@ -28,6 +30,7 @@ from mathtext_fastapi.constants import (
     TIMEOUT_RESPONSE_DICT,
     TIMEOUT_THRESHOLD,
 )
+
 # TODO: Simplify conversation_manager code
 from mathtext_fastapi.conversation_manager import manage_conversation_response
 from mathtext_fastapi.nlu import (
@@ -35,23 +38,25 @@ from mathtext_fastapi.nlu import (
     run_keyword_evaluation,
 )
 from mathtext_fastapi.supabase_logging_async import prepare_message_data_for_logging
-from mathtext_fastapi.request_validators import truncate_long_message_text, parse_nlu_api_request_for_message
+from mathtext_fastapi.request_validators import (
+    truncate_long_message_text,
+    parse_nlu_api_request_for_message,
+)
 from mathtext_fastapi.v2_conversation_manager import manage_conversation_response
 from mathtext_fastapi.v2_nlu import v2_evaluate_message_with_nlu
 
 
-
 log = getLogger(__name__)
 
-sentry_sdk.init(
-    dsn=SENTRY_DSN,
+# sentry_sdk.init(
+#     dsn=SENTRY_DSN,
 
-    # Set traces_sample_rate to 1.0 to capture 100%
-    # of transactions for performance monitoring.
-    # We recommend adjusting this value in production,
-    traces_sample_rate=SENTRY_TRACES_SAMPLE_RATE,
-    profiles_sample_rate=SENTRY_PROFILES_SAMPLE_RATE
-)
+#     # Set traces_sample_rate to 1.0 to capture 100%
+#     # of transactions for performance monitoring.
+#     # We recommend adjusting this value in production,
+#     traces_sample_rate=SENTRY_TRACES_SAMPLE_RATE,
+#     profiles_sample_rate=SENTRY_PROFILES_SAMPLE_RATE
+# )
 
 app = FastAPI()
 
@@ -86,6 +91,7 @@ def text2int_ep(content: Text = None):
     # content = {"message": ml_response}
     # return JSONResponse(content=content)
     return JSONResponse(content={})
+
 
 @app.post("/v1/manager")
 async def programmatic_message_manager(request: Request):
@@ -169,7 +175,7 @@ def intent_recognition_ep(content: Text = None):
 
 @app.post("/nlu")
 async def evaluate_user_message_with_nlu_api(request: Request):
-    """ Calls nlu evaluation and returns the nlu_response
+    """Calls nlu evaluation and returns the nlu_response
 
     Input
     - request.body: json - message data for the most recent user response
@@ -182,14 +188,13 @@ async def evaluate_user_message_with_nlu_api(request: Request):
     if message_dict == ERROR_RESPONSE_DICT:
         return ERROR_RESPONSE_DICT
 
-    message_text = str(message_dict.get('message_body', ''))
+    message_text = str(message_dict.get("message_body", ""))
     message_text = truncate_long_message_text(message_text)
-    expected_answer = str(message_dict.get('expected_answer', ''))
+    expected_answer = str(message_dict.get("expected_answer", ""))
 
     try:
         nlu_response = await asyncio.wait_for(
-            evaluate_message_with_nlu(message_text, expected_answer),
-            TIMEOUT_THRESHOLD
+            evaluate_message_with_nlu(message_text, expected_answer), TIMEOUT_THRESHOLD
         )
     except asyncio.TimeoutError:
         nlu_response = TIMEOUT_RESPONSE_DICT
@@ -202,7 +207,7 @@ async def evaluate_user_message_with_nlu_api(request: Request):
 @app.post("/v2/nlu")
 # @app.post("/nlu")
 async def v2_evaluate_user_message_with_nlu_api(request: Request):
-    """ Calls nlu evaluation and returns the nlu_response
+    """Calls nlu evaluation and returns the nlu_response
 
     Input
     - request.body: json - message data for the most recent user response
@@ -214,14 +219,14 @@ async def v2_evaluate_user_message_with_nlu_api(request: Request):
     if message_dict == ERROR_RESPONSE_DICT:
         return ERROR_RESPONSE_DICT
 
-    message_text = str(message_dict.get('message_body', ''))
+    message_text = str(message_dict.get("message_body", ""))
     message_text = truncate_long_message_text(message_text)
-    expected_answer = str(message_dict.get('expected_answer', ''))
+    expected_answer = str(message_dict.get("expected_answer", ""))
 
     try:
         nlu_response = await asyncio.wait_for(
             v2_evaluate_message_with_nlu(message_text, expected_answer),
-            TIMEOUT_THRESHOLD
+            TIMEOUT_THRESHOLD,
         )
     except asyncio.TimeoutError:
         nlu_response = TIMEOUT_RESPONSE_DICT
@@ -249,10 +254,10 @@ async def num_one(request: Request):
     """
     data_dict = await request.json()
     message_data = ast.literal_eval(
-        data_dict.get('message_data', '').get('message_body', '')
+        data_dict.get("message_data", "").get("message_body", "")
     )
-    user_id = message_data['user_id']
-    message_text = message_data['message_text']
+    user_id = message_data["user_id"]
+    message_text = message_data["message_text"]
     return num_one_quiz.process_user_message(user_id, message_text)
 
 
@@ -275,14 +280,12 @@ async def ask_math_question(request: Request):
     """
     data_dict = await request.json()
     message_data = ast.literal_eval(
-        data_dict.get('message_data', '').get('message_body', '')
+        data_dict.get("message_data", "").get("message_body", "")
     )
-    difficulty = message_data['difficulty']
-    do_increase = message_data['do_increase']
+    difficulty = message_data["difficulty"]
+    do_increase = message_data["do_increase"]
 
-    return JSONResponse(
-        generators.start_interactive_math(difficulty, do_increase)
-    )
+    return JSONResponse(generators.start_interactive_math(difficulty, do_increase))
 
 
 @app.post("/hint")
@@ -305,15 +308,13 @@ async def get_hint(request: Request):
     """
     data_dict = await request.json()
     message_data = ast.literal_eval(
-        data_dict.get('message_data', '').get('message_body', '')
+        data_dict.get("message_data", "").get("message_body", "")
     )
-    start = message_data['start']
-    step = message_data['step']
-    difficulty = message_data['difficulty']
+    start = message_data["start"]
+    step = message_data["step"]
+    difficulty = message_data["difficulty"]
 
-    return JSONResponse(
-        hints.generate_hint(start, step, difficulty)
-    )
+    return JSONResponse(hints.generate_hint(start, step, difficulty))
 
 
 @app.post("/question")
@@ -337,26 +338,24 @@ async def ask_math_question(request: Request):
     """
     data_dict = await request.json()
     message_data = ast.literal_eval(
-        data_dict.get('message_data', '').get('message_body', '')
+        data_dict.get("message_data", "").get("message_body", "")
     )
-    start = message_data['start']
-    step = message_data['step']
+    start = message_data["start"]
+    step = message_data["step"]
     arg_tuple = (start, step)
     try:
-        question_num = message_data['question_num']
+        question_num = message_data["question_num"]
         arg_tuple += (question_num,)
     except KeyError:
         pass
 
-    return JSONResponse(
-        questions.generate_question_data(*arg_tuple)
-    )
+    return JSONResponse(questions.generate_question_data(*arg_tuple))
 
 
 @app.post("/difficulty")
 async def get_hint(request: Request):
     """Generate a number matching difficulty
-    
+
     Input
     {
         'difficulty': 0.01,
@@ -368,20 +367,18 @@ async def get_hint(request: Request):
     """
     data_dict = await request.json()
     message_data = ast.literal_eval(
-        data_dict.get('message_data', '').get('message_body', '')
+        data_dict.get("message_data", "").get("message_body", "")
     )
-    difficulty = message_data['difficulty']
-    do_increase = message_data['do_increase']
+    difficulty = message_data["difficulty"]
+    do_increase = message_data["do_increase"]
 
-    return JSONResponse(
-        utils.get_next_difficulty(difficulty, do_increase)
-    )
+    return JSONResponse(utils.get_next_difficulty(difficulty, do_increase))
 
 
 @app.post("/start_step")
 async def get_hint(request: Request):
     """Generate a start and step values
-    
+
     Input
     {
         'difficulty': 0.01,
@@ -393,12 +390,12 @@ async def get_hint(request: Request):
     """
     data_dict = await request.json()
     message_data = ast.literal_eval(
-        data_dict.get('message_data', '').get('message_body', '')
+        data_dict.get("message_data", "").get("message_body", "")
     )
-    difficulty = message_data['difficulty']
+    difficulty = message_data["difficulty"]
     arg_tuple = (difficulty,)
     try:
-        path_to_csv_file = message_data['path_to_csv_file']
+        path_to_csv_file = message_data["path_to_csv_file"]
         arg_tuple += (path_to_csv_file,)
     except KeyError:
         pass
@@ -409,7 +406,7 @@ async def get_hint(request: Request):
 @app.post("/sequence")
 async def generate_question(request: Request):
     """Generate a sequence from start, step and optional separator parameter
-    
+
     Input
     {
         'start': 5,
@@ -422,13 +419,13 @@ async def generate_question(request: Request):
     """
     data_dict = await request.json()
     message_data = ast.literal_eval(
-        data_dict.get('message_data', '').get('message_body', '')
+        data_dict.get("message_data", "").get("message_body", "")
     )
-    start = message_data['start']
-    step = message_data['step']
+    start = message_data["start"]
+    step = message_data["step"]
     arg_tuple = (start, step)
     try:
-        sep = message_data['sep']
+        sep = message_data["sep"]
         arg_tuple += (sep,)
     except KeyError:
         pass

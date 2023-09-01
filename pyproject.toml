@@ -9,12 +9,13 @@ authors = [
   ]
 description = "Natural Language Understanding (text processing) for math symbols, digits, and words with a Gradio user interface and REST API."
 readme = "README.md"
-# requires-python = ">=3.8"
+# requires-python = ">=3.10"
 license = "AGPL-3.0-or-later"
 classifiers = [
     "Programming Language :: Python :: 3",
     "Programming Language :: Python :: 3.8",
     "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
     "License :: OSI Approved :: GNU Affero General Public License v3 or later (AGPLv3+)",
     "Operating System :: OS Independent",
 ]
@@ -33,7 +34,7 @@ mathactive = "0.0.14"
 mathtext = "0.0.19"
 fastapi = "*"
 # python = ">=3.9.16" # tested on hobson's virtualenv on linux
-python = ">=3.9.16,<4.0"
+python = ">=3.10,<4.0"
 redis = "*"
 requests = "*"
 httpx = "<0.22,>=0.19"

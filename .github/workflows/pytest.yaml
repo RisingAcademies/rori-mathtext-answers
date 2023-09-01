@@ -1,0 +1,46 @@
+name: Run pytest
+
+on: [push]
+
+jobs:
+  build:
+    name: Build image
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: ["3.10"]
+    
+    steps:
+    - name: Check out code
+      uses: actions/checkout@v3
+
+    - name: Set up Python ${{ matrix.python-version }}
+      uses: actions/setup-python@v4
+      with:
+        python-version: ${{ matrix.python-version }}
+
+    - name: Create virtual environment
+      run : |
+        python -m pip install --upgrade pip poetry pytest virtualenv
+        python -m venv .venv
+        source .venv/bin/activate
+
+    - name: Install dependencies
+      run: |
+        pip install --editable .
+
+    - name: Run pytest
+      run: pytest
+      env:
+        CURRENT_MODEL_FILENAME: ${{ vars.CURRENT_MODEL_FILENAME }}
+        CURRENT_MODEL_VERSION: ${{ vars.CURRENT_MODEL_VERSION }}
+        SENTRY_PROFILES_SAMPLE_RATE: ${{ vars.SENTRY_PROFILES_SAMPLE_RATE }}
+        SENTRY_TRACES_SAMPLE_RATE: ${{ vars.SENTRY_TRACES_SAMPLE_RATE }}
+        TIMEOUT_THRESHOLD: ${{ vars.TIMEOUT_THRESHOLD }}
+        CSV_GOOGLE_SHEET_ID: ${{ vars.CSV_GOOGLE_SHEET_ID }}
+        REDIS_RESPONSE_CACHE_URL: ${{ secrets.REDIS_RESPONSE_CACHE_URL }}
+        SENTRY_DSN: ${{ secrets.SENTRY_DSN }}
+        SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+        OBJECT_STORAGE_NAME: ${{ secrets.OBJECT_STORAGE_NAME }}
+        OBJECT_STORAGE_PROVIDER: ${{ secrets.OBJECT_STORAGE_PROVIDER }}
+        GOOGLE_CLOUD_MODEL_SERVICE_AGENT_CREDENTIALS_JSON: ${{ secrets.GOOGLE_CLOUD_MODEL_SERVICE_AGENT_CREDENTIALS_JSON }}
