@@ -1,7 +1,7 @@
 name: Build and push container
 on:
   push:
-    branches: [feature-dockerize-repo]
+    branches: [staging]
 jobs:
   build-container:
     name: Build image
