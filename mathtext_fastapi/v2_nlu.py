@@ -66,7 +66,7 @@ def check_answer_intent_confidence(intents_results):
     for result in intents_results.get("intents", []):
         if (
             result.get("data", "") == "math_answer"
-            and result.get("confidence", 0) >= APPROVED_INTENT_CONFIDENCE_THRESHOLD
+            and result.get("confidence", 0.0) >= APPROVED_INTENT_CONFIDENCE_THRESHOLD
         ):
             is_answer = True
     return is_answer
@@ -90,7 +90,7 @@ def check_nlu_number_result_for_correctness(nlu_eval_result, expected_answer):
     """Check whether an integer or float result is a correct answer or not
 
     >>> check_nlu_number_result_for_correctness(100, "100")
-    {'type': 'correct_answer', 'data': '100', 'confidence': 0}
+    {'type': 'correct_answer', 'data': '100', 'confidence': 1.0}
     >>> check_nlu_number_result_for_correctness(None, "20")
     {}
     """
@@ -99,7 +99,7 @@ def check_nlu_number_result_for_correctness(nlu_eval_result, expected_answer):
             label = "correct_answer"
         else:
             label = "wrong_answer"
-        return build_single_event_nlu_response(label, str(nlu_eval_result), 0)
+        return build_single_event_nlu_response(label, str(nlu_eval_result), 1.0)
     return {}
 
 
@@ -123,11 +123,11 @@ def check_for_yes_answer_in_intents(intents_results, normalized_expected_answer)
             (
                 {
                     "data": intent.get("data", ""),
-                    "confidence": intent.get("confidence", 0),
+                    "confidence": intent.get("confidence", 0.0),
                 }
                 for intent in intents_results.get("intents", [])
                 if intent.get("data", "") == "yes"
-                and intent.get("confidence", 0) > APPROVED_INTENT_CONFIDENCE_THRESHOLD
+                and intent.get("confidence", 0.0) > APPROVED_INTENT_CONFIDENCE_THRESHOLD
             ),
             None,
         )
@@ -135,7 +135,7 @@ def check_for_yes_answer_in_intents(intents_results, normalized_expected_answer)
             return build_single_event_nlu_response(
                 "correct_answer",
                 result.get("data", "yes"),
-                result.get("confidence", 0),
+                result.get("confidence", 0.0),
             )
     return None
 
@@ -190,10 +190,10 @@ async def v2_evaluate_message_with_nlu(message_text, expected_answer):
                 if result != TOKENS2INT_ERROR_INT:
                     if expected_answer == str(result):
                         return build_single_event_nlu_response(
-                            "correct_answer", str(result), 0
+                            "correct_answer", str(result), 1.0
                         )
                     return build_single_event_nlu_response(
-                        "wrong_answer", str(result), 0
+                        "wrong_answer", str(result), 1.0
                     )
 
         with sentry_sdk.start_span(description="V2 Model Evaluation"):
@@ -223,4 +223,4 @@ async def v2_evaluate_message_with_nlu(message_text, expected_answer):
         if yes_intent_as_answer:
             return yes_intent_as_answer
 
-    return build_single_event_nlu_response("out_of_scope", message_text, 0)
+    return build_single_event_nlu_response("out_of_scope", message_text, 0.0)
