@@ -54,6 +54,8 @@ APPROVED_INTENTS = [
     "stop",
     "content_question",
     "math_answer",
+    "break",
+    "safety",
 ]
 
 APPROVED_INTENT_CONFIDENCE_THRESHOLD = 0.5
