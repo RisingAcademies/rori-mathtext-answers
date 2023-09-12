@@ -52,7 +52,7 @@ APPROVED_INTENTS = [
     "change_topic",
     "help",
     "stop",
-    "content_question",
+    "math_question",
     "math_answer",
     "break",
     "safety",
