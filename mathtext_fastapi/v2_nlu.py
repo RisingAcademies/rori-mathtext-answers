@@ -180,9 +180,10 @@ async def v2_evaluate_message_with_nlu(message_text, expected_answer):
             with sentry_sdk.start_span(description="V2 Regex Number Evaluation"):
                 result = run_regex_evaluations(message_text, expected_answer)
                 if result:
-                    return build_single_event_nlu_response(
-                        "correct_answer", result, 1.0
-                    )
+                    label = "wrong_answer"
+                    if result == normalized_expected_answer:
+                        label = "correct_answer"
+                    return build_single_event_nlu_response(label, result, 1.0)
 
             # Evaluation 4 - Check for exact int or float number
             with sentry_sdk.start_span(description="V2 Exact Number Evaluation"):
