@@ -95,8 +95,11 @@ def check_nlu_number_result_for_correctness(nlu_eval_result, expected_answer):
     {}
     """
     if nlu_eval_result and nlu_eval_result != None and nlu_eval_result != 0:
-        if expected_answer == str(nlu_eval_result):
+        if expected_answer == str(nlu_eval_result) or are_equivalent_numerical_answers(
+            str(nlu_eval_result), expected_answer
+        ):
             label = "correct_answer"
+            nlu_eval_result = expected_answer
         else:
             label = "wrong_answer"
         return build_single_event_nlu_response(label, str(nlu_eval_result), 1.0)
@@ -138,6 +141,24 @@ def check_for_yes_answer_in_intents(intents_results, normalized_expected_answer)
                 result.get("confidence", 0.0),
             )
     return None
+
+
+def are_equivalent_numerical_answers(str1, str2):
+    """Checks whether an integer and float answer are equivalent
+
+    >>> are_equivalent_numerical_answers("17", "17.0")
+    True
+    >>> are_equivalent_numerical_answers("15.0", "15")
+    True
+    >>> are_equivalent_numerical_answers("I don't know", "15")
+    False
+    """
+    try:
+        num1 = float(str1)
+        num2 = float(str2)
+        return num1 == num2
+    except ValueError:
+        return False
 
 
 async def v2_evaluate_message_with_nlu(message_text, expected_answer):
@@ -188,10 +209,13 @@ async def v2_evaluate_message_with_nlu(message_text, expected_answer):
             # Evaluation 4 - Check for exact int or float number
             with sentry_sdk.start_span(description="V2 Exact Number Evaluation"):
                 result = text2num(message_text)
+
                 if result != TOKENS2INT_ERROR_INT:
-                    if expected_answer == str(result):
+                    if expected_answer == str(
+                        result
+                    ) or are_equivalent_numerical_answers(str(result), expected_answer):
                         return build_single_event_nlu_response(
-                            "correct_answer", str(result), 1.0
+                            "correct_answer", expected_answer, 1.0
                         )
                     return build_single_event_nlu_response(
                         "wrong_answer", str(result), 1.0
