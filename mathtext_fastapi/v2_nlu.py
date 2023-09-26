@@ -110,12 +110,12 @@ def extract_integers_and_floats_with_regex(message_text, expected_answer):
     """Tries to extract numbers or convert number words to numbers"""
     result = text2float(message_text)
     answer = check_nlu_number_result_for_correctness(result, expected_answer)
-    if answer:
+    if answer and result != TOKENS2INT_ERROR_INT:
         return answer
 
     result = text2int(message_text)
     answer = check_nlu_number_result_for_correctness(result, expected_answer)
-    if answer:
+    if answer and result != TOKENS2INT_ERROR_INT:
         return answer
     return {}
 
