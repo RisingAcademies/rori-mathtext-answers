@@ -10,7 +10,6 @@ jobs:
     env:
       PROJECT_ID: ${{ secrets.GOOGLE_CLOUD_PROJECT_ID }}
       ARTIFACT_REPOSITORY: ${{ secrets.GOOGLE_CLOUD_ARTIFACT_REPOSITORY }}
-      # IMAGE_NAME: ${{ if eq(github.ref, 'refs/heads/production') }}rori-answer-api${{ else }}rori-answer-api-staging${{ endif }}
       IMAGE_NAME: ${{ github.ref == 'refs/heads/production' && 'rori-answer-api' || 'rori-answer-api-staging' }}
       TAG: latest
 
