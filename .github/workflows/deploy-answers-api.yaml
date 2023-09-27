@@ -1,7 +1,7 @@
 name: Build and push container
 on:
   push:
-    branches: [staging]
+    branches: [staging, production]
 jobs:
   build-container:
     name: Build image
@@ -10,7 +10,7 @@ jobs:
     env:
       PROJECT_ID: ${{ secrets.GOOGLE_CLOUD_PROJECT_ID }}
       ARTIFACT_REPOSITORY: ${{ secrets.GOOGLE_CLOUD_ARTIFACT_REPOSITORY }}
-      IMAGE_NAME: rori-answers-api
+      IMAGE_NAME: ${{ if eq(github.ref, 'refs/heads/production') }}rori-answer-api${{ else }}rori-answer-api-staging${{ endif }}
       TAG: latest
 
     steps:
