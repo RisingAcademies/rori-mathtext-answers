@@ -52,8 +52,8 @@ def test_sign_correct_answer_in_phrase():
 
 def test_fraction_against_sign():
     response = simulate_api_call(client, "1/2", ">")
-    expected_nlu_response_type = "intent"
-    expected_nlu_response_data = "math_answer"
+    expected_nlu_response_type = "wrong_answer"
+    expected_nlu_response_data = "1/2"
     assert response.status_code == 200
     assert response.json()["type"] == expected_nlu_response_type
     assert response.json()["data"] == expected_nlu_response_data
