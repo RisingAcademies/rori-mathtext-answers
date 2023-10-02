@@ -86,10 +86,19 @@ def test_equivalent_decimal_against_integer():
     assert response.json()["data"] == expected_nlu_response_data
 
 
-def test_equivalent_integer_against_decimal():
+def test_equivalent_integer_against_decimal_for_yes_confusion():
     response = simulate_api_call(client, "1", "1.0")
     expected_nlu_response_type = "correct_answer"
     expected_nlu_response_data = "1.0"
+    assert response.status_code == 200
+    assert response.json()["type"] == expected_nlu_response_type
+    assert response.json()["data"] == expected_nlu_response_data
+
+
+def test_equivalent_integer_against_decimal():
+    response = simulate_api_call(client, "17", "17.0")
+    expected_nlu_response_type = "correct_answer"
+    expected_nlu_response_data = "17.0"
     assert response.status_code == 200
     assert response.json()["type"] == expected_nlu_response_type
     assert response.json()["data"] == expected_nlu_response_data

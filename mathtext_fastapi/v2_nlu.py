@@ -15,7 +15,8 @@ from mathtext.utils.nlutils import text2num
 from mathtext.utils.text2int_so import text2int, text2float
 from mathtext.v2_text_processing import (
     normalize_message_and_answer,
-    extract_approved_response_from_phrase,
+    extract_approved_answer_from_phrase,
+    extract_approved_keyword_from_phrase,
     run_regex_evaluations,
 )
 
@@ -38,25 +39,40 @@ def evaluate_for_exact_match(normalized_student_message, normalized_expected_ans
     ) == normalized_expected_answer.replace(" ", "")
 
 
-def evaluate_for_exact_match_in_phrase(
+def evaluate_for_exact_answer_match_in_phrase(
     normalized_student_message, normalized_expected_answer, expected_answer
 ):
     """
-    evaluate_for_exact_match_in_phrase("2", "2", "2")
-    "2"
-    >>> evaluate_for_exact_match_in_phrase("yes", "yes", "Yes")
-    'Yes'
-    >>> evaluate_for_exact_match_in_phrase("I don't know", "4", "4")
-
-    >>> evaluate_for_exact_match_in_phrase("manu", "3", "4")
-    'menu'
+    evaluate_for_exact_answer_match_in_phrase("2", "2", "2")
+    ('2', True)
+    >>> evaluate_for_exact_answer_match_in_phrase("yes", "yes", "Yes")
+    ('Yes', True)
+    >>> evaluate_for_exact_answer_match_in_phrase("I don't know", "4", "4")
+    ('32202', False)
     """
     tokenized_student_message = normalized_student_message.split()
-    return extract_approved_response_from_phrase(
+    result, is_result_correct = extract_approved_answer_from_phrase(
         tokenized_student_message,
         normalized_expected_answer,
         expected_answer,
     )
+    return result, is_result_correct
+
+
+def evaluate_for_exact_keyword_match_in_phrase(
+    normalized_student_message, normalized_expected_answer, expected_answer
+):
+    """
+    >>> evaluate_for_exact_keyword_match_in_phrase("manu", "3", "4")
+    'menu'
+    """
+    tokenized_student_message = normalized_student_message.split()
+    result = extract_approved_keyword_from_phrase(
+        tokenized_student_message,
+        normalized_expected_answer,
+        expected_answer,
+    )
+    return result
 
 
 def check_answer_intent_confidence(intents_results):
@@ -185,17 +201,35 @@ async def v2_evaluate_message_with_nlu(message_text, expected_answer):
 
             # Evaluation 2 - Check for pre-defined answers and common misspellings
             with sentry_sdk.start_span(description="V2 Text Evaluation"):
-                result = evaluate_for_exact_match_in_phrase(
+                result, is_result_correct = evaluate_for_exact_answer_match_in_phrase(
                     normalized_student_message,
                     normalized_expected_answer,
                     expected_answer,
                 )
-                if result:
-                    if result in APPROVED_KEYWORDS:
-                        return build_single_event_nlu_response("keyword", result, 1.0)
+                if result and is_result_correct:
                     return build_single_event_nlu_response(
                         "correct_answer", result, 1.0
                     )
+                if (
+                    result
+                    and result != str(TOKENS2INT_ERROR_INT)
+                    and is_result_correct == False
+                ):
+                    return build_single_event_nlu_response(
+                        "wrong_answer",
+                        result,
+                        0.0,
+                    )
+
+                result = evaluate_for_exact_keyword_match_in_phrase(
+                    normalized_student_message,
+                    normalized_expected_answer,
+                    expected_answer,
+                )
+
+                if result and result != str(TOKENS2INT_ERROR_INT):
+                    if result in APPROVED_KEYWORDS:
+                        return build_single_event_nlu_response("keyword", result, 1.0)
 
             # Evaluation 3 - Check for fraction, decimal, time, and exponent answers
             with sentry_sdk.start_span(description="V2 Regex Number Evaluation"):

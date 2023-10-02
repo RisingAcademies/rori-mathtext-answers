@@ -42,63 +42,54 @@ def test_no_correct_answer_in_phrase():
 
 
 def test_odd_wrong_answer():
-    response = simulate_api_call(client, "odd", "even")
-    expected_nlu_response_type = "intent"
-    expected_nlu_response_data = "math_answer"
-    assert response.status_code == 200
-    assert response.json()["type"] == expected_nlu_response_type
-    assert response.json()["data"] == expected_nlu_response_data
-
-
-def test_odd_wrong_answer():
-    response = simulate_api_call(client, "odd", "even")
-    expected_nlu_response_type = "intent"
-    expected_nlu_response_data = "math_answer"
+    response = simulate_api_call(client, "odd", "Even")
+    expected_nlu_response_type = "wrong_answer"
+    expected_nlu_response_data = "Odd"
     assert response.status_code == 200
     assert response.json()["type"] == expected_nlu_response_type
     assert response.json()["data"] == expected_nlu_response_data
 
 
 def test_even_correct_answer_in_phrase():
-    response = simulate_api_call(client, "it's even", "even")
+    response = simulate_api_call(client, "it's even", "Even")
     expected_nlu_response_type = "correct_answer"
-    expected_nlu_response_data = "even"
+    expected_nlu_response_data = "Even"
     assert response.status_code == 200
     assert response.json()["type"] == expected_nlu_response_type
     assert response.json()["data"] == expected_nlu_response_data
 
 
 def test_short_day_of_week_correct_answer():
-    response = simulate_api_call(client, "wed", "wednesday")
+    response = simulate_api_call(client, "wed", "Wednesday")
     expected_nlu_response_type = "correct_answer"
-    expected_nlu_response_data = "wednesday"
+    expected_nlu_response_data = "Wednesday"
     assert response.status_code == 200
     assert response.json()["type"] == expected_nlu_response_type
     assert response.json()["data"] == expected_nlu_response_data
 
 
 def test_long_day_of_week_correct_answer():
-    response = simulate_api_call(client, "Thursday", "thursday")
+    response = simulate_api_call(client, "Thursday", "Thursday")
     expected_nlu_response_type = "correct_answer"
-    expected_nlu_response_data = "thursday"
+    expected_nlu_response_data = "Thursday"
     assert response.status_code == 200
     assert response.json()["type"] == expected_nlu_response_type
     assert response.json()["data"] == expected_nlu_response_data
 
 
 def test_short_day_of_week_correct_answer_in_phrase():
-    response = simulate_api_call(client, "maybe they'd go on Sat", "saturday")
+    response = simulate_api_call(client, "maybe they'd go on Sat", "Saturday")
     expected_nlu_response_type = "correct_answer"
-    expected_nlu_response_data = "saturday"
+    expected_nlu_response_data = "Saturday"
     assert response.status_code == 200
     assert response.json()["type"] == expected_nlu_response_type
     assert response.json()["data"] == expected_nlu_response_data
 
 
 def test_short_day_of_week_wrong_answer():
-    response = simulate_api_call(client, "mon", "tuesday")
-    expected_nlu_response_type = "intent"
-    expected_nlu_response_data = "math_answer"
+    response = simulate_api_call(client, "mon", "Tuesday")
+    expected_nlu_response_type = "wrong_answer"
+    expected_nlu_response_data = "Monday"
     assert response.status_code == 200
     assert response.json()["type"] == expected_nlu_response_type
     assert response.json()["data"] == expected_nlu_response_data
@@ -115,8 +106,8 @@ def test_multiple_choice_correct_answer():
 
 def test_multiple_choice_wrong_answer():
     response = simulate_api_call(client, "That'd be C", "D")
-    expected_nlu_response_type = "intent"
-    expected_nlu_response_data = "math_answer"
+    expected_nlu_response_type = "wrong_answer"
+    expected_nlu_response_data = "C"
     assert response.status_code == 200
     assert response.json()["type"] == expected_nlu_response_type
     assert response.json()["data"] == expected_nlu_response_data
