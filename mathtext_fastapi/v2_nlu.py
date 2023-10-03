@@ -136,23 +136,42 @@ def extract_integers_and_floats_with_regex(message_text, expected_answer):
     return {}
 
 
+def search_through_intent_results(intents_results, target_intent_label):
+    """Determines if the target intent scored above a certain confidence threshold
+
+    >>> search_through_intent_results({'intents': [{'type': 'intent', 'data': 'yes', 'confidence': 0.9936121956268761}]}, "yes")
+    {'data': 'yes', 'confidence': 0.9936121956268761}
+
+    >>> search_through_intent_results({'intents': [{'type': 'intent', 'data': 'yes', 'confidence': 0.0}]}, "yes")
+    """
+    result = next(
+        (
+            {
+                "data": intent.get("data", ""),
+                "confidence": intent.get("confidence", 0.0),
+            }
+            for intent in intents_results.get("intents", [])
+            if intent.get("data", "") == target_intent_label
+            and intent.get("confidence", 0.0) > APPROVED_INTENT_CONFIDENCE_THRESHOLD
+        ),
+        None,
+    )
+    return result
+
+
 def check_for_yes_answer_in_intents(intents_results, normalized_expected_answer):
-    if normalized_expected_answer == "yes":
-        result = next(
-            (
-                {
-                    "data": intent.get("data", ""),
-                    "confidence": intent.get("confidence", 0.0),
-                }
-                for intent in intents_results.get("intents", [])
-                if intent.get("data", "") == "yes"
-                and intent.get("confidence", 0.0) > APPROVED_INTENT_CONFIDENCE_THRESHOLD
-            ),
-            None,
-        )
-        if result:
+    """Check if a yes intent in the expected answer is a correct or wrong answer"""
+    result = search_through_intent_results(intents_results, "yes")
+    if result:
+        if normalized_expected_answer == "yes":
             return build_single_event_nlu_response(
                 "correct_answer",
+                result.get("data", "yes"),
+                result.get("confidence", 0.0),
+            )
+        else:
+            return build_single_event_nlu_response(
+                "wrong_answer",
                 result.get("data", "yes"),
                 result.get("confidence", 0.0),
             )
