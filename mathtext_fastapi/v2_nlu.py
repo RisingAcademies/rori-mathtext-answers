@@ -90,16 +90,22 @@ def check_answer_intent_confidence(intents_results):
 
 def check_approved_intent_confidence(intents_results):
     """Checks whether approved non-answer intents are over the approved confidence threshold"""
-    approved_intent = {}
-    for result in intents_results.get("intents", []):
-        if (
-            result.get("data", "") in APPROVED_INTENTS
-            and result.get("confidence", 0) > APPROVED_INTENT_CONFIDENCE_THRESHOLD
-        ):
-            return build_single_event_nlu_response(
-                "intent", result.get("data"), result.get("confidence")
-            )
-    return approved_intent
+    highest_confidence_intent = {}
+    if intents_results:
+        highest_confidence_intent = max(intents_results, key=lambda x: x["confidence"])
+
+    if (
+        highest_confidence_intent.get("data", "") in APPROVED_INTENTS
+        and highest_confidence_intent.get("data", "") != "out_of_scope"
+        and highest_confidence_intent.get("confidence", 0)
+        > APPROVED_INTENT_CONFIDENCE_THRESHOLD
+    ):
+        return build_single_event_nlu_response(
+            "intent",
+            highest_confidence_intent.get("data"),
+            highest_confidence_intent.get("confidence"),
+        )
+    return {}
 
 
 def check_nlu_number_result_for_correctness(nlu_eval_result, expected_answer):
@@ -289,16 +295,18 @@ async def v2_evaluate_message_with_nlu(message_text, expected_answer):
                 if result:
                     return result
 
-        # Evaluation 7 - Extract approved intents
-        approved_intent = check_approved_intent_confidence(intents_results)
-        if approved_intent:
-            return approved_intent
-
-        # Evaluation 8 - Final check for "yes" answer
+        # Evaluation 7 - Final check for "yes" answer
         yes_intent_as_answer = check_for_yes_answer_in_intents(
             intents_results, normalized_expected_answer
         )
         if yes_intent_as_answer:
             return yes_intent_as_answer
+
+        # Evaluation 8 - Extract approved intents
+        approved_intent = check_approved_intent_confidence(
+            intents_results.get("intents", [])
+        )
+        if approved_intent:
+            return approved_intent
 
     return build_single_event_nlu_response("out_of_scope", message_text, 0.0)
