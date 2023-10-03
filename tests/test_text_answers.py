@@ -111,3 +111,30 @@ def test_multiple_choice_wrong_answer():
     assert response.status_code == 200
     assert response.json()["type"] == expected_nlu_response_type
     assert response.json()["data"] == expected_nlu_response_data
+
+
+def test_multiple_choice_wrong_answer():
+    response = simulate_api_call(client, "yep", "10")
+    expected_nlu_response_type = "out_of_scope"
+    expected_nlu_response_data = "yep"
+    assert response.status_code == 200
+    assert response.json()["type"] == expected_nlu_response_type
+    assert response.json()["data"] == expected_nlu_response_data
+
+
+def test_multiple_choice_wrong_answer():
+    response = simulate_api_call(client, "sure", "yes")
+    expected_nlu_response_type = "correct_answer"
+    expected_nlu_response_data = "yes"
+    assert response.status_code == 200
+    assert response.json()["type"] == expected_nlu_response_type
+    assert response.json()["data"] == expected_nlu_response_data
+
+
+def test_multiple_choice_wrong_answer():
+    response = simulate_api_call(client, "I want a hint", "B")
+    expected_nlu_response_type = "intent"
+    expected_nlu_response_data = "math_question"
+    assert response.status_code == 200
+    assert response.json()["type"] == expected_nlu_response_type
+    assert response.json()["data"] == expected_nlu_response_data
