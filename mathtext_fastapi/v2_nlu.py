@@ -234,11 +234,14 @@ async def v2_evaluate_message_with_nlu(message_text, expected_answer):
                     and result != str(TOKENS2INT_ERROR_INT)
                     and is_result_correct == False
                 ):
-                    return build_single_event_nlu_response(
-                        "wrong_answer",
-                        result,
-                        1.0,
-                    )
+                    intents_results = predict_message_intent(message_text)
+                    is_answer = check_answer_intent_confidence(intents_results)
+                    if is_answer:
+                        return build_single_event_nlu_response(
+                            "wrong_answer",
+                            result,
+                            1.0,
+                        )
 
                 result = evaluate_for_exact_keyword_match_in_phrase(
                     normalized_student_message,
