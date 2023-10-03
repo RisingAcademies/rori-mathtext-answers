@@ -208,6 +208,7 @@ async def v2_evaluate_message_with_nlu(message_text, expected_answer):
         ) = normalize_message_and_answer(message_text, expected_answer)
 
         intents_results = None
+        is_answer = None
 
         if len(message_text) < 50:
             # Evaluation 1 - Check for exact match
@@ -283,8 +284,7 @@ async def v2_evaluate_message_with_nlu(message_text, expected_answer):
             # Evaluation 5 - Classify intent with multilabel logistic regression model
             if not intents_results:
                 intents_results = predict_message_intent(message_text)
-
-        is_answer = check_answer_intent_confidence(intents_results)
+                is_answer = check_answer_intent_confidence(intents_results)
 
         if is_answer:
             # Evaluation 6 - Extract integers/floats with regex
