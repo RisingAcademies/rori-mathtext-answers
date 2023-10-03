@@ -242,7 +242,7 @@ async def v2_evaluate_message_with_nlu(message_text, expected_answer):
 
             # Evaluation 4 - Check for exact int or float number
             with sentry_sdk.start_span(description="V2 Exact Number Evaluation"):
-                result = text2num(message_text)
+                result = text2num(normalized_student_message)
 
                 if result != TOKENS2INT_ERROR_INT:
                     if expected_answer == str(

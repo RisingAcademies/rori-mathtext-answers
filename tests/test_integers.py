@@ -120,3 +120,40 @@ def test_wrong_decimal_against_integer():
     assert response.status_code == 200
     assert response.json()["type"] == expected_nlu_response_type
     assert response.json()["data"] == expected_nlu_response_data
+
+
+# Note: For now commas are stripped from the result
+def test_wrong_answer_with_comma():
+    response = simulate_api_call(client, "1,455", "1839")
+    expected_nlu_response_type = "wrong_answer"
+    expected_nlu_response_data = "1455"
+    assert response.status_code == 200
+    assert response.json()["type"] == expected_nlu_response_type
+    assert response.json()["data"] == expected_nlu_response_data
+
+
+def test_right_answer_with_comma_in_student_message():
+    response = simulate_api_call(client, "123,496", "123496")
+    expected_nlu_response_type = "correct_answer"
+    expected_nlu_response_data = "123496"
+    assert response.status_code == 200
+    assert response.json()["type"] == expected_nlu_response_type
+    assert response.json()["data"] == expected_nlu_response_data
+
+
+def test_right_answer_with_comma_in_expected_answer():
+    response = simulate_api_call(client, "123496", "123,496")
+    expected_nlu_response_type = "correct_answer"
+    expected_nlu_response_data = "123,496"
+    assert response.status_code == 200
+    assert response.json()["type"] == expected_nlu_response_type
+    assert response.json()["data"] == expected_nlu_response_data
+
+
+def test_right_answer_with_comma_in_wrong_position():
+    response = simulate_api_call(client, "12,3496", "123496")
+    expected_nlu_response_type = "correct_answer"
+    expected_nlu_response_data = "123496"
+    assert response.status_code == 200
+    assert response.json()["type"] == expected_nlu_response_type
+    assert response.json()["data"] == expected_nlu_response_data
