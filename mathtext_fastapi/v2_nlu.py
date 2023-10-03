@@ -207,6 +207,8 @@ async def v2_evaluate_message_with_nlu(message_text, expected_answer):
             normalized_expected_answer,
         ) = normalize_message_and_answer(message_text, expected_answer)
 
+        intents_results = None
+
         if len(message_text) < 50:
             # Evaluation 1 - Check for exact match
             with sentry_sdk.start_span(description="V2 Comparison Evaluation"):
@@ -279,7 +281,8 @@ async def v2_evaluate_message_with_nlu(message_text, expected_answer):
 
         with sentry_sdk.start_span(description="V2 Model Evaluation"):
             # Evaluation 5 - Classify intent with multilabel logistic regression model
-            intents_results = predict_message_intent(message_text)
+            if not intents_results:
+                intents_results = predict_message_intent(message_text)
 
         is_answer = check_answer_intent_confidence(intents_results)
 
