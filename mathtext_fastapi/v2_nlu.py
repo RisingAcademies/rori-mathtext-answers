@@ -160,18 +160,12 @@ def search_through_intent_results(intents_results, target_intent_label):
 
 
 def check_for_yes_answer_in_intents(intents_results, normalized_expected_answer):
-    """Check if a yes intent in the expected answer is a correct or wrong answer"""
-    result = search_through_intent_results(intents_results, "yes")
-    if result:
-        if normalized_expected_answer == "yes":
+    """Check if a yes intent in the expected answer is a correct"""
+    if normalized_expected_answer == "yes":
+        result = search_through_intent_results(intents_results, "yes")
+        if result:
             return build_single_event_nlu_response(
                 "correct_answer",
-                result.get("data", "yes"),
-                result.get("confidence", 0.0),
-            )
-        else:
-            return build_single_event_nlu_response(
-                "wrong_answer",
                 result.get("data", "yes"),
                 result.get("confidence", 0.0),
             )
