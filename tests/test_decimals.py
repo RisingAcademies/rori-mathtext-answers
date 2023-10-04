@@ -70,8 +70,8 @@ def test_decimal_wrong_answer_in_phrase():
 
 def test_fraction_again_decimal():
     response = simulate_api_call(client, "3/0", "3.0")
-    expected_nlu_response_type = "intent"
-    expected_nlu_response_data = "math_answer"
+    expected_nlu_response_type = "wrong_answer"
+    expected_nlu_response_data = "3/0"
     assert response.status_code == 200
     assert response.json()["type"] == expected_nlu_response_type
     assert response.json()["data"] == expected_nlu_response_data

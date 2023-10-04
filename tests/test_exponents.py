@@ -52,8 +52,8 @@ def test_decimal_against_exponent():
 
 def test_fraction_against_exponent():
     response = simulate_api_call(client, "5/4", "5^4")
-    expected_nlu_response_type = "intent"
-    expected_nlu_response_data = "math_answer"
+    expected_nlu_response_type = "wrong_answer"
+    expected_nlu_response_data = "5/4"
     assert response.status_code == 200
     assert response.json()["type"] == expected_nlu_response_type
     assert response.json()["data"] == expected_nlu_response_data

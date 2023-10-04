@@ -15,7 +15,8 @@ from mathtext.utils.nlutils import text2num
 from mathtext.utils.text2int_so import text2int, text2float
 from mathtext.v2_text_processing import (
     normalize_message_and_answer,
-    extract_approved_response_from_phrase,
+    extract_approved_answer_from_phrase,
+    extract_approved_keyword_from_phrase,
     run_regex_evaluations,
 )
 
@@ -38,25 +39,40 @@ def evaluate_for_exact_match(normalized_student_message, normalized_expected_ans
     ) == normalized_expected_answer.replace(" ", "")
 
 
-def evaluate_for_exact_match_in_phrase(
+def evaluate_for_exact_answer_match_in_phrase(
     normalized_student_message, normalized_expected_answer, expected_answer
 ):
     """
-    evaluate_for_exact_match_in_phrase("2", "2", "2")
-    "2"
-    >>> evaluate_for_exact_match_in_phrase("yes", "yes", "Yes")
-    'Yes'
-    >>> evaluate_for_exact_match_in_phrase("I don't know", "4", "4")
-
-    >>> evaluate_for_exact_match_in_phrase("manu", "3", "4")
-    'menu'
+    evaluate_for_exact_answer_match_in_phrase("2", "2", "2")
+    ('2', True)
+    >>> evaluate_for_exact_answer_match_in_phrase("yes", "yes", "Yes")
+    ('Yes', True)
+    >>> evaluate_for_exact_answer_match_in_phrase("I don't know", "4", "4")
+    ('32202', False)
     """
     tokenized_student_message = normalized_student_message.split()
-    return extract_approved_response_from_phrase(
+    result, is_result_correct = extract_approved_answer_from_phrase(
         tokenized_student_message,
         normalized_expected_answer,
         expected_answer,
     )
+    return result, is_result_correct
+
+
+def evaluate_for_exact_keyword_match_in_phrase(
+    normalized_student_message, normalized_expected_answer, expected_answer
+):
+    """
+    >>> evaluate_for_exact_keyword_match_in_phrase("manu", "3", "4")
+    'menu'
+    """
+    tokenized_student_message = normalized_student_message.split()
+    result = extract_approved_keyword_from_phrase(
+        tokenized_student_message,
+        normalized_expected_answer,
+        expected_answer,
+    )
+    return result
 
 
 def check_answer_intent_confidence(intents_results):
@@ -74,16 +90,22 @@ def check_answer_intent_confidence(intents_results):
 
 def check_approved_intent_confidence(intents_results):
     """Checks whether approved non-answer intents are over the approved confidence threshold"""
-    approved_intent = {}
-    for result in intents_results.get("intents", []):
-        if (
-            result.get("data", "") in APPROVED_INTENTS
-            and result.get("confidence", 0) > APPROVED_INTENT_CONFIDENCE_THRESHOLD
-        ):
-            return build_single_event_nlu_response(
-                "intent", result.get("data"), result.get("confidence")
-            )
-    return approved_intent
+    highest_confidence_intent = {}
+    if intents_results:
+        highest_confidence_intent = max(intents_results, key=lambda x: x["confidence"])
+
+    if (
+        highest_confidence_intent.get("data", "") in APPROVED_INTENTS
+        and highest_confidence_intent.get("data", "") != "out_of_scope"
+        and highest_confidence_intent.get("confidence", 0)
+        > APPROVED_INTENT_CONFIDENCE_THRESHOLD
+    ):
+        return build_single_event_nlu_response(
+            "intent",
+            highest_confidence_intent.get("data"),
+            highest_confidence_intent.get("confidence"),
+        )
+    return {}
 
 
 def check_nlu_number_result_for_correctness(nlu_eval_result, expected_answer):
@@ -120,20 +142,33 @@ def extract_integers_and_floats_with_regex(message_text, expected_answer):
     return {}
 
 
+def search_through_intent_results(intents_results, target_intent_label):
+    """Determines if the target intent scored above a certain confidence threshold
+
+    >>> search_through_intent_results({'intents': [{'type': 'intent', 'data': 'yes', 'confidence': 0.9936121956268761}]}, "yes")
+    {'data': 'yes', 'confidence': 0.9936121956268761}
+
+    >>> search_through_intent_results({'intents': [{'type': 'intent', 'data': 'yes', 'confidence': 0.0}]}, "yes")
+    """
+    result = next(
+        (
+            {
+                "data": intent.get("data", ""),
+                "confidence": intent.get("confidence", 0.0),
+            }
+            for intent in intents_results.get("intents", [])
+            if intent.get("data", "") == target_intent_label
+            and intent.get("confidence", 0.0) > APPROVED_INTENT_CONFIDENCE_THRESHOLD
+        ),
+        None,
+    )
+    return result
+
+
 def check_for_yes_answer_in_intents(intents_results, normalized_expected_answer):
+    """Check if a yes intent in the expected answer is a correct"""
     if normalized_expected_answer == "yes":
-        result = next(
-            (
-                {
-                    "data": intent.get("data", ""),
-                    "confidence": intent.get("confidence", 0.0),
-                }
-                for intent in intents_results.get("intents", [])
-                if intent.get("data", "") == "yes"
-                and intent.get("confidence", 0.0) > APPROVED_INTENT_CONFIDENCE_THRESHOLD
-            ),
-            None,
-        )
+        result = search_through_intent_results(intents_results, "yes")
         if result:
             return build_single_event_nlu_response(
                 "correct_answer",
@@ -172,6 +207,9 @@ async def v2_evaluate_message_with_nlu(message_text, expected_answer):
             normalized_expected_answer,
         ) = normalize_message_and_answer(message_text, expected_answer)
 
+        intents_results = None
+        is_answer = None
+
         if len(message_text) < 50:
             # Evaluation 1 - Check for exact match
             with sentry_sdk.start_span(description="V2 Comparison Evaluation"):
@@ -185,17 +223,38 @@ async def v2_evaluate_message_with_nlu(message_text, expected_answer):
 
             # Evaluation 2 - Check for pre-defined answers and common misspellings
             with sentry_sdk.start_span(description="V2 Text Evaluation"):
-                result = evaluate_for_exact_match_in_phrase(
+                result, is_result_correct = evaluate_for_exact_answer_match_in_phrase(
                     normalized_student_message,
                     normalized_expected_answer,
                     expected_answer,
                 )
-                if result:
-                    if result in APPROVED_KEYWORDS:
-                        return build_single_event_nlu_response("keyword", result, 1.0)
+                if result and is_result_correct:
                     return build_single_event_nlu_response(
                         "correct_answer", result, 1.0
                     )
+                if (
+                    result
+                    and result != str(TOKENS2INT_ERROR_INT)
+                    and is_result_correct == False
+                ):
+                    intents_results = predict_message_intent(message_text)
+                    is_answer = check_answer_intent_confidence(intents_results)
+                    if is_answer:
+                        return build_single_event_nlu_response(
+                            "wrong_answer",
+                            result,
+                            1.0,
+                        )
+
+                result = evaluate_for_exact_keyword_match_in_phrase(
+                    normalized_student_message,
+                    normalized_expected_answer,
+                    expected_answer,
+                )
+
+                if result and result != str(TOKENS2INT_ERROR_INT):
+                    if result in APPROVED_KEYWORDS:
+                        return build_single_event_nlu_response("keyword", result, 1.0)
 
             # Evaluation 3 - Check for fraction, decimal, time, and exponent answers
             with sentry_sdk.start_span(description="V2 Regex Number Evaluation"):
@@ -208,7 +267,7 @@ async def v2_evaluate_message_with_nlu(message_text, expected_answer):
 
             # Evaluation 4 - Check for exact int or float number
             with sentry_sdk.start_span(description="V2 Exact Number Evaluation"):
-                result = text2num(message_text)
+                result = text2num(normalized_student_message)
 
                 if result != TOKENS2INT_ERROR_INT:
                     if expected_answer == str(
@@ -223,9 +282,9 @@ async def v2_evaluate_message_with_nlu(message_text, expected_answer):
 
         with sentry_sdk.start_span(description="V2 Model Evaluation"):
             # Evaluation 5 - Classify intent with multilabel logistic regression model
-            intents_results = predict_message_intent(message_text)
-
-        is_answer = check_answer_intent_confidence(intents_results)
+            if not intents_results:
+                intents_results = predict_message_intent(message_text)
+                is_answer = check_answer_intent_confidence(intents_results)
 
         if is_answer:
             # Evaluation 6 - Extract integers/floats with regex
@@ -236,16 +295,18 @@ async def v2_evaluate_message_with_nlu(message_text, expected_answer):
                 if result:
                     return result
 
-        # Evaluation 7 - Extract approved intents
-        approved_intent = check_approved_intent_confidence(intents_results)
-        if approved_intent:
-            return approved_intent
-
-        # Evaluation 8 - Final check for "yes" answer
+        # Evaluation 7 - Final check for "yes" answer
         yes_intent_as_answer = check_for_yes_answer_in_intents(
             intents_results, normalized_expected_answer
         )
         if yes_intent_as_answer:
             return yes_intent_as_answer
+
+        # Evaluation 8 - Extract approved intents
+        approved_intent = check_approved_intent_confidence(
+            intents_results.get("intents", [])
+        )
+        if approved_intent:
+            return approved_intent
 
     return build_single_event_nlu_response("out_of_scope", message_text, 0.0)
