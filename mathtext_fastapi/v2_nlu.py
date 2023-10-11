@@ -31,11 +31,16 @@ async def run_keyword_and_intent_evaluations(text):
     if result and result != str(32202):
         return build_single_event_nlu_response("keyword", result, 1.0)
     result = predict_message_intent(text)
-    if result and result != str(32202):
+    if (
+        result
+        and result != str(32202)
+        and result.get("confidence", 0) > APPROVED_INTENT_CONFIDENCE_THRESHOLD
+        and result.get("data") != "out_of_scope"
+    ):
         return build_single_event_nlu_response(
             "intent", result.get("data", ""), result.get("confidence", 0)
         )
-    return ERROR_RESPONSE_DICT
+    return build_single_event_nlu_response("out_of_scope", text, 0.0)
 
 
 def evaluate_for_exact_match(normalized_student_message, normalized_expected_answer):
