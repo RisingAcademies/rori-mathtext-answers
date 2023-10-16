@@ -31,6 +31,8 @@ from mathtext_fastapi.constants import (
     TIMEOUT_THRESHOLD,
 )
 
+# Temporary comment to trigger rebuild
+
 # TODO: Simplify conversation_manager code
 from mathtext_fastapi.conversation_manager import manage_conversation_response
 from mathtext_fastapi.nlu import (
@@ -43,7 +45,10 @@ from mathtext_fastapi.request_validators import (
     parse_nlu_api_request_for_message,
 )
 from mathtext_fastapi.v2_conversation_manager import manage_conversation_response
-from mathtext_fastapi.v2_nlu import v2_evaluate_message_with_nlu
+from mathtext_fastapi.v2_nlu import (
+    v2_evaluate_message_with_nlu,
+    run_keyword_and_intent_evaluations,
+)
 
 
 log = getLogger(__name__)
@@ -170,6 +175,26 @@ def intent_recognition_ep(content: Text = None):
     ml_response = predict_message_intent(content.content)
     # content = {"content": ml_response}
     return JSONResponse(content=ml_response)
+
+
+@app.post("/nlu/intent-recognition")
+async def recognize_keywords_and_intents(request: Request):
+    """Attempts to detect approved keywords and intents in a student message"""
+    message_dict = await parse_nlu_api_request_for_message(request)
+    if message_dict == ERROR_RESPONSE_DICT:
+        return ERROR_RESPONSE_DICT
+
+    message_text = str(message_dict.get("message_body", ""))
+    message_text = truncate_long_message_text(message_text)
+
+    try:
+        nlu_response = await asyncio.wait_for(
+            run_keyword_and_intent_evaluations(message_text),
+            TIMEOUT_THRESHOLD,
+        )
+    except asyncio.TimeoutError:
+        nlu_response = TIMEOUT_RESPONSE_DICT
+    return nlu_response
 
 
 @app.post("/nlu")

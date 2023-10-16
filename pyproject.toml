@@ -48,6 +48,7 @@ sentry_sdk = {extras = ["fastapi"], version = "*"}
 # sentencepiece = "*"  # included in sentencetransformers or transformers
 # pandas = "*"
 # scipy = "*"
+torch = ">=2.0.0, !=2.0.1, !=2.1.0"
 
 [tool.poetry.dependencies.en_core_web_sm]
 url = "https://github.com/explosion/spacy-models/releases/download/en_core_web_sm-3.4.1/en_core_web_sm-3.4.1.tar.gz"
