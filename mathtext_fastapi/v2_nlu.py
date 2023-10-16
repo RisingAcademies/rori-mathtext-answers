@@ -184,11 +184,16 @@ def search_through_intent_results(intents_results, target_intent_label):
 
 def check_for_yes_answer_in_intents(intents_results, normalized_expected_answer):
     """Check if a yes intent in the expected answer is a correct"""
-    if normalized_expected_answer == "yes":
+    if normalized_expected_answer == "yes" or normalized_expected_answer == "no":
         result = search_through_intent_results(intents_results, "yes")
+
+        label = "correct_answer"
+        if normalized_expected_answer == "no" and result:
+            label = "wrong_answer"
+
         if result:
             return build_single_event_nlu_response(
-                "correct_answer",
+                label,
                 result.get("data", "yes"),
                 result.get("confidence", 0.0),
             )
