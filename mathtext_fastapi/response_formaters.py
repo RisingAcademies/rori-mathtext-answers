@@ -1,7 +1,7 @@
 from mathtext.constants import TOKENS2INT_ERROR_INT
 
 
-def build_single_event_nlu_response(eval_type, result, confidence=1, intents=[]):
+def build_single_event_nlu_response(eval_type, result, confidence=1.0, intents=[]):
     """Formats the result of a single event to the standard nlu response format
 
     Currently applies to comparison evaluation, timeout, and error responses
