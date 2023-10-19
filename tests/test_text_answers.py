@@ -138,3 +138,21 @@ def test_multiple_choice_wrong_answer():
     assert response.status_code == 200
     assert response.json()["type"] == expected_nlu_response_type
     assert response.json()["data"] == expected_nlu_response_data
+
+
+def test_yes_no_wrong_answer():
+    response = simulate_api_call(client, "Yes", "No")
+    expected_nlu_response_type = "wrong_answer"
+    expected_nlu_response_data = "yes"
+    assert response.status_code == 200
+    assert response.json()["type"] == expected_nlu_response_type
+    assert response.json()["data"] == expected_nlu_response_data
+
+
+def test_true_false_wrong_answer():
+    response = simulate_api_call(client, "T", "F")
+    expected_nlu_response_type = "wrong_answer"
+    expected_nlu_response_data = "T"
+    assert response.status_code == 200
+    assert response.json()["type"] == expected_nlu_response_type
+    assert response.json()["data"] == expected_nlu_response_data
