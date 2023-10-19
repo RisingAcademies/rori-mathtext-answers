@@ -144,17 +144,18 @@ def check_nlu_number_result_for_correctness(nlu_eval_result, expected_answer):
 
     >>> check_nlu_number_result_for_correctness(100, "100")
     {'type': 'correct_answer', 'data': '100', 'confidence': 1.0}
+    >>> check_nlu_number_result_for_correctness(10, "100")
+    {'type': 'wrong_answer', 'data': '10', 'confidence': 1.0}
     >>> check_nlu_number_result_for_correctness(None, "20")
     {}
     """
-    if nlu_eval_result and nlu_eval_result != None and nlu_eval_result != 0:
+    label = "wrong_answer"
+    if nlu_eval_result and nlu_eval_result not in [None, 0]:
         if expected_answer == str(nlu_eval_result) or are_equivalent_numerical_answers(
             str(nlu_eval_result), expected_answer
         ):
             label = "correct_answer"
             nlu_eval_result = expected_answer
-        else:
-            label = "wrong_answer"
         return build_single_event_nlu_response(label, str(nlu_eval_result), 1.0)
     return {}
 
