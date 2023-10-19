@@ -4,7 +4,6 @@ from logging import getLogger
 
 from mathtext.constants import TOKENS2INT_ERROR_INT
 from mathtext_fastapi.constants import (
-    ERROR_RESPONSE_DICT,
     APPROVED_KEYWORDS,
     APPROVED_INTENTS,
     APPROVED_INTENT_CONFIDENCE_THRESHOLD,
