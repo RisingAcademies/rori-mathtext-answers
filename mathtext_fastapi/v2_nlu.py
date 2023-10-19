@@ -29,6 +29,10 @@ log = getLogger(__name__)
 
 
 async def run_keyword_and_intent_evaluations(text):
+    result = has_profanity(text)
+    if result:
+        return build_single_event_nlu_response("keyword", "profanity")
+
     result = evaluate_for_exact_keyword_match_in_phrase(text, "", "")
     if result and result != str(32202):
         return build_single_event_nlu_response("keyword", result, 1.0)
