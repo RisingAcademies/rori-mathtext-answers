@@ -198,8 +198,16 @@ def search_through_intent_results(intents_results, target_intent_label):
 
 
 def check_for_yes_answer_in_intents(intents_results, normalized_expected_answer):
-    """Check if a yes intent in the expected answer is a correct"""
-    if normalized_expected_answer == "yes" or normalized_expected_answer == "no":
+    """Check if a yes intent in the expected answer is a correct answer
+
+    >>> check_for_yes_answer_in_intents({'intents': [{'type': 'intent', 'data': 'yes', 'confidence': 0.89}]}, 'yes')
+    {'type': 'correct_answer', 'data': 'yes', 'confidence': 0.89}
+    >>> check_for_yes_answer_in_intents({'intents': [{'type': 'intent', 'data': 'yes', 'confidence': 0.67}]}, 'no')
+    {'type': 'wrong_answer', 'data': 'yes', 'confidence': 0.67}
+    >>> check_for_yes_answer_in_intents({'intents': [{'type': 'intent', 'data': 'yes', 'confidence': 0.22}]}, 'yes')
+
+    """
+    if normalized_expected_answer in ["yes", "no"]:
         result = search_through_intent_results(intents_results, "yes")
 
         label = "correct_answer"
