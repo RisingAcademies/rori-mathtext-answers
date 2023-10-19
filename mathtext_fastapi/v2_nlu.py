@@ -4,18 +4,17 @@ from logging import getLogger
 
 from mathtext.constants import TOKENS2INT_ERROR_INT
 from mathtext_fastapi.constants import (
-    APPROVED_KEYWORDS,
-    APPROVED_INTENTS,
     APPROVED_INTENT_CONFIDENCE_THRESHOLD,
+    APPROVED_INTENTS,
+    APPROVED_KEYWORDS,
 )
 from mathtext.predict_intent import predict_message_intent
-
 from mathtext.utils.nlutils import text2num
 from mathtext.utils.text2int_so import text2int, text2float
 from mathtext.v2_text_processing import (
-    normalize_message_and_answer,
     extract_approved_answer_from_phrase,
     extract_approved_keyword_from_phrase,
+    normalize_message_and_answer,
     run_regex_evaluations,
 )
 
