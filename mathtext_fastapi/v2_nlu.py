@@ -31,7 +31,7 @@ log = getLogger(__name__)
 async def run_keyword_and_intent_evaluations(text):
     result = has_profanity(text)
     if result:
-        return build_single_event_nlu_response("keyword", "profanity")
+        return build_single_event_nlu_response("intent", "profanity")
 
     result = evaluate_for_exact_keyword_match_in_phrase(text, "", "")
     if result and result != str(32202):
@@ -242,11 +242,11 @@ async def v2_evaluate_message_with_nlu(message_text, expected_answer):
             # Evaluate 1 - Check for invalid input
             result = has_profanity(message_text)
             if result:
-                return build_single_event_nlu_response("keyword", "profanity")
+                return build_single_event_nlu_response("intent", "profanity")
 
             result = is_old_button(message_text)
             if result:
-                return build_single_event_nlu_response("keyword", "old_button")
+                return build_single_event_nlu_response("intent", "old_button")
 
             # Evaluation 2 - Check for exact match
             with sentry_sdk.start_span(description="V2 Comparison Evaluation"):
