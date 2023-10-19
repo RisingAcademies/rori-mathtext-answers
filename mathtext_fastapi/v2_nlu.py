@@ -43,7 +43,7 @@ def run_keyword_and_intent_evaluations(text):
 
     result = evaluate_for_exact_keyword_match_in_phrase(text, "", "")
     if result and result != str(32202):
-        return build_single_event_nlu_response("keyword", result, 1.0)
+        return build_single_event_nlu_response("keyword", result)
     result = predict_message_intent(text)
     if (
         result
@@ -156,7 +156,7 @@ def check_nlu_number_result_for_correctness(nlu_eval_result, expected_answer):
         ):
             label = "correct_answer"
             nlu_eval_result = expected_answer
-        return build_single_event_nlu_response(label, str(nlu_eval_result), 1.0)
+        return build_single_event_nlu_response(label, str(nlu_eval_result))
     return {}
 
 
@@ -272,7 +272,7 @@ async def v2_evaluate_message_with_nlu(message_text, expected_answer):
                 )
                 if result:
                     return build_single_event_nlu_response(
-                        "correct_answer", expected_answer, 1.0
+                        "correct_answer", expected_answer
                     )
 
             # Evaluation 3 - Check for pre-defined answers and common misspellings
@@ -283,9 +283,7 @@ async def v2_evaluate_message_with_nlu(message_text, expected_answer):
                     expected_answer,
                 )
                 if result and is_result_correct:
-                    return build_single_event_nlu_response(
-                        "correct_answer", result, 1.0
-                    )
+                    return build_single_event_nlu_response("correct_answer", result)
                 if (
                     result
                     and result != str(TOKENS2INT_ERROR_INT)
@@ -297,7 +295,6 @@ async def v2_evaluate_message_with_nlu(message_text, expected_answer):
                         return build_single_event_nlu_response(
                             "wrong_answer",
                             result,
-                            1.0,
                         )
 
                 result = evaluate_for_exact_keyword_match_in_phrase(
@@ -308,7 +305,7 @@ async def v2_evaluate_message_with_nlu(message_text, expected_answer):
 
                 if result and result != str(TOKENS2INT_ERROR_INT):
                     if result in APPROVED_KEYWORDS:
-                        return build_single_event_nlu_response("keyword", result, 1.0)
+                        return build_single_event_nlu_response("keyword", result)
 
             # Evaluation 4 - Check for fraction, decimal, time, and exponent answers
             with sentry_sdk.start_span(description="V2 Regex Number Evaluation"):
@@ -317,7 +314,7 @@ async def v2_evaluate_message_with_nlu(message_text, expected_answer):
                     label = "wrong_answer"
                     if result == normalized_expected_answer:
                         label = "correct_answer"
-                    return build_single_event_nlu_response(label, result, 1.0)
+                    return build_single_event_nlu_response(label, result)
 
             # Evaluation 5 - Check for exact int or float number
             with sentry_sdk.start_span(description="V2 Exact Number Evaluation"):
@@ -328,11 +325,9 @@ async def v2_evaluate_message_with_nlu(message_text, expected_answer):
                         result
                     ) or are_equivalent_numerical_answers(str(result), expected_answer):
                         return build_single_event_nlu_response(
-                            "correct_answer", expected_answer, 1.0
+                            "correct_answer", expected_answer
                         )
-                    return build_single_event_nlu_response(
-                        "wrong_answer", str(result), 1.0
-                    )
+                    return build_single_event_nlu_response("wrong_answer", str(result))
 
         with sentry_sdk.start_span(description="V2 Model Evaluation"):
             # Evaluation 6 - Classify intent with multilabel logistic regression model
