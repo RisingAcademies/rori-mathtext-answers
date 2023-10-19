@@ -26,7 +26,17 @@ from mathtext_fastapi.response_formaters import build_single_event_nlu_response
 log = getLogger(__name__)
 
 
-async def run_keyword_and_intent_evaluations(text):
+def run_keyword_and_intent_evaluations(text):
+    """Evaluates a student message to check the message's intent through an approved keyword or intent
+
+    >>> run_keyword_and_intent_evaluations("fuck")
+    {'type': 'intent', 'data': 'profanity', 'confidence': 1.0}
+    >>> run_keyword_and_intent_evaluations("menu")
+    {'type': 'keyword', 'data': 'menu', 'confidence': 1.0}
+    >>> result = run_keyword_and_intent_evaluations("I want to change topics")
+    >>> result.get("type", "")
+    'intent'
+    """
     result = has_profanity(text)
     if result:
         return build_single_event_nlu_response("intent", "profanity")
