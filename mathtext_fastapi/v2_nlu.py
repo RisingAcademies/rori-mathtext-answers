@@ -389,16 +389,16 @@ def extract_approved_keyword(
     return {}
 
 
-def extract_exact_match(
+def extract_exact_answer_match(
     normalized_student_message, normalized_expected_answer, expected_answer
 ):
     """Runs direct comparison of normalized student message and expected answer
 
-    >>> extract_exact_match("true", "true", "True")
+    >>> extract_exact_answer_match("true", "true", "True")
     {'type': 'correct_answer', 'data': 'True', 'confidence': 1.0}
-    >>> extract_exact_match("it's 5", "5", "5")
+    >>> extract_exact_answer_match("it's 5", "5", "5")
     {}
-    >>> extract_exact_match("false", "true", "True")
+    >>> extract_exact_answer_match("false", "true", "True")
     {}
     """
     result = evaluate_for_exact_match_with_expected_answer(
@@ -422,7 +422,7 @@ def run_text_processing_evaluations(
 
     # Evaluation 2 - Check for exact match
     with sentry_sdk.start_span(description="V2 Comparison Evaluation"):
-        result = extract_exact_match(
+        result = extract_exact_answer_match(
             normalized_student_message,
             normalized_expected_answer,
             expected_answer,
