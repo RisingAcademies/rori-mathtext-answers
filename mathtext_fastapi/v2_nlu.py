@@ -198,12 +198,14 @@ def extract_integers_and_floats_with_regex(student_message, expected_answer):
     return {}
 
 
-def search_through_intent_results(intents_results, target_intent_label):
+def check_if_intent_scored_over_approved_confidence_threshold(
+    intents_results, target_intent_label
+):
     """Determines if the target intent scored above a certain confidence threshold
 
-    >>> search_through_intent_results({'intents': [{'type': 'intent', 'data': 'yes', 'confidence': 0.9936121956268761}]}, "yes")
+    >>> check_if_intent_scored_over_approved_confidence_threshold({'intents': [{'type': 'intent', 'data': 'yes', 'confidence': 0.9936121956268761}]}, "yes")
     {'data': 'yes', 'confidence': 0.9936121956268761}
-    >>> search_through_intent_results({'intents': [{'type': 'intent', 'data': 'yes', 'confidence': 0.0}]}, "yes")
+    >>> check_if_intent_scored_over_approved_confidence_threshold({'intents': [{'type': 'intent', 'data': 'yes', 'confidence': 0.0}]}, "yes")
     {}
     """
     result = next(
@@ -231,7 +233,9 @@ def check_for_yes_answer_in_intents(intents_results, normalized_expected_answer)
     >>> check_for_yes_answer_in_intents({'intents': [{'type': 'intent', 'data': 'yes', 'confidence': 0.22}]}, 'yes')
     """
     if normalized_expected_answer in ["yes", "no"]:
-        result = search_through_intent_results(intents_results, "yes")
+        result = check_if_intent_scored_over_approved_confidence_threshold(
+            intents_results, "yes"
+        )
 
         label = "correct_answer"
         if normalized_expected_answer == "no" and result:
