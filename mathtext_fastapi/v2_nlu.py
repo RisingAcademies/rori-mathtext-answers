@@ -129,12 +129,12 @@ def check_answer_intent_confidence(intents_results):
     return is_answer
 
 
-def check_approved_intent_confidence(intents_results):
+def find_highest_confidence_intent_over_threshold(intents_results):
     """Evaluates intent results for the highest confidence intent that is over the approved confidence threshold
 
-    >>> check_approved_intent_confidence([{'type': 'intent', 'data': 'math_answer', 'confidence': 0.89}, {'type': 'intent', 'data': 'change_topic', 'confidence': 0.70}])
+    >>> find_highest_confidence_intent_over_threshold([{'type': 'intent', 'data': 'math_answer', 'confidence': 0.89}, {'type': 'intent', 'data': 'change_topic', 'confidence': 0.70}])
     {'type': 'intent', 'data': 'math_answer', 'confidence': 0.89}
-    >>> check_approved_intent_confidence([{'type': 'intent', 'data': 'math_answer', 'confidence': 0.20}, {'type': 'intent', 'data': 'change_topic', 'confidence': 0.10}])
+    >>> find_highest_confidence_intent_over_threshold([{'type': 'intent', 'data': 'math_answer', 'confidence': 0.20}, {'type': 'intent', 'data': 'change_topic', 'confidence': 0.10}])
     {}
     """
     highest_confidence_intent = {}
@@ -510,7 +510,9 @@ async def v2_evaluate_message_with_nlu(student_message, expected_answer):
             return result
 
         # Evaluation 9 - Extract approved intents
-        result = check_approved_intent_confidence(intents_results.get("intents", []))
+        result = find_highest_confidence_intent_over_threshold(
+            intents_results.get("intents", [])
+        )
         if result:
             return result
 
