@@ -203,8 +203,8 @@ def search_through_intent_results(intents_results, target_intent_label):
 
     >>> search_through_intent_results({'intents': [{'type': 'intent', 'data': 'yes', 'confidence': 0.9936121956268761}]}, "yes")
     {'data': 'yes', 'confidence': 0.9936121956268761}
-
     >>> search_through_intent_results({'intents': [{'type': 'intent', 'data': 'yes', 'confidence': 0.0}]}, "yes")
+    {}
     """
     result = next(
         (
@@ -216,7 +216,7 @@ def search_through_intent_results(intents_results, target_intent_label):
             if intent.get("data", "") == target_intent_label
             and intent.get("confidence", 0.0) > APPROVED_INTENT_CONFIDENCE_THRESHOLD
         ),
-        None,
+        {},
     )
     return result
 
