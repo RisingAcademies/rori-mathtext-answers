@@ -111,16 +111,16 @@ def evaluate_for_exact_keyword_match_in_phrase(
 def check_answer_intent_confidence(intents_results):
     """Checks whether the answer intent is over the approved confidence threshold
 
-    >>> check_answer_intent_confidence({'intents': [{'type': 'intent', 'data': 'math_answer', 'confidence': 0.89}]})
+    >>> check_answer_intent_confidence([{'type': 'intent', 'data': 'math_answer', 'confidence': 0.89}])
     True
-    >>> check_answer_intent_confidence({'intents': [{'type': 'intent', 'data': 'math_answer', 'confidence': 0.20}]})
+    >>> check_answer_intent_confidence([{'type': 'intent', 'data': 'math_answer', 'confidence': 0.20}])
     False
-    >>> check_answer_intent_confidence({'intents': [{'type': 'intent', 'data': 'change_topic', 'confidence': 0.89}]})
+    >>> check_answer_intent_confidence([{'type': 'intent', 'data': 'change_topic', 'confidence': 0.89}])
     False
     """
     is_answer = False
 
-    for result in intents_results.get("intents", []):
+    for result in intents_results:
         if (
             result.get("data", "") == "math_answer"
             and result.get("confidence", 0.0) >= APPROVED_INTENT_CONFIDENCE_THRESHOLD
@@ -203,9 +203,9 @@ def check_if_intent_scored_over_approved_confidence_threshold(
 ):
     """Determines if the target intent scored above a certain confidence threshold
 
-    >>> check_if_intent_scored_over_approved_confidence_threshold({'intents': [{'type': 'intent', 'data': 'yes', 'confidence': 0.9936121956268761}]}, "yes")
+    >>> check_if_intent_scored_over_approved_confidence_threshold([{'type': 'intent', 'data': 'yes', 'confidence': 0.9936121956268761}], "yes")
     {'data': 'yes', 'confidence': 0.9936121956268761}
-    >>> check_if_intent_scored_over_approved_confidence_threshold({'intents': [{'type': 'intent', 'data': 'yes', 'confidence': 0.0}]}, "yes")
+    >>> check_if_intent_scored_over_approved_confidence_threshold([{'type': 'intent', 'data': 'yes', 'confidence': 0.0}], "yes")
     {}
     """
     result = next(
@@ -214,7 +214,7 @@ def check_if_intent_scored_over_approved_confidence_threshold(
                 "data": intent.get("data", ""),
                 "confidence": intent.get("confidence", 0.0),
             }
-            for intent in intents_results.get("intents", [])
+            for intent in intents_results
             if intent.get("data", "") == target_intent_label
             and intent.get("confidence", 0.0) > APPROVED_INTENT_CONFIDENCE_THRESHOLD
         ),
@@ -226,11 +226,11 @@ def check_if_intent_scored_over_approved_confidence_threshold(
 def check_for_yes_answer_in_intents(intents_results, normalized_expected_answer):
     """Check if a yes intent in the expected answer is a correct answer
 
-    >>> check_for_yes_answer_in_intents({'intents': [{'type': 'intent', 'data': 'yes', 'confidence': 0.89}]}, 'yes')
+    >>> check_for_yes_answer_in_intents([{'type': 'intent', 'data': 'yes', 'confidence': 0.89}], 'yes')
     {'type': 'correct_answer', 'data': 'yes', 'confidence': 0.89}
-    >>> check_for_yes_answer_in_intents({'intents': [{'type': 'intent', 'data': 'yes', 'confidence': 0.67}]}, 'no')
+    >>> check_for_yes_answer_in_intents([{'type': 'intent', 'data': 'yes', 'confidence': 0.67}], 'no')
     {'type': 'wrong_answer', 'data': 'yes', 'confidence': 0.67}
-    >>> check_for_yes_answer_in_intents({'intents': [{'type': 'intent', 'data': 'yes', 'confidence': 0.22}]}, 'yes')
+    >>> check_for_yes_answer_in_intents([{'type': 'intent', 'data': 'yes', 'confidence': 0.22}], 'yes')
     """
     if normalized_expected_answer in ["yes", "no"]:
         result = check_if_intent_scored_over_approved_confidence_threshold(
@@ -355,7 +355,8 @@ def extract_approved_answer(
     if result and is_result_correct:
         return build_single_event_nlu_response("correct_answer", result)
     if result and result != str(TOKENS2INT_ERROR_INT) and is_result_correct == False:
-        intents_results = predict_message_intent(student_message)
+        intents_results_dict = predict_message_intent(student_message)
+        intents_results = intents_results_dict.get("intents", [])
         is_answer = check_answer_intent_confidence(intents_results)
         if is_answer:
             return build_single_event_nlu_response(
@@ -478,7 +479,7 @@ async def v2_evaluate_message_with_nlu(student_message, expected_answer):
             normalized_expected_answer,
         ) = normalize_message_and_answer(student_message, expected_answer)
 
-        intents_results = None
+        intents_results = []
         is_answer = None
 
         if len(student_message) < 50:
@@ -494,7 +495,8 @@ async def v2_evaluate_message_with_nlu(student_message, expected_answer):
         with sentry_sdk.start_span(description="V2 Model Evaluation"):
             # Evaluation 6 - Classify intent with multilabel logistic regression model
             if not intents_results:
-                intents_results = predict_message_intent(student_message)
+                intents_result_dict = predict_message_intent(student_message)
+                intents_results = intents_result_dict.get("intents", [])
                 is_answer = check_answer_intent_confidence(intents_results)
 
         if is_answer:
@@ -514,9 +516,7 @@ async def v2_evaluate_message_with_nlu(student_message, expected_answer):
             return result
 
         # Evaluation 9 - Extract approved intents
-        result = find_highest_confidence_intent_over_threshold(
-            intents_results.get("intents", [])
-        )
+        result = find_highest_confidence_intent_over_threshold(intents_results)
         if result:
             return result
 
