@@ -194,6 +194,9 @@ async def recognize_keywords_and_intents(request: Request):
         )
     except asyncio.TimeoutError:
         nlu_response = TIMEOUT_RESPONSE_DICT
+    except Exception as e:
+        nlu_response = ERROR_RESPONSE_DICT
+        log.error(f"NLU Intent Recognition Endpoint Exception: {e}")
     return nlu_response
 
 
@@ -222,7 +225,9 @@ async def evaluate_user_message_with_nlu_api(request: Request):
         )
     except asyncio.TimeoutError:
         nlu_response = TIMEOUT_RESPONSE_DICT
-
+    except Exception as e:
+        nlu_response = ERROR_RESPONSE_DICT
+        log.error(f"NLU Endpoint Exception: {e}")
     asyncio.create_task(prepare_message_data_for_logging(message_dict, nlu_response))
 
     return JSONResponse(content=nlu_response)
@@ -254,7 +259,9 @@ async def v2_evaluate_user_message_with_nlu_api(request: Request):
         )
     except asyncio.TimeoutError:
         nlu_response = TIMEOUT_RESPONSE_DICT
-
+    except Exception as e:
+        nlu_response = ERROR_RESPONSE_DICT
+        log.error(f"V2 NLU Endpoint Exception: {e}")
     asyncio.create_task(prepare_message_data_for_logging(message_dict, nlu_response))
 
     return JSONResponse(content=nlu_response)
