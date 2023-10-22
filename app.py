@@ -197,7 +197,7 @@ async def recognize_keywords_and_intents(request: Request):
     except Exception as e:
         nlu_response = ERROR_RESPONSE_DICT
         log.error(f"NLU Intent Recognition Endpoint Exception: {e}")
-    return nlu_response
+    return JSONResponse(content=nlu_response)
 
 
 @app.post("/nlu")
