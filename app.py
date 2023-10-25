@@ -34,7 +34,6 @@ from mathtext_fastapi.constants import (
 # Temporary comment to trigger rebuild
 
 # TODO: Simplify conversation_manager code
-from mathtext_fastapi.conversation_manager import manage_conversation_response
 from mathtext_fastapi.nlu import (
     evaluate_message_with_nlu,
     run_keyword_evaluation,
@@ -44,7 +43,6 @@ from mathtext_fastapi.request_validators import (
     truncate_long_message_text,
     parse_nlu_api_request_for_message,
 )
-from mathtext_fastapi.v2_conversation_manager import manage_conversation_response
 from mathtext_fastapi.v2_nlu import (
     v2_evaluate_message_with_nlu,
     run_keyword_and_intent_evaluations,
@@ -95,72 +93,6 @@ def text2int_ep(content: Text = None):
     # content = {"message": ml_response}
     # return JSONResponse(content=content)
     return JSONResponse(content={})
-
-
-@app.post("/v1/manager")
-async def programmatic_message_manager(request: Request):
-    """
-    Calls conversation management function to determine the next state
-
-    Input
-    request.body: dict - message data for the most recent user response
-    {
-        "author_id": "+47897891",
-        "contact_uuid": "j43hk26-2hjl-43jk-hnk2-k4ljl46j0ds09",
-        "author_type": "OWNER",
-        "message_body": "a test message",
-        "message_direction": "inbound",
-        "message_id": "ABJAK64jlk3-agjkl2QHFAFH",
-        "message_inserted_at": "2022-07-05T04:00:34.03352Z",
-        "message_updated_at": "2023-02-14T03:54:19.342950Z",
-    }
-
-    Output
-    context: dict - the information for the current state
-    {
-        "user": "47897891",
-        "state": "welcome-message-state",
-        "bot_message": "Welcome to Rori!",
-        "user_message": "",
-        "type": "ask"
-    }
-    """
-    data_dict = await request.json()
-    context = manage_conversation_response(data_dict)
-    return JSONResponse(context)
-
-
-@app.post("/v2/manager")
-async def programmatic_message_manager(request: Request):
-    """
-    Calls conversation management function to determine the next state
-
-    Input
-    request.body: dict - message data for the most recent user response
-    {
-        "author_id": "+47897891",
-        "contact_uuid": "j43hk26-2hjl-43jk-hnk2-k4ljl46j0ds09",
-        "author_type": "OWNER",
-        "message_body": "a test message",
-        "message_direction": "inbound",
-        "message_id": "ABJAK64jlk3-agjkl2QHFAFH",
-        "message_inserted_at": "2022-07-05T04:00:34.03352Z",
-        "message_updated_at": "2023-02-14T03:54:19.342950Z",
-    }
-
-    Output
-    context: dict - the information for the current state
-    {
-        "user": "47897891",
-        "state": "welcome-message-state",
-        "bot_message": "Welcome to Rori!",
-        "user_message": "",
-        "type": "ask"
-    }
-    """
-    data_dict = await request.json()
-    context = manage_conversation_response(data_dict)
-    return JSONResponse(context)
 
 
 @app.post("/keyword-detection")
