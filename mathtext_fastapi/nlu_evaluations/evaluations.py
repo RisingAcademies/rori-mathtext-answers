@@ -95,6 +95,7 @@ def extract_approved_answer(
                 "wrong_answer",
                 result,
             )
+        return intents_results_dict
     return {}
 
 

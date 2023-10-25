@@ -85,14 +85,19 @@ def run_text_processing_evaluations(
 
     # Evaluation 3 - Check for pre-defined answers and common misspellings
     with sentry_sdk.start_span(description="V2 Text Evaluation"):
+        intents_results = {}
         result = extract_approved_answer(
             normalized_student_message,
             normalized_expected_answer,
             expected_answer,
             student_message,
         )
-        if result:
+
+        if result and not result.get("intents", {}):
             return result
+
+        if result.get("intents", {}):
+            intents_results = result
 
         result = extract_approved_keyword(
             normalized_student_message,
@@ -117,6 +122,8 @@ def run_text_processing_evaluations(
         )
         if result:
             return result
+    if intents_results:
+        return intents_results
     return {}
 
 
@@ -141,8 +148,10 @@ async def v2_evaluate_message_with_nlu(student_message, expected_answer):
                 expected_answer,
                 student_message,
             )
-            if result:
+            if result and not result.get("intents", ""):
                 return result
+            if result and result.get("intents", ""):
+                intents_results = result.get("intents", [])
 
         with sentry_sdk.start_span(description="V2 Model Evaluation"):
             # Evaluation 6 - Classify intent with multilabel logistic regression model
