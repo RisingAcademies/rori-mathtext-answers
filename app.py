@@ -4,19 +4,12 @@ or
 `python -m uvicorn app:app --reload --host localhost --port 7860`
 """
 import asyncio
-import ast
-
-# import datetime as dt
 import sentry_sdk
 
-# from collections.abc import Mapping
-# from dateutil.parser import isoparse
 from fastapi import FastAPI, Request
 from fastapi.responses import JSONResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
-
-# from json import JSONDecodeError
 from logging import getLogger
 from pydantic import BaseModel
 
@@ -29,19 +22,14 @@ from mathtext_fastapi.constants import (
     TIMEOUT_RESPONSE_DICT,
     TIMEOUT_THRESHOLD,
 )
-
-# Temporary comment to trigger rebuild
-
-# TODO: Simplify conversation_manager code
 from mathtext_fastapi.nlu import (
     evaluate_message_with_nlu,
-    run_keyword_evaluation,
 )
-from mathtext_fastapi.supabase_logging_async import prepare_message_data_for_logging
 from mathtext_fastapi.request_validators import (
     truncate_long_message_text,
     parse_nlu_api_request_for_message,
 )
+from mathtext_fastapi.supabase_logging_async import prepare_message_data_for_logging
 from mathtext_fastapi.v2_nlu import (
     v2_evaluate_message_with_nlu,
     run_keyword_and_intent_evaluations,
@@ -80,31 +68,9 @@ async def trigger_error():
     division_by_zero = 1 / 0
 
 
-@app.post("/hello")
-def hello(content: Text = None):
-    content = {"message": f"Hello {content.content}!"}
-    return JSONResponse(content=content)
-
-
-@app.post("/text2int")
-def text2int_ep(content: Text = None):
-    # ml_response = text2int(content.content)
-    # content = {"message": ml_response}
-    # return JSONResponse(content=content)
-    return JSONResponse(content={})
-
-
-@app.post("/keyword-detection")
-def keyword_detection_ep(content: Text = None):
-    ml_response = run_keyword_evaluation(content.content)
-    content = {"content": ml_response}
-    return JSONResponse(content=content)
-
-
 @app.post("/intent-recognition")
 def intent_recognition_ep(content: Text = None):
     ml_response = predict_message_intent(content.content)
-    # content = {"content": ml_response}
     return JSONResponse(content=ml_response)
 
 
@@ -160,7 +126,6 @@ async def evaluate_user_message_with_nlu_api(request: Request):
 
 
 @app.post("/v2/nlu")
-# @app.post("/nlu")
 async def v2_evaluate_user_message_with_nlu_api(request: Request):
     """Calls nlu evaluation and returns the nlu_response
 
