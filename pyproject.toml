@@ -22,33 +22,24 @@ classifiers = [
 
 
 [tool.poetry.dependencies]
-# FIXME: We should always load the main branch (not Vlad) branch of mathactive here:
-fuzzywuzzy = "*"
-transitions = "*"
-openpyxl = "*"
-psycopg2 = "*"
 asyncpg = "*"
-python-Levenshtein = "*"
-
+fastapi = "*"
+fuzzywuzzy = "*"
+httpx = "<0.22,>=0.19"
 mathactive = "0.0.14"
 mathtext = "0.0.25"
-fastapi = "*"
-# python = ">=3.9.16" # tested on hobson's virtualenv on linux
+openpyxl = "*"
+psycopg2 = "*"
 python = ">=3.10,<4.0"
+python-Levenshtein = "*"
 redis = "*"
 requests = "*"
-httpx = "<0.22,>=0.19"
-# supabase = "*"
-uvicorn = "*"
-sqlalchemy = "*"
 sentry_sdk = {extras = ["fastapi"], version = "*"}
-
-# # Installed by mathtext!!
-# pydantic = "*"
-# sentencepiece = "*"  # included in sentencetransformers or transformers
-# pandas = "*"
-# scipy = "*"
+sqlalchemy = "*"
 torch = ">=2.0.0, !=2.0.1, !=2.1.0"
+transitions = "*"
+uvicorn = "*"
+
 
 # TODO: Add a pytest section doctest: +ELLIPSIS
 [tool.pytest.ini_options]
@@ -62,9 +53,3 @@ toml = "*"
 [build-system]
 requires = ["poetry-core"]
 build-backend = "poetry.core.masonry.api"
-
-# [build-system]
-# requires = ["hatchling"]
-# build-backend = "hatchling.build"
-
-# repository = "https://gitlab.com/tangibleai/community/mathtext-fastapi"
