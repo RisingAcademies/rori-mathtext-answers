@@ -36,10 +36,7 @@ from mathtext_fastapi.response_formaters import build_single_event_nlu_response
 
 log = getLogger(__name__)
 
-from memory_profiler import profile
 
-
-# @profile
 async def run_keyword_and_intent_evaluations(text):
     """Evaluates a student message to check the message's intent through an approved keyword or intent
 
