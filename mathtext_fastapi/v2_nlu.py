@@ -1,5 +1,6 @@
 """ The functions in this file are directly called from the NLU endpoints.  They control the logic of the order of evaluations and send a final response back to the endpoint function """
 
+import asyncio
 import sentry_sdk
 
 from logging import getLogger
@@ -31,14 +32,14 @@ from mathtext_fastapi.response_formaters import build_single_event_nlu_response
 log = getLogger(__name__)
 
 
-def run_keyword_and_intent_evaluations(text):
+async def run_keyword_and_intent_evaluations(text):
     """Evaluates a student message to check the message's intent through an approved keyword or intent
 
-    >>> run_keyword_and_intent_evaluations("fuck")
+    >>> asyncio.run(run_keyword_and_intent_evaluations("fuck"))
     {'type': 'intent', 'data': 'profanity', 'confidence': 1.0}
-    >>> run_keyword_and_intent_evaluations("menu")
+    >>> asyncio.run(run_keyword_and_intent_evaluations("menu"))
     {'type': 'keyword', 'data': 'menu', 'confidence': 1.0}
-    >>> result = run_keyword_and_intent_evaluations("I want to change topics")
+    >>> result = asyncio.run(run_keyword_and_intent_evaluations("I want to change topics"))
     >>> result.get("type", "")
     'intent'
     """
