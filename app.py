@@ -13,7 +13,7 @@ from fastapi.templating import Jinja2Templates
 from logging import getLogger
 from pydantic import BaseModel
 
-from mathtext.predict_intent import predict_message_intent
+from mathtext.predict_intent import predict_intent
 from mathtext_fastapi.constants import (
     ERROR_RESPONSE_DICT,
     SENTRY_DSN,
@@ -22,9 +22,7 @@ from mathtext_fastapi.constants import (
     TIMEOUT_RESPONSE_DICT,
     TIMEOUT_THRESHOLD,
 )
-from mathtext_fastapi.nlu import (
-    evaluate_message_with_nlu,
-)
+
 from mathtext_fastapi.request_validators import (
     truncate_long_message_text,
     parse_nlu_api_request_for_message,
@@ -38,14 +36,14 @@ from mathtext_fastapi.v2_nlu import (
 
 log = getLogger(__name__)
 
-sentry_sdk.init(
-    dsn=SENTRY_DSN,
-    # Set traces_sample_rate to 1.0 to capture 100%
-    # of transactions for performance monitoring.
-    # We recommend adjusting this value in production,
-    traces_sample_rate=SENTRY_TRACES_SAMPLE_RATE,
-    profiles_sample_rate=SENTRY_PROFILES_SAMPLE_RATE,
-)
+# sentry_sdk.init(
+#     dsn=SENTRY_DSN,
+#     # Set traces_sample_rate to 1.0 to capture 100%
+#     # of transactions for performance monitoring.
+#     # We recommend adjusting this value in production,
+#     traces_sample_rate=SENTRY_TRACES_SAMPLE_RATE,
+#     profiles_sample_rate=SENTRY_PROFILES_SAMPLE_RATE,
+# )
 
 app = FastAPI()
 
@@ -70,7 +68,7 @@ async def trigger_error():
 
 @app.post("/intent-recognition")
 def intent_recognition_ep(content: Text = None):
-    ml_response = predict_message_intent(content.content)
+    ml_response = predict_intent(content.content)
     return JSONResponse(content=ml_response)
 
 
@@ -94,39 +92,6 @@ async def recognize_keywords_and_intents(request: Request):
     except Exception as e:
         nlu_response = ERROR_RESPONSE_DICT
         log.error(f"NLU Intent Recognition Endpoint Exception: {e}")
-    return JSONResponse(content=nlu_response)
-
-
-@app.post("/nlu")
-async def evaluate_user_message_with_nlu_api(request: Request):
-    """Calls nlu evaluation and returns the nlu_response
-
-    Input
-    - request.body: json - message data for the most recent user response
-
-    Output
-    - int_data_dict or sent_data_dict: dict - the type of NLU run and result
-      {'type':'integer', 'data': '8', 'confidence': 0}
-    """
-    message_dict = await parse_nlu_api_request_for_message(request)
-    if message_dict == ERROR_RESPONSE_DICT:
-        return ERROR_RESPONSE_DICT
-
-    message_text = str(message_dict.get("message_body", ""))
-    message_text = truncate_long_message_text(message_text)
-    expected_answer = str(message_dict.get("expected_answer", ""))
-
-    try:
-        nlu_response = await asyncio.wait_for(
-            evaluate_message_with_nlu(message_text, expected_answer), TIMEOUT_THRESHOLD
-        )
-    except asyncio.TimeoutError:
-        nlu_response = TIMEOUT_RESPONSE_DICT
-    except Exception as e:
-        nlu_response = ERROR_RESPONSE_DICT
-        log.error(f"NLU Endpoint Exception: {e}")
-    asyncio.create_task(prepare_message_data_for_logging(message_dict, nlu_response))
-
     return JSONResponse(content=nlu_response)
 
 

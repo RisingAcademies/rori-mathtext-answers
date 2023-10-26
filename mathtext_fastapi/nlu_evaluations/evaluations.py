@@ -1,17 +1,18 @@
 """ These functions evaluate a student message for specific types of responses and build a response object to send back to the chatbot """
 from mathtext.constants import TOKENS2INT_ERROR_INT
+from mathtext.predict_intent import predict_message_intent
+from mathtext.utils.converters import text2num, text2int, text2float
+from mathtext.utils.checkers import (
+    has_profanity,
+    is_old_button,
+)
+from mathtext.text_processing import (
+    run_regex_evaluations,
+)
 from mathtext_fastapi.constants import (
     APPROVED_INTENTS,
     APPROVED_INTENT_CONFIDENCE_THRESHOLD,
     APPROVED_KEYWORDS,
-)
-from mathtext.predict_intent import predict_message_intent
-from mathtext.utils.nlutils import text2num
-from mathtext.utils.text2int_so import text2int, text2float
-from mathtext.v2_text_processing import (
-    has_profanity,
-    is_old_button,
-    run_regex_evaluations,
 )
 from mathtext_fastapi.nlu_evaluations.evaluation_utils import (
     are_equivalent_numerical_answers,
@@ -86,7 +87,7 @@ def extract_approved_answer(
     )
     if result and is_result_correct:
         return build_single_event_nlu_response("correct_answer", result)
-    if result and result != str(TOKENS2INT_ERROR_INT) and is_result_correct == False:
+    if result and result != TOKENS2INT_ERROR_INT and is_result_correct == False:
         intents_results_dict = predict_message_intent(student_message)
         intents_results = intents_results_dict.get("intents", [])
         is_answer = check_answer_intent_confidence(intents_results)
@@ -117,7 +118,7 @@ def extract_approved_keyword(
         expected_answer,
     )
 
-    if result and result != str(TOKENS2INT_ERROR_INT):
+    if result and result != TOKENS2INT_ERROR_INT:
         if result in APPROVED_KEYWORDS:
             return build_single_event_nlu_response("keyword", result)
     return {}

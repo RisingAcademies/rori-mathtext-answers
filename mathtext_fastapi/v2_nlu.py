@@ -1,37 +1,45 @@
 """ The functions in this file are directly called from the NLU endpoints.  They control the logic of the order of evaluations and send a final response back to the endpoint function """
 
-import asyncio
+import asyncio  # Needed to run async doctests
 import sentry_sdk
 
 from logging import getLogger
-from mathtext_fastapi.constants import (
-    APPROVED_INTENT_CONFIDENCE_THRESHOLD,
-)
-from mathtext.predict_intent import predict_message_intent
-from mathtext.v2_text_processing import (
-    normalize_message_and_answer,
+
+from mathtext.constants import TOKENS2INT_ERROR_INT
+from mathtext.predict_intent import predict_intent
+from mathtext.utils.checkers import (
     has_profanity,
 )
-from mathtext_fastapi.nlu_evaluations.evaluations import (
-    check_for_invalid_input,
-    extract_exact_answer_match,
-    extract_approved_answer,
-    extract_approved_keyword,
-    extract_special_numbers_with_regex,
-    extract_integers_and_floats_with_regex,
-    check_for_yes_answer_in_intents,
-    find_highest_confidence_intent_over_threshold,
-    extract_number_match_to_expected_answer,
+from mathtext.text_processing import (
+    normalize_message_and_answer,
+)
+
+from mathtext_fastapi.constants import (
+    APPROVED_INTENT_CONFIDENCE_THRESHOLD,
 )
 from mathtext_fastapi.nlu_evaluations.evaluation_utils import (
     evaluate_for_exact_keyword_match_in_phrase,
     check_answer_intent_confidence,
 )
+from mathtext_fastapi.nlu_evaluations.evaluations import (
+    check_for_invalid_input,
+    check_for_yes_answer_in_intents,
+    extract_approved_answer,
+    extract_approved_keyword,
+    extract_exact_answer_match,
+    extract_integers_and_floats_with_regex,
+    extract_number_match_to_expected_answer,
+    extract_special_numbers_with_regex,
+    find_highest_confidence_intent_over_threshold,
+)
 from mathtext_fastapi.response_formaters import build_single_event_nlu_response
 
 log = getLogger(__name__)
 
+from memory_profiler import profile
 
+
+# @profile
 async def run_keyword_and_intent_evaluations(text):
     """Evaluates a student message to check the message's intent through an approved keyword or intent
 
@@ -48,12 +56,12 @@ async def run_keyword_and_intent_evaluations(text):
         return build_single_event_nlu_response("intent", "profanity")
 
     result = evaluate_for_exact_keyword_match_in_phrase(text, "", "")
-    if result and result != str(32202):
+    if result and result != TOKENS2INT_ERROR_INT:
         return build_single_event_nlu_response("keyword", result)
-    result = predict_message_intent(text)
+    result = predict_intent(text)
     if (
         result
-        and result != str(32202)
+        and result != TOKENS2INT_ERROR_INT
         and result.get("confidence", 0) > APPROVED_INTENT_CONFIDENCE_THRESHOLD
         and result.get("data") != "out_of_scope"
     ):
@@ -157,7 +165,7 @@ async def v2_evaluate_message_with_nlu(student_message, expected_answer):
         with sentry_sdk.start_span(description="V2 Model Evaluation"):
             # Evaluation 6 - Classify intent with multilabel logistic regression model
             if not intents_results:
-                intents_result_dict = predict_message_intent(student_message)
+                intents_result_dict = predict_intent(student_message)
                 intents_results = intents_result_dict.get("intents", [])
                 is_answer = check_answer_intent_confidence(intents_results)
 

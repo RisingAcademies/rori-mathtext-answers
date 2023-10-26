@@ -1,7 +1,6 @@
 """ These functions perform tasks to help evaluate a message """
 
-
-from mathtext.v2_text_processing import (
+from mathtext.utils.extractors import (
     extract_approved_answer_from_phrase,
     extract_approved_keyword_from_phrase,
 )
@@ -34,7 +33,7 @@ def evaluate_for_exact_answer_match_in_phrase(
     >>> evaluate_for_exact_answer_match_in_phrase("yes", "yes", "Yes")
     ('Yes', True)
     >>> evaluate_for_exact_answer_match_in_phrase("I don't know", "4", "4")
-    ('32202', False)
+    (32202, False)
     """
     tokenized_student_message = normalized_student_message.split()
     result, is_result_correct = extract_approved_answer_from_phrase(
