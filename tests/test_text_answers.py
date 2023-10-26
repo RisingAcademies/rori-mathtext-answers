@@ -156,3 +156,21 @@ def test_true_false_wrong_answer():
     assert response.status_code == 200
     assert response.json()["type"] == expected_nlu_response_type
     assert response.json()["data"] == expected_nlu_response_data
+
+
+def test_wrong_answer_type_tf_mc_1():
+    response = simulate_api_call(client, "C", "T")
+    expected_nlu_response_type = "wrong_answer"
+    expected_nlu_response_data = "C"
+    assert response.status_code == 200
+    assert response.json()["type"] == expected_nlu_response_type
+    assert response.json()["data"] == expected_nlu_response_data
+
+
+def test_wrong_answer_type_tf_mc_2():
+    response = simulate_api_call(client, "D", "F")
+    expected_nlu_response_type = "wrong_answer"
+    expected_nlu_response_data = "D"
+    assert response.status_code == 200
+    assert response.json()["type"] == expected_nlu_response_type
+    assert response.json()["data"] == expected_nlu_response_data
