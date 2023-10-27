@@ -47,7 +47,7 @@ TIMEOUT_RESPONSE_DICT = build_single_event_nlu_response(
 )
 
 # Settings for NLU intent recognition
-APPROVED_KEYWORDS = ["help", "menu", "stop", "next", "support"]
+APPROVED_KEYWORDS = ["help", "menu", "stop", "support"]
 APPROVED_INTENTS = [
     "change_topic",
     "help",
