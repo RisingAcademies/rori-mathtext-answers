@@ -11,7 +11,7 @@ WORKDIR /code
 COPY pyproject.toml ./
 RUN poetry config virtualenvs.create false && \
     poetry install --no-dev
-
+RUN python -m spacy download en_core_web_sm
 # Install and switch to a non-root user
 # RUN useradd -m -u 1000 user
 # USER user

@@ -27,7 +27,7 @@ fastapi = "*"
 fuzzywuzzy = "*"
 httpx = "<0.22,>=0.19"
 mathactive = "0.0.14"
-mathtext = "0.0.23"
+mathtext = "2.0.1"
 openpyxl = "*"
 psycopg2 = "*"
 python = ">=3.10,<4.0"
@@ -40,9 +40,6 @@ torch = ">=2.0.0, !=2.0.1, !=2.1.0"
 transitions = "*"
 uvicorn = "*"
 
-
-[tool.poetry.dependencies.en_core_web_sm]
-url = "https://github.com/explosion/spacy-models/releases/download/en_core_web_sm-3.4.1/en_core_web_sm-3.4.1.tar.gz"
 
 # TODO: Add a pytest section doctest: +ELLIPSIS
 [tool.pytest.ini_options]

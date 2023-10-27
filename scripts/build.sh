@@ -8,6 +8,7 @@ fi
 
 pip install --upgrade pip poetry virtualenv wheel
 pip install --upgrade -e .
+python -m spacy download en_core_web_sm
 
 # pip install --upgrade scikit-learn
 # pip install --upgrade transformers
