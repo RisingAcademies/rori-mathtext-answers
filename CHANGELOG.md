@@ -1,4 +1,11 @@
-## [2.0.0](https://github.com/RisingAcademies/rori-mathtext-answers/tree/2.0.0)
+## 2.0.1
+Remove support for 'next' keyword
+- Remove 'next' keyword tests
+- Remove 'next' from approved keywords
+- Upgrade mathtext to 2.0.2
+
+
+## 2.0.0
 Refactor endpoint to support V3 Rori content and technical needs
 - Adjust endpoint evaluations to work with V3 Rori content
 - Add /nlu/intent-recognition endpoint for keyword and intent evaluation
