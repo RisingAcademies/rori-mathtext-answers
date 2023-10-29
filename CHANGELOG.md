@@ -1,3 +1,10 @@
+## 2.0.2
+Adjust dependencies to use latest version of FastAPI
+- Remove mathactive dependency
+- Upgrade FastAPI version
+- Upgrade Uvicorn version
+
+
 ## 2.0.1
 Remove support for 'next' keyword
 - Remove 'next' keyword tests
