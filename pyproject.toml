@@ -23,10 +23,9 @@ classifiers = [
 
 [tool.poetry.dependencies]
 asyncpg = "*"
-fastapi = "*"
+fastapi = ">=0.104.0"
 fuzzywuzzy = "*"
 httpx = "<0.22,>=0.19"
-mathactive = "0.0.14"
 mathtext = "2.0.2"
 openpyxl = "*"
 psycopg2 = "*"
@@ -38,7 +37,7 @@ sentry_sdk = {extras = ["fastapi"], version = "*"}
 sqlalchemy = "*"
 torch = ">=2.0.0, !=2.0.1, !=2.1.0"
 transitions = "*"
-uvicorn = "*"
+uvicorn = ">=0.23.0"
 
 
 # TODO: Add a pytest section doctest: +ELLIPSIS
