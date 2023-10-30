@@ -13,7 +13,7 @@ from fastapi.templating import Jinja2Templates
 from logging import getLogger
 from pydantic import BaseModel
 
-from mathtext.predict_intent import predict_intent, clean_prediction_cache
+from mathtext.predict_intent import predict_message_intent, clean_prediction_cache
 from mathtext_fastapi.constants import (
     ERROR_RESPONSE_DICT,
     SENTRY_DSN,
@@ -68,7 +68,7 @@ async def trigger_error():
 
 @app.post("/intent-recognition")
 def intent_recognition_ep(content: Text = None):
-    ml_response = predict_intent(content.content)
+    ml_response = predict_message_intent(content.content)
     return JSONResponse(content=ml_response)
 
 

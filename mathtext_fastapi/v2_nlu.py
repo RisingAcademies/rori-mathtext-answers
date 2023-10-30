@@ -6,7 +6,7 @@ import sentry_sdk
 from logging import getLogger
 
 from mathtext.constants import TOKENS2INT_ERROR_INT
-from mathtext.predict_intent import predict_intent
+from mathtext.predict_intent import predict_message_intent
 from mathtext.utils.checkers import (
     has_profanity,
 )
@@ -55,7 +55,7 @@ async def run_keyword_and_intent_evaluations(text):
     result = evaluate_for_exact_keyword_match_in_phrase(text, "", "")
     if result and result != TOKENS2INT_ERROR_INT:
         return build_single_event_nlu_response("keyword", result)
-    result = predict_intent(text)
+    result = predict_message_intent(text)
     if (
         result
         and result != TOKENS2INT_ERROR_INT
@@ -162,7 +162,7 @@ async def v2_evaluate_message_with_nlu(student_message, expected_answer):
         with sentry_sdk.start_span(description="V2 Model Evaluation"):
             # Evaluation 6 - Classify intent with multilabel logistic regression model
             if not intents_results:
-                intents_result_dict = predict_intent(student_message)
+                intents_result_dict = predict_message_intent(student_message)
                 intents_results = intents_result_dict.get("intents", [])
                 is_answer = check_answer_intent_confidence(intents_results)
 
