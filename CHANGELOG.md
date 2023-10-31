@@ -1,7 +1,6 @@
 ## 2.0.3
 Fix joblib prediction cache clean up
 - Upgrade Mathtext version
-- Add calls to prediction cache clean up function to each endpoint
 
 
 ## 2.0.2
