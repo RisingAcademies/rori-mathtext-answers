@@ -41,15 +41,6 @@ def test_designate_stop_as_keyword():
     assert response.json()["data"] == expected_nlu_response_data
 
 
-def test_designate_next_as_keyword():
-    response = simulate_api_call(client, "next", "374")
-    expected_nlu_response_type = "keyword"
-    expected_nlu_response_data = "next"
-    assert response.status_code == 200
-    assert response.json()["type"] == expected_nlu_response_type
-    assert response.json()["data"] == expected_nlu_response_data
-
-
 def test_designate_support_as_keyword():
     response = simulate_api_call(client, "support", "374")
     expected_nlu_response_type = "keyword"

@@ -75,3 +75,12 @@ def test_fraction_again_decimal():
     assert response.status_code == 200
     assert response.json()["type"] == expected_nlu_response_type
     assert response.json()["data"] == expected_nlu_response_data
+
+
+def test_wrong_decimal_answer_in_place_of_integer():
+    response = simulate_api_call(client, "0.9", "9")
+    expected_nlu_response_type = "wrong_answer"
+    expected_nlu_response_data = "0.9"
+    assert response.status_code == 200
+    assert response.json()["type"] == expected_nlu_response_type
+    assert response.json()["data"] == expected_nlu_response_data

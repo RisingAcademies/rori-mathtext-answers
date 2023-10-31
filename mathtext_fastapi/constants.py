@@ -46,8 +46,8 @@ TIMEOUT_RESPONSE_DICT = build_single_event_nlu_response(
     "timeout", TOKENS2INT_ERROR_INT, 0
 )
 
-APPROVED_KEYWORDS = ["help", "menu", "stop", "next", "support"]
-
+# Settings for NLU intent recognition
+APPROVED_KEYWORDS = ["help", "menu", "stop", "support"]
 APPROVED_INTENTS = [
     "change_topic",
     "help",
@@ -57,5 +57,4 @@ APPROVED_INTENTS = [
     "break",
     "safety",
 ]
-
 APPROVED_INTENT_CONFIDENCE_THRESHOLD = 0.5

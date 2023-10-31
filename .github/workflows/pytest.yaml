@@ -28,6 +28,7 @@ jobs:
     - name: Install dependencies
       run: |
         pip install --editable .
+        python -m spacy download en_core_web_sm
 
     - name: Run pytest
       run: pytest
