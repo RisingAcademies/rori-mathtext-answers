@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "MathText_FastAPI"
-version = "0.0.1"
+version = "2.0.3"
 authors = [
   "Sebastian Larsen <sebastianlarson22@gmail.com>",
   "Çetin ÇAKIR <cetincakirtr@gmail.com>",
@@ -9,47 +9,37 @@ authors = [
   ]
 description = "Natural Language Understanding (text processing) for math symbols, digits, and words with a Gradio user interface and REST API."
 readme = "README.md"
-# requires-python = ">=3.8"
+# requires-python = ">=3.10"
 license = "AGPL-3.0-or-later"
 classifiers = [
     "Programming Language :: Python :: 3",
     "Programming Language :: Python :: 3.8",
     "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
     "License :: OSI Approved :: GNU Affero General Public License v3 or later (AGPLv3+)",
     "Operating System :: OS Independent",
 ]
 
 
 [tool.poetry.dependencies]
-# FIXME: We should always load the main branch (not Vlad) branch of mathactive here:
+asyncpg = "*"
+fastapi = ">=0.104.0"
 fuzzywuzzy = "*"
-transitions = "*"
+httpx = "<0.22,>=0.19"
+mathtext = "2.0.3"
 openpyxl = "*"
 psycopg2 = "*"
-asyncpg = "*"
+python = ">=3.10,<4.0"
 python-Levenshtein = "*"
-
-mathactive = "0.0.14"
-mathtext = "0.0.16"
-fastapi = "*"
-# python = ">=3.9.16" # tested on hobson's virtualenv on linux
-python = ">=3.8"
 redis = "*"
 requests = "*"
-httpx = "<0.22,>=0.19"
-# supabase = "*"
-uvicorn = "*"
+sentry_sdk = {extras = ["fastapi"], version = "*"}
 sqlalchemy = "*"
-'sentry_sdk[fastapi]' = "*"
+toml = "*"
+torch = ">=2.0.0, !=2.0.1, !=2.1.0"
+transitions = "*"
+uvicorn = ">=0.23.0"
 
-# # Installed by mathtext!!
-# pydantic = "*"
-# sentencepiece = "*"  # included in sentencetransformers or transformers
-# pandas = "*"
-# scipy = "*"
-
-[tool.poetry.dependencies.en_core_web_sm]
-url = "https://github.com/explosion/spacy-models/releases/download/en_core_web_sm-3.4.1/en_core_web_sm-3.4.1.tar.gz"
 
 # TODO: Add a pytest section doctest: +ELLIPSIS
 [tool.pytest.ini_options]
@@ -63,9 +53,3 @@ toml = "*"
 [build-system]
 requires = ["poetry-core"]
 build-backend = "poetry.core.masonry.api"
-
-# [build-system]
-# requires = ["hatchling"]
-# build-backend = "hatchling.build"
-
-# repository = "https://gitlab.com/tangibleai/community/mathtext-fastapi"
