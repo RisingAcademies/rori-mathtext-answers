@@ -13,7 +13,7 @@ from fastapi.templating import Jinja2Templates
 from logging import getLogger
 from pydantic import BaseModel
 
-from mathtext.predict_intent import predict_message_intent, clean_prediction_cache
+from mathtext.predict_intent import predict_message_intent
 from mathtext_fastapi.constants import (
     ERROR_RESPONSE_DICT,
     SENTRY_DSN,
@@ -92,7 +92,6 @@ async def recognize_keywords_and_intents(request: Request):
     except Exception as e:
         nlu_response = ERROR_RESPONSE_DICT
         log.error(f"NLU Intent Recognition Endpoint Exception: {e}")
-    asyncio.create_task(clean_prediction_cache())
     return JSONResponse(content=nlu_response)
 
 
@@ -125,6 +124,5 @@ async def v2_evaluate_user_message_with_nlu_api(request: Request):
         nlu_response = ERROR_RESPONSE_DICT
         log.error(f"V2 NLU Endpoint Exception: {e}")
     asyncio.create_task(prepare_message_data_for_logging(message_dict, nlu_response))
-    asyncio.create_task(clean_prediction_cache())
 
     return JSONResponse(content=nlu_response)
