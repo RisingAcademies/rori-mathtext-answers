@@ -1,3 +1,8 @@
+## [2.0.4](https://github.com/RisingAcademies/rori-mathtext-answers/tree/2.0.4)
+Remove calls to joblib prediction cache clean up
+- Remove calls to cache cleanup in active endpoints
+
+
 ## [2.0.3](https://github.com/RisingAcademies/rori-mathtext-answers/tree/2.0.3)
 Fix joblib prediction cache clean up
 - Upgrade Mathtext version
