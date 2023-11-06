@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "MathText_FastAPI"
-version = "2.0.4"
+version = "2.0.5"
 authors = [
   "Sebastian Larsen <sebastianlarson22@gmail.com>",
   "Çetin ÇAKIR <cetincakirtr@gmail.com>",
