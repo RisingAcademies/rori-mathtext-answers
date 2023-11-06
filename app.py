@@ -15,6 +15,7 @@ from pydantic import BaseModel
 
 from mathtext.predict_intent import predict_message_intent
 from mathtext_fastapi.constants import (
+    APPROVED_KEYWORDS,
     ERROR_RESPONSE_DICT,
     SENTRY_DSN,
     SENTRY_PROFILES_SAMPLE_RATE,
@@ -64,6 +65,12 @@ def home(request: Request):
 @app.get("/sentry-debug")
 async def trigger_error():
     division_by_zero = 1 / 0
+
+
+@app.get("/keywords")
+def topics():
+    """Return Rori's supported keywords"""
+    return JSONResponse(content={"keywords": APPROVED_KEYWORDS})
 
 
 @app.post("/intent-recognition")
