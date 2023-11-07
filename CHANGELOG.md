@@ -1,3 +1,6 @@
+## 2.0.6 (pending)
+- Update documentation
+
 ## [2.0.5](https://github.com/RisingAcademies/rori-mathtext-answers/tree/2.0.5)
 Add liveness check
 - Add the keywords endpoint for liveness check
