@@ -39,21 +39,21 @@ pip install --editable .
 
 ### Directory Structure
 ```bash
-|-- mathtext_fastapi
-| |-- data
-| |-- nlu_evaluations
-| | |-- evaluation_utils.py # Support functions for message evaluations
-| | |-- evaluations.py # Evaluations for specific types of responses
-| |-- cache.py
-| |-- constants.py # Configuration variables for the application
-| |-- request_validators.py # Validates the request object
-| |-- response_formaters.py # Converts evaluation result to response obj
-| |-- supabase_logging_async.py # Background logging Deque management
-| |-- v2_nlu.py # Sequences of evaluations
-|-- scripts
-|-- tests
-|-- CHANGELOG.md
-|-- pyproject.toml
-|-- Dockerfile
-|-- app.py # Main FastAPI application and endpoints
+├── mathtext_fastapi
+│   ├── data
+│   ├── nlu_evaluations
+│   │   ├── evaluation_utils.py # Support functions for message evaluations
+│   │   ├── evaluations.py # Evaluations for specific types of responses
+│   ├── cache.py
+│   ├── constants.py # Configuration variables for the application
+│   ├── request_validators.py # Validates the request object
+│   ├── response_formaters.py # Converts evaluation result to response obj
+│   ├── supabase_logging_async.py # Background logging Deque management
+│   ├── v2_nlu.py # Sequences of evaluations
+├── scripts
+├── tests
+├── CHANGELOG.md
+├── pyproject.toml
+├── Dockerfile
+├── app.py # Main FastAPI application and endpoints
 ```
