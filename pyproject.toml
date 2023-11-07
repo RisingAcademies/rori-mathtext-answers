@@ -2,19 +2,15 @@
 name = "MathText_FastAPI"
 version = "2.0.4"
 authors = [
-  "Sebastian Larsen <sebastianlarson22@gmail.com>",
   "Çetin ÇAKIR <cetincakirtr@gmail.com>",
   "Hobson Lane <gitlab@totalgood.com>",
   "Greg Thompson <greg+pypi@tangibleai.com>",
   ]
-description = "Natural Language Understanding (text processing) for math symbols, digits, and words with a Gradio user interface and REST API."
+description = "REST API of natural language evaluations (text processing and intent recognition) for messages sent to the Rori math chatbot"
 readme = "README.md"
 # requires-python = ">=3.10"
 license = "AGPL-3.0-or-later"
 classifiers = [
-    "Programming Language :: Python :: 3",
-    "Programming Language :: Python :: 3.8",
-    "Programming Language :: Python :: 3.9",
     "Programming Language :: Python :: 3.10",
     "License :: OSI Approved :: GNU Affero General Public License v3 or later (AGPLv3+)",
     "Operating System :: OS Independent",
@@ -41,7 +37,6 @@ transitions = "*"
 uvicorn = ">=0.23.0"
 
 
-# TODO: Add a pytest section doctest: +ELLIPSIS
 [tool.pytest.ini_options]
 addopts = "--doctest-modules"
 
@@ -49,6 +44,7 @@ addopts = "--doctest-modules"
 [tool.poetry.group.dev.dependencies]
 pytest = "*"
 toml = "*"
+
 
 [build-system]
 requires = ["poetry-core"]
