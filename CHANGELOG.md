@@ -1,4 +1,4 @@
-## 2.0.6
+## [2.0.6](https://github.com/RisingAcademies/rori-mathtext-answers/tree/2.0.6)
 Add support for 'next' keyword as 'menu' keyword trigger
 - Update mathtext to 2.0.4
 
