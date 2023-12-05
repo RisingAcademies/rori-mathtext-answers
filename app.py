@@ -4,6 +4,7 @@ or
 `python -m uvicorn app:app --reload --host localhost --port 7860`
 """
 import asyncio
+import random
 import sentry_sdk
 
 from fastapi import FastAPI, Request
@@ -133,3 +134,13 @@ async def v2_evaluate_user_message_with_nlu_api(request: Request):
     asyncio.create_task(prepare_message_data_for_logging(message_dict, nlu_response))
 
     return JSONResponse(content=nlu_response)
+
+
+@app.get("/progress")
+async def get_user_progress(request: Request):
+    num_lessons_completed = random.randint(3, 15)
+    num_questions_answered = random.randint(20, 80)
+    num_correct_answers = num_questions_answered - 7
+    url = f"https://res.cloudinary.com/tangibleai/image/upload/co_rgb:FFFFFF,l_text:Comfortaa_160_normal_left:{num_lessons_completed}/fl_layer_apply,x_-0.28,y_-0.085/co_rgb:FFFFFF,l_text:Comfortaa_160_normal_left:{num_questions_answered}/fl_layer_apply,x_-0.035,y_-0.085/co_rgb:FFFFFF,l_text:arial_160_normal_left:{num_correct_answers}/fl_layer_apply,x_0.25,y_-0.085/rori/progress_card_for_cloudinary_numbers_only_rpmhn5.jpg"
+    content = {"report_url": url}
+    return JSONResponse(content=content)
