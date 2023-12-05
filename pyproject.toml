@@ -18,21 +18,24 @@ classifiers = [
 
 
 [tool.poetry.dependencies]
+asgiref = "*"
 asyncpg = "*"
+django = "*"
 fastapi = ">=0.104.0"
 fuzzywuzzy = "*"
 httpx = "<0.22,>=0.19"
 mathtext = "2.0.4"
 openpyxl = "*"
 psycopg2 = "*"
+# psycopg2-binary = "*"
 python = ">=3.10,<4.0"
 python-Levenshtein = "*"
 redis = "*"
 requests = "*"
 sentry_sdk = {extras = ["fastapi"], version = "*"}
-sqlalchemy = "*"
 toml = "*"
-torch = ">=2.0.0, !=2.0.1, !=2.1.0"
+# torch = ">=2.0.0, !=2.0.1, !=2.1.0"
+torch = "==2.0.0"
 transitions = "*"
 uvicorn = ">=0.23.0"
 

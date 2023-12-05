@@ -1,3 +1,4 @@
+import json
 import os
 from pathlib import Path
 
@@ -58,3 +59,5 @@ APPROVED_INTENTS = [
     "safety",
 ]
 APPROVED_INTENT_CONFIDENCE_THRESHOLD = 0.5
+
+POSTGRES_URL = json.loads(os.environ.get("POSTGRES_URL"))

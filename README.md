@@ -26,12 +26,17 @@ source .venv/bin/activate || source .venv/scripts/activate
 
 # 6. Install Math Answers API dependencies
 pip install --editable .
+
+# 7. Prepare database via migrations
+python mathtext_fastapi/django_logging/manage.py makemigrations
+python mathtext_fastapi/django_logging/manage.py migrate
 ```
 
 
 ### Run locally
 `uvicorn app:app --host localhost --port 7860`
 
+* NOTE: You do not need to run a Django server.  The FastAPI application will automatically activate and use the Django ORM for logging.
 
 ### Test locally
 `pytest`
@@ -41,6 +46,12 @@ pip install --editable .
 ```bash
 ├── mathtext_fastapi
 │   ├── data
+│   ├── django_logging
+│   │   ├── django_app
+│   │   │   ├── models.py # Message model 
+│   │   ├── django_logging # Background logging of each request
+│   │   ├── manage.py # Used for making migration files
+│   │   ├── settings.py # Specifies DB creds for local and live instances
 │   ├── nlu_evaluations
 │   │   ├── evaluation_utils.py # Support functions for message evaluations
 │   │   ├── evaluations.py # Evaluations for specific types of responses

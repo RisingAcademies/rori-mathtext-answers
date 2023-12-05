@@ -25,14 +25,14 @@ from mathtext_fastapi.constants import (
 )
 
 from mathtext_fastapi.request_validators import (
-    truncate_long_message_text,
     parse_nlu_api_request_for_message,
+    truncate_long_message_text,
 )
-from mathtext_fastapi.supabase_logging_async import prepare_message_data_for_logging
 from mathtext_fastapi.v2_nlu import (
-    v2_evaluate_message_with_nlu,
     run_keyword_and_intent_evaluations,
+    v2_evaluate_message_with_nlu,
 )
+from mathtext_fastapi.django_logging.django_logging import log_message_context
 
 
 log = getLogger(__name__)
@@ -130,6 +130,6 @@ async def v2_evaluate_user_message_with_nlu_api(request: Request):
     except Exception as e:
         nlu_response = ERROR_RESPONSE_DICT
         log.error(f"V2 NLU Endpoint Exception: {e}")
-    asyncio.create_task(prepare_message_data_for_logging(message_dict, nlu_response))
+    asyncio.create_task(log_message_context(message_dict, nlu_response))
 
     return JSONResponse(content=nlu_response)
