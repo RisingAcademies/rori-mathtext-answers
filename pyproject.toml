@@ -20,6 +20,7 @@ classifiers = [
 [tool.poetry.dependencies]
 asgiref = "*"
 asyncpg = "*"
+channels = "*"
 django = "*"
 fastapi = ">=0.104.0"
 fuzzywuzzy = "*"
