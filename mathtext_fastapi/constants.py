@@ -37,9 +37,6 @@ SENTRY_PROFILES_SAMPLE_RATE = float(os.environ.get("SENTRY_PROFILES_SAMPLE_RATE"
 # Supabase logging
 SUPABASE_URL = os.environ.get("SUPABASE_URL")
 
-# Cache for NLU Response
-REDIS_RESPONSE_CACHE_URL = os.environ.get("REDIS_RESPONSE_CACHE_URL", "")
-
 # Cutoff time for NLU endpoint
 TIMEOUT_THRESHOLD = int(os.environ.get("TIMEOUT_THRESHOLD"))
 ERROR_RESPONSE_DICT = build_single_event_nlu_response("error", TOKENS2INT_ERROR_INT, 0)
