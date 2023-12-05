@@ -1,4 +1,10 @@
-from mathtext_fastapi.constants import POSTGRES_URL
+from mathtext_fastapi.constants import (
+    POSTGRES_DATABASE,
+    POSTGRES_USERNAME,
+    POSTGRES_PASSWORD,
+    POSTGRES_HOST,
+    POSTGRES_PORT,
+)
 
 import logging
 
@@ -7,7 +13,7 @@ TIME_ZONE = "UTC"
 USE_TZ = True
 
 
-if POSTGRES_URL is None:
+if POSTGRES_HOST is None:
     DATABASES = {
         "default": {
             "ENGINE": "django.db.backends.sqlite3",
@@ -19,12 +25,11 @@ else:
     DATABASES = {
         "default": {
             "ENGINE": "django.db.backends.postgresql",
-            "NAME": POSTGRES_URL.get("database", ""),
-            "USER": POSTGRES_URL.get("username", ""),
-            "PASSWORD": POSTGRES_URL.get("password", ""),
-            "HOST": POSTGRES_URL.get("host", ""),
-            "PORT": POSTGRES_URL.get("port", ""),
+            "NAME": POSTGRES_DATABASE,
+            "USER": POSTGRES_USERNAME,
+            "PASSWORD": POSTGRES_PASSWORD,
+            "HOST": POSTGRES_HOST,
+            "PORT": POSTGRES_PORT,
         },
     }
-    logging.info(f"Using Postgres {POSTGRES_URL.get('host','')}")
 INSTALLED_APPS = ["mathtext_fastapi.django_logging.django_app.config.DjangoConfig"]
