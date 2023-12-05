@@ -1,10 +1,17 @@
+## 2.0.7
+Add progress report endpoint
+- Add `/progress` GET endpoint to test sending a Cloudinary progress report image URL
+
+
 ## [2.0.6](https://github.com/RisingAcademies/rori-mathtext-answers/tree/2.0.6)
 Add support for 'next' keyword as 'menu' keyword trigger
 - Update mathtext to 2.0.4
 
+
 ## [2.0.5](https://github.com/RisingAcademies/rori-mathtext-answers/tree/2.0.5)
 Add liveness check
 - Add the keywords endpoint for liveness check
+
 
 ## [2.0.4](https://github.com/RisingAcademies/rori-mathtext-answers/tree/2.0.4)
 Remove calls to joblib prediction cache clean up
