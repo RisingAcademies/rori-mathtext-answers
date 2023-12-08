@@ -18,7 +18,7 @@ USE_TZ = True
 DEBUG = True
 
 
-if POSTGRES_HOST is None and GOOGLE_CLOUD_SQL_HOST is None:
+if not POSTGRES_HOST and not GOOGLE_CLOUD_SQL_HOST:
     DATABASES = {
         "default": {
             "ENGINE": "django.db.backends.sqlite3",
