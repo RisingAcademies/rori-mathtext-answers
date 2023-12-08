@@ -1,4 +1,8 @@
 from mathtext_fastapi.constants import (
+    GOOGLE_CLOUD_SQL_HOST,
+    GOOGLE_CLOUD_SQL_USER,
+    GOOGLE_CLOUD_SQL_PASSWORD,
+    GOOGLE_CLOUD_SQL_NAME,
     POSTGRES_DATABASE,
     POSTGRES_USERNAME,
     POSTGRES_PASSWORD,
@@ -11,9 +15,10 @@ import logging
 LANGUAGE_CODE = "en-us"
 TIME_ZONE = "UTC"
 USE_TZ = True
+DEBUG = True
 
 
-if POSTGRES_HOST is None:
+if POSTGRES_HOST is None and GOOGLE_CLOUD_SQL_HOST is None:
     DATABASES = {
         "default": {
             "ENGINE": "django.db.backends.sqlite3",
@@ -21,6 +26,16 @@ if POSTGRES_HOST is None:
         }
     }
     logging.warning("Postgres not configured; using local SQLite db.")
+elif GOOGLE_CLOUD_SQL_HOST:
+    DATABASES = {
+        "default": {
+            "ENGINE": "django.db.backends.postgresql",
+            "NAME": GOOGLE_CLOUD_SQL_NAME,
+            "USER": GOOGLE_CLOUD_SQL_USER,
+            "PASSWORD": GOOGLE_CLOUD_SQL_PASSWORD,
+            "HOST": GOOGLE_CLOUD_SQL_HOST,
+        },
+    }
 else:
     DATABASES = {
         "default": {
