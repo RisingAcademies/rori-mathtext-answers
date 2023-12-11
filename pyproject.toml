@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "MathText_FastAPI"
-version = "2.0.6"
+version = "2.0.7"
 authors = [
   "Çetin ÇAKIR <cetincakirtr@gmail.com>",
   "Hobson Lane <gitlab@totalgood.com>",
@@ -22,7 +22,7 @@ asyncpg = "*"
 fastapi = ">=0.104.0"
 fuzzywuzzy = "*"
 httpx = "<0.22,>=0.19"
-mathtext = "2.0.4"
+mathtext = "2.0.5"
 openpyxl = "*"
 psycopg2 = "*"
 python = ">=3.10,<4.0"
