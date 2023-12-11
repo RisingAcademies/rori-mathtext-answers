@@ -119,6 +119,7 @@ async def v2_evaluate_user_message_with_nlu_api(request: Request):
     message_text = str(message_dict.get("message_body", ""))
     message_text = truncate_long_message_text(message_text)
     expected_answer = str(message_dict.get("expected_answer", ""))
+    user_status, activity, activity_session = get_user_model()
     log.info(f"Message text: {message_text}, Expected answer: {expected_answer}")
     try:
         nlu_response = await asyncio.wait_for(

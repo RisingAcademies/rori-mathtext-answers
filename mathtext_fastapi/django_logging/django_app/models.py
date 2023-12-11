@@ -103,8 +103,8 @@ class MathAnswerMessageMetadata(models.Model):
 
 
 class UserStatus(models.Model):
-    user = models.ForeignKey(User, on_delete=models.PROTECT)
-    current_activity = models.ForeignKey(Activity, on_delete=models.PROTECT)
+    user = models.OneToOneField(User, on_delete=models.PROTECT)
+    current_activity_session = models.ForeignKey(ActivitySession, on_delete=models.PROTECT)
     created_at = models.DateTimeField(default=get_current_datetime)
     updated_at = models.DateTimeField(auto_now=True)
 
@@ -121,3 +121,10 @@ class UserProperties(models.Model):
     class Meta:
         managed = False
         db_table = "math_api_user_properties"
+
+
+class BktParams(models.Model):
+    activity = models.OneToOneField(Activity,on_delete=models.PROTECT)
+    p_transit = models.FloatField()
+    p_slip = models.FloatField()
+    p_guess = models.FloatField()

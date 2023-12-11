@@ -13,6 +13,9 @@ from mathtext_fastapi.django_logging.django_app.models import (
     UserStatus,
 )
 
+def get_user_model():
+    user
+
 
 def retrieve_user_status(is_new_user, user, activity):
     """Retrieves the UserStatus instance for a given User or creates it if the user is new"""
