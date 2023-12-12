@@ -100,7 +100,7 @@ class MathAnswerMessageMetadata(models.Model):
 class UserStatus(models.Model):
     user = models.ForeignKey(User, on_delete=models.PROTECT)
     current_activity_session = models.ForeignKey(
-        ActivitySession, on_delete=models.PROTECT
+        ActivitySession, on_delete=models.PROTECT, null=True
     )
     created_at = models.DateTimeField(default=get_current_datetime)
     updated_at = models.DateTimeField(auto_now=True)
