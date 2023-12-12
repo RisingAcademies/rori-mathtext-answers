@@ -32,6 +32,9 @@ from mathtext_fastapi.v2_nlu import (
     run_keyword_and_intent_evaluations,
     v2_evaluate_message_with_nlu,
 )
+
+from mathtext_fastapi.student_ability_model import calculate_lesson_mastery
+from mathtext_fastapi.django_logging.django_logging import get_user_model
 from mathtext_fastapi.django_logging.django_logging import log_user_and_message_context
 
 
@@ -119,18 +122,38 @@ async def v2_evaluate_user_message_with_nlu_api(request: Request):
     message_text = str(message_dict.get("message_body", ""))
     message_text = truncate_long_message_text(message_text)
     expected_answer = str(message_dict.get("expected_answer", ""))
-    user_status, activity, activity_session = get_user_model()
+    user, user_status, activity, activity_session = get_user_model()
     log.info(f"Message text: {message_text}, Expected answer: {expected_answer}")
     try:
+
         nlu_response = await asyncio.wait_for(
             v2_evaluate_message_with_nlu(message_text, expected_answer),
             TIMEOUT_THRESHOLD,
         )
+
     except asyncio.TimeoutError:
         nlu_response = TIMEOUT_RESPONSE_DICT
     except Exception as e:
         nlu_response = ERROR_RESPONSE_DICT
         log.error(f"V2 NLU Endpoint Exception: {e}")
+
+    try:
+        prev_p_learn = activity_session.properties["p_learn"]
+        p_transit = activity.bktparams.p_transit
+        p_guess = activity.bktparams.p_guess
+        p_slip = activity.bktparams.p_slip
+
+        new_p_learn = calculate_lesson_mastery(nlu_response['type'],
+                                               prev_p_learn=prev_p_learn,
+                                               p_slip=p_slip,
+                                               p_guess=p_guess,
+                                               p_transit=p_transit)
+
+        nlu_response['p_learn'] = new_p_learn
+
+    except Exception as e:
+        pass
+
     asyncio.create_task(log_user_and_message_context(message_dict, nlu_response))
 
     return JSONResponse(content=nlu_response)

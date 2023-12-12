@@ -13,29 +13,28 @@ from mathtext_fastapi.django_logging.django_app.models import (
     UserStatus,
 )
 
-def get_user_model():
-    user
+
+def get_user_model(message_data):
+    user, created = User.objects.get_or_create(
+        properties={"turn_author_id": message_data["author_id"]}  # Revise later
+    )
+
+    content_unit_name = message_data.get("question_micro_lesson", "")
+    activity = Activity.objects.get(name=content_unit_name)
+
+    user_status = retrieve_user_status(created, user)
+    return (
+        user,
+        user_status,
+    )  # activity, activity_session
 
 
-def retrieve_user_status(is_new_user, user, activity):
+def retrieve_user_status(is_new_user, user):
     """Retrieves the UserStatus instance for a given User or creates it if the user is new"""
     user_status = None
     if is_new_user:
-        user_status_context = {"user": user, "current_activity": activity}
+        user_status_context = {"user": user, "current_activity_session": None}
         user_status = UserStatus.objects.create(**user_status_context)
-
-        user_properties_context = {"user": user, "name": "test", "value": "test"}
-        user_properties = UserProperties.objects.create(**user_properties_context)
-
-        status = ActivitySession.ActivitySessionStatus.IN_PROGRESS
-        current_activity_session_context = {
-            "activity": activity,
-            "user": user,
-            "status": status,
-        }
-        activity_session = ActivitySession.objects.create(
-            **current_activity_session_context
-        )
 
     if not user_status:
         user_status = UserStatus.objects.filter(user=user).first()
@@ -153,3 +152,28 @@ def log_user_and_message_context(message_data, nlu_response):
         message_metadata = log_message_metadata(
             student_message, message_data, nlu_response
         )
+
+
+if __name__ == "__main__":
+    activity_params = {"name": "G1.N1.1.2.1", "type":"math_answer_api", "content": {}}
+    activity= Activity.objects.get_or_create(**activity_params)
+    message_data = {
+            "author_id": "57787919091",
+            "author_type": "OWNER",
+            "contact_uuid": "df78gsdf78df",
+            "message_direction": "inbound",
+            "message_id": "ABGGIyd4CZSfAhANH3bakk0ByOtSYj8I7Dxz",
+            "message_inserted_at": "2023-05-31T13:20:25.779686Z",
+            "message_updated_at": "2023-05-31T13:57:40.650739Z",
+            "question_micro_lesson": "G1.N1.1.2.1",
+            "question": "___, 27, 28, 29, 30",
+            "question_level": "1",
+            "question_skill": "Fractions",
+            "question_topic": "Fractions",
+            "question_number": "1",
+            "expected_answer": "2,253",
+            "message_body": "maybe 26.5",
+    }
+    user, user_status = get_user_model(message_data)
+    print(user)
+    print(user_status)

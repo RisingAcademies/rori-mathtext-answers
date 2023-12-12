@@ -1,7 +1,15 @@
 
 
 def calculate_lesson_mastery(curr_answer_type, prev_p_learn, p_slip, p_guess, p_transit):
-
+    """
+    Calculates the probability of student mastering current lesson based on the most recent answer
+    :param curr_answer_type:
+    :param prev_p_learn:
+    :param p_slip:
+    :param p_guess:
+    :param p_transit:
+    :return: 0 < p_learn <1.0 - the probability of the user mastering the current lesson
+    """
     p_learn = prev_p_learn
 
     if curr_answer_type == "correct_answer":
