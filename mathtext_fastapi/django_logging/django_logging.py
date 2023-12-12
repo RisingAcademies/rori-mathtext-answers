@@ -56,7 +56,7 @@ def create_new_activity_session(user, activity):
 
 
 def update_user_and_activity_context(user, user_status, activity):
-    update_activity_session(user, user_status, activity)
+    update_activity_session(user_status)
     update_user_status(user_status, activity)
     activity_session = create_new_activity_session(user, activity)
     return activity_session
@@ -65,8 +65,15 @@ def update_user_and_activity_context(user, user_status, activity):
 def retrieve_activity_session(user, user_status, activity):
     """Returns the most current ActivitySession for a user"""
     activity_session = None
-    if user_status.current_activity_session.activity.id != activity.id:
-        activity_session = update_user_and_activity_context(user, user_status, activity)
+    try:
+        if user_status.current_activity_session.activity.id != activity.id:
+            activity_session = update_user_and_activity_context(
+                user, user_status, activity
+            )
+    except AttributeError as e:
+        activity_session = create_new_activity_session(user, activity)
+        user_status.current_activity_session = activity_session
+        user_status.save()
     if not activity_session:
         activity_session = user_status.current_activity_session
     return activity_session
@@ -115,18 +122,19 @@ def log_message_metadata(student_message, message_data, nlu_response):
     return message_metadata
 
 
+@database_sync_to_async
 def get_user_model(message_data):
-    content_unit_name = message_data.get("question_micro_lesson", "")
-    activity = Activity.objects.get(name=content_unit_name)
-
     user, created = User.objects.get_or_create(
         properties={"turn_author_id": message_data["author_id"]}  # Revise later
     )
 
     user_status = retrieve_user_status(created, user)
 
+    content_unit_name = message_data.get("question_micro_lesson", "")
+    activity = Activity.objects.get(name=content_unit_name)
+
     activity_session = retrieve_activity_session(user, user_status, activity)
-    return user, user_status, activity_session
+    return user, user_status, activity, activity_session
 
 
 # TODO: need to add validation for each instance
