@@ -28,18 +28,21 @@ def retrieve_user_status(is_new_user, user, activity):
 
 def update_activity_session(user, user_status, activity):
     """Update the old ActivitySession and create a new ActivitySession"""
-    # Find/Update the last activity session of a student
-    previous_activity_session = (
-        ActivitySession.objects.filter(user=user).order_by("-id").first()
-    )
-    previous_activity_session.status = ActivitySession.ActivitySessionStatus.EARLY_EXIT
-    previous_activity_session.save()
 
-    # Update User Status with new Activity
+    previous_activity_session = (
+        user_status.current_activity_session.status
+    ) = ActivitySession.ActivitySessionStatus.EARLY_EXIT
+    previous_activity_session.save()
+    return previous_activity_session
+
+
+def update_user_status(user_status, activity):
     user_status.current_activity = activity
     user_status.save()
+    return user_status
 
-    # Create new ActivitySession
+
+def create_new_activity_session(user, activity):
     status = ActivitySession.ActivitySessionStatus.IN_PROGRESS
     current_activity_session_context = {
         "activity": activity,
@@ -52,16 +55,29 @@ def update_activity_session(user, user_status, activity):
     return activity_session
 
 
+def update_user_and_activity_context(user, user_status, activity):
+    update_activity_session(user, user_status, activity)
+    update_user_status(user_status, activity)
+    activity_session = create_new_activity_session(user, activity)
+    return activity_session
+
+
 def retrieve_activity_session(user, user_status, activity):
     """Returns the most current ActivitySession for a user"""
     activity_session = None
     if user_status.current_activity.id != activity.id:
-        activity_session = update_activity_session(user, user_status, activity)
+        activity_session = update_user_and_activity_context(user, user_status, activity)
     if not activity_session:
         activity_session = (
             ActivitySession.objects.filter(user_id=user).order_by("-id").first()
         )
     return activity_session
+    # Find/Update the last activity session of a student
+    previous_activity_session = (
+        ActivitySession.objects.filter(user=user).order_by("-id").first()
+    )
+    previous_activity_session.status = ActivitySession.ActivitySessionStatus.EARLY_EXIT
+    previous_activity_session.save()
 
 
 def log_bot_message(activity_session, message_data):
@@ -107,6 +123,20 @@ def log_message_metadata(student_message, message_data, nlu_response):
     return message_metadata
 
 
+def get_user_model(message_data):
+    content_unit_name = message_data.get("question_micro_lesson", "")
+    activity = Activity.objects.get(name=content_unit_name)
+
+    user, created = User.objects.get_or_create(
+        properties={"turn_author_id": message_data["author_id"]}  # Revise later
+    )
+
+    user_status = retrieve_user_status(created, user, activity)
+
+    activity_session = retrieve_activity_session(user, user_status, activity)
+    return user, user_status, activity_session
+
+
 # TODO: need to add validation for each instance
 @database_sync_to_async
 def log_user_and_message_context(message_data, nlu_response):
@@ -118,17 +148,7 @@ def log_user_and_message_context(message_data, nlu_response):
     All DB queries must succeed or changes are rolled back
     """
     with transaction.atomic():
-        # if True:
-        content_unit_name = message_data.get("question_micro_lesson", "")
-        activity = Activity.objects.get(name=content_unit_name)
-
-        user, created = User.objects.get_or_create(
-            properties={"turn_author_id": message_data["author_id"]}  # Revise later
-        )
-
-        user_status = retrieve_user_status(created, user, activity)
-
-        activity_session = retrieve_activity_session(user, user_status, activity)
+        user, user_status, activity_session = get_user_model(message_data)
 
         bot_message = log_bot_message(activity_session, message_data)
 
