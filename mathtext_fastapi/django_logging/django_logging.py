@@ -153,6 +153,10 @@ def log_user_and_message_context(message_data, nlu_response):
             student_message, message_data, nlu_response
         )
 
+def update_p_learn(activity_session, p_learn):
+    activity_session.properties["p_learn"] = p_learn
+    activity_session.save()
+
 
 if __name__ == "__main__":
     activity_params = {"name": "G1.N1.1.2.1", "type":"math_answer_api", "content": {}}

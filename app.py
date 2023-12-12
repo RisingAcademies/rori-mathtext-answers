@@ -34,7 +34,7 @@ from mathtext_fastapi.v2_nlu import (
 )
 
 from mathtext_fastapi.student_ability_model import calculate_lesson_mastery
-from mathtext_fastapi.django_logging.django_logging import get_user_model
+from mathtext_fastapi.django_logging.django_logging import get_user_model, update_p_learn
 from mathtext_fastapi.django_logging.django_logging import log_user_and_message_context
 
 
@@ -148,6 +148,9 @@ async def v2_evaluate_user_message_with_nlu_api(request: Request):
                                                p_slip=p_slip,
                                                p_guess=p_guess,
                                                p_transit=p_transit)
+
+        ## update the p_learn in the activity_session
+        update_p_learn(activity_session, new_p_learn)
 
         nlu_response['p_learn'] = new_p_learn
 
