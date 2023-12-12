@@ -37,7 +37,7 @@ def update_activity_session(user_status):
 
 
 def update_user_status(user_status, activity):
-    user_status.current_activity = activity
+    user_status.current_activity_session.activity = activity
     user_status.save()
     return user_status
 
@@ -65,10 +65,10 @@ def update_user_and_activity_context(user, user_status, activity):
 def retrieve_activity_session(user, user_status, activity):
     """Returns the most current ActivitySession for a user"""
     activity_session = None
-    if user_status.current_activity.id != activity.id:
+    if user_status.current_activity_session.activity.id != activity.id:
         activity_session = update_user_and_activity_context(user, user_status, activity)
     if not activity_session:
-        activity_session = user_status.current_activity_session()
+        activity_session = user_status.current_activity_session
     return activity_session
 
 
@@ -123,7 +123,7 @@ def get_user_model(message_data):
         properties={"turn_author_id": message_data["author_id"]}  # Revise later
     )
 
-    user_status = retrieve_user_status(created, user, activity)
+    user_status = retrieve_user_status(created, user)
 
     activity_session = retrieve_activity_session(user, user_status, activity)
     return user, user_status, activity_session
