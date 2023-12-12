@@ -14,11 +14,11 @@ from mathtext_fastapi.django_logging.django_app.models import (
 )
 
 
-def retrieve_user_status(is_new_user, user, activity):
+def retrieve_user_status(is_new_user, user):
     """Retrieves the UserStatus instance for a given User or creates it if the user is new"""
     user_status = None
     if is_new_user:
-        user_status_context = {"user": user, "current_activity": activity}
+        user_status_context = {"user": user, "current_activity_session": None}
         user_status = UserStatus.objects.create(**user_status_context)
 
     if not user_status:
@@ -26,7 +26,7 @@ def retrieve_user_status(is_new_user, user, activity):
     return user_status
 
 
-def update_activity_session(user, user_status, activity):
+def update_activity_session(user_status):
     """Update the old ActivitySession and create a new ActivitySession"""
 
     previous_activity_session = (
@@ -68,16 +68,8 @@ def retrieve_activity_session(user, user_status, activity):
     if user_status.current_activity.id != activity.id:
         activity_session = update_user_and_activity_context(user, user_status, activity)
     if not activity_session:
-        activity_session = (
-            ActivitySession.objects.filter(user_id=user).order_by("-id").first()
-        )
+        activity_session = user_status.current_activity_session()
     return activity_session
-    # Find/Update the last activity session of a student
-    previous_activity_session = (
-        ActivitySession.objects.filter(user=user).order_by("-id").first()
-    )
-    previous_activity_session.status = ActivitySession.ActivitySessionStatus.EARLY_EXIT
-    previous_activity_session.save()
 
 
 def log_bot_message(activity_session, message_data):
@@ -150,10 +142,8 @@ def log_user_and_message_context(message_data, nlu_response):
     with transaction.atomic():
         user, user_status, activity_session = get_user_model(message_data)
 
-        bot_message = log_bot_message(activity_session, message_data)
+        log_bot_message(activity_session, message_data)
 
         student_message = log_student_message(activity_session, message_data)
 
-        message_metadata = log_message_metadata(
-            student_message, message_data, nlu_response
-        )
+        log_message_metadata(student_message, message_data, nlu_response)
