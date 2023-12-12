@@ -1,9 +1,13 @@
 import pandas as pd
 from mathtext_fastapi.django_logging.django_app.models import Activity
 
-lesson_list_file = "etl/rori_lesson_list.csv"
-open_line_params_file = "etl/rori_bkt_params_open_line.csv"
-rising_line_params_file = "etl/rori_bkt_params_rising_line.csv"
+lesson_list_file = "mathtext_fastapi/django_logging/etl/rori_lesson_list.csv"
+open_line_params_file = (
+    "mathtext_fastapi/django_logging/etl/rori_bkt_params_open_line.csv"
+)
+rising_line_params_file = (
+    "mathtext_fastapi/django_logging/etl/rori_bkt_params_rising_line.csv"
+)
 
 # Read CSV files into Pandas DataFrames
 lesson_list_df = pd.read_csv(lesson_list_file)
