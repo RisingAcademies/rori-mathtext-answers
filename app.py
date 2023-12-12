@@ -32,7 +32,10 @@ from mathtext_fastapi.v2_nlu import (
     run_keyword_and_intent_evaluations,
     v2_evaluate_message_with_nlu,
 )
-from mathtext_fastapi.django_logging.django_logging import log_user_and_message_context
+from mathtext_fastapi.django_logging.django_logging import (
+    log_user_and_message_context,
+    get_user_model,
+)
 
 
 log = getLogger(__name__)
@@ -120,6 +123,9 @@ async def v2_evaluate_user_message_with_nlu_api(request: Request):
     message_text = truncate_long_message_text(message_text)
     expected_answer = str(message_dict.get("expected_answer", ""))
     log.info(f"Message text: {message_text}, Expected answer: {expected_answer}")
+
+    user, user_status, activity, activity_session = get_user_model()
+
     try:
         nlu_response = await asyncio.wait_for(
             v2_evaluate_message_with_nlu(message_text, expected_answer),
@@ -130,6 +136,8 @@ async def v2_evaluate_user_message_with_nlu_api(request: Request):
     except Exception as e:
         nlu_response = ERROR_RESPONSE_DICT
         log.error(f"V2 NLU Endpoint Exception: {e}")
-    asyncio.create_task(log_user_and_message_context(message_dict, nlu_response))
+    asyncio.create_task(
+        log_user_and_message_context(message_dict, nlu_response, activity_session)
+    )
 
     return JSONResponse(content=nlu_response)

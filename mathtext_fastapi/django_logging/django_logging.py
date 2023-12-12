@@ -131,7 +131,7 @@ def get_user_model(message_data):
 
 # TODO: need to add validation for each instance
 @database_sync_to_async
-def log_user_and_message_context(message_data, nlu_response):
+def log_user_and_message_context(message_data, nlu_response, activity_session):
     """Uses Turn.io context data to create log records of
     User, UserStatus, UserProperties,
     Activity, ActivitySession
@@ -140,8 +140,6 @@ def log_user_and_message_context(message_data, nlu_response):
     All DB queries must succeed or changes are rolled back
     """
     with transaction.atomic():
-        user, user_status, activity_session = get_user_model(message_data)
-
         log_bot_message(activity_session, message_data)
 
         student_message = log_student_message(activity_session, message_data)
