@@ -21,19 +21,6 @@ def retrieve_user_status(is_new_user, user, activity):
         user_status_context = {"user": user, "current_activity": activity}
         user_status = UserStatus.objects.create(**user_status_context)
 
-        user_properties_context = {"user": user, "name": "test", "value": "test"}
-        user_properties = UserProperties.objects.create(**user_properties_context)
-
-        status = ActivitySession.ActivitySessionStatus.IN_PROGRESS
-        current_activity_session_context = {
-            "activity": activity,
-            "user": user,
-            "status": status,
-        }
-        activity_session = ActivitySession.objects.create(
-            **current_activity_session_context
-        )
-
     if not user_status:
         user_status = UserStatus.objects.filter(user=user).first()
     return user_status
