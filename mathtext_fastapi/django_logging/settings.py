@@ -1,16 +1,17 @@
+import logging
+
 from mathtext_fastapi.constants import (
     GOOGLE_CLOUD_SQL_HOST,
     GOOGLE_CLOUD_SQL_USER,
     GOOGLE_CLOUD_SQL_PASSWORD,
     GOOGLE_CLOUD_SQL_NAME,
+    GOOGLE_CLOUD_SQL_PORT,
     POSTGRES_DATABASE,
     POSTGRES_USERNAME,
     POSTGRES_PASSWORD,
     POSTGRES_HOST,
     POSTGRES_PORT,
 )
-
-import logging
 
 LANGUAGE_CODE = "en-us"
 TIME_ZONE = "UTC"
@@ -34,6 +35,7 @@ elif GOOGLE_CLOUD_SQL_HOST:
             "USER": GOOGLE_CLOUD_SQL_USER,
             "PASSWORD": GOOGLE_CLOUD_SQL_PASSWORD,
             "HOST": GOOGLE_CLOUD_SQL_HOST,
+            "PORT": GOOGLE_CLOUD_SQL_PORT,
         },
     }
 else:
