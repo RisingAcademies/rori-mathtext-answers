@@ -1,5 +1,12 @@
-# from asgiref.sync import sync_to_async
+"""
+Some logging functions on this file use transaction.atomic.
+- https://docs.djangoproject.com/en/4.2/topics/db/transactions/
+
+DBError-related exceptions will cause all DB transactions nested inside transactions.atomic to be rolled back.  Need to be careful with Exception handling logic.
+- https://stackoverflow.com/questions/42586841/is-it-ok-to-catch-and-reraise-an-exception-inside-django-transaction-atomic
+"""
 import asyncio
+import logging
 
 from channels.db import database_sync_to_async
 from django.db import transaction
@@ -13,6 +20,8 @@ from mathtext_fastapi.django_logging.django_app.models import (
     UserProperties,
     UserStatus,
 )
+
+log = logging.getLogger(__name__)
 
 
 def retrieve_user_status(is_new_user, user):
@@ -42,23 +51,34 @@ def update_user_status(user_status, activity_session):
     user_status.save()
     return user_status
 
+
 def create_new_activity_session(user, activity, line_number):
     status = ActivitySession.ActivitySessionStatus.IN_PROGRESS
 
     properties = {}
 
-    if ("bkt_params" in activity.content) and (line_number in activity.content["bkt_params"]):
+    if ("bkt_params" in activity.content) and (
+        line_number in activity.content["bkt_params"]
+    ):
         properties["bkt_params"] = {}
-        properties["bkt_params"]["p_learn"] = activity.content["bkt_params"][line_number]["l0"]
-        properties["bkt_params"]["p_guess"] = activity.content["bkt_params"][line_number]["p_slip"]
-        properties["bkt_params"]["p_slip"] = activity.content["bkt_params"][line_number]["p_guess"]
-        properties["bkt_params"]["p_transit"] = activity.content["bkt_params"][line_number]["p_transit"]
+        properties["bkt_params"]["p_learn"] = activity.content["bkt_params"][
+            line_number
+        ]["l0"]
+        properties["bkt_params"]["p_guess"] = activity.content["bkt_params"][
+            line_number
+        ]["p_slip"]
+        properties["bkt_params"]["p_slip"] = activity.content["bkt_params"][
+            line_number
+        ]["p_guess"]
+        properties["bkt_params"]["p_transit"] = activity.content["bkt_params"][
+            line_number
+        ]["p_transit"]
 
     current_activity_session_context = {
         "activity": activity,
         "user": user,
         "status": status,
-        "properties": properties
+        "properties": properties,
     }
     activity_session = ActivitySession.objects.create(
         **current_activity_session_context
@@ -134,18 +154,23 @@ def log_message_metadata(student_message, message_data, nlu_response):
 
 @database_sync_to_async
 def get_user_model(message_data):
-    user, created = User.objects.get_or_create(
-        properties={"turn_author_id": message_data["author_id"]}  # Revise later
-    )
+    with transaction.atomic():
+        user, created = User.objects.get_or_create(
+            properties={
+                "turn_author_id": message_data["author_id"]
+            }  # TODO: Revise later to use contact_uuid
+        )
 
-    user_status = retrieve_user_status(created, user)
+        user_status = retrieve_user_status(created, user)
 
-    content_unit_name = message_data.get("question_micro_lesson", "")
-    activity = Activity.objects.get(name=content_unit_name)
+        content_unit_name = message_data.get("question_micro_lesson", "")
+        activity = Activity.objects.get(name=content_unit_name)
 
-    line_number = message_data.get("line_number", "")
-    activity_session = retrieve_activity_session(user, user_status, activity, line_number)
-    return user, user_status, activity, activity_session
+        line_number = message_data.get("line_number", "")
+        activity_session = retrieve_activity_session(
+            user, user_status, activity, line_number
+        )
+        return user, user_status, activity, activity_session
 
 
 @database_sync_to_async
@@ -153,9 +178,10 @@ def update_p_learn(activity_session, new_p_learn):
     try:
         activity_session.properties["bkt_params"]["p_learn"] = new_p_learn
         activity_session.save()
-    except Exception:
-        # TODO log error
-        pass
+    except Exception as e:
+        log.warning(f"Unable to save new_p_learn to ActivitySession.properties")
+        log.warning(str(e))
+        raise
 
 
 # TODO: need to add validation for each instance
