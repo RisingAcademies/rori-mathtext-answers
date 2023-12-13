@@ -26,29 +26,29 @@ from mathtext_fastapi.constants import (
 
 from mathtext_fastapi.request_validators import (
     parse_nlu_api_request_for_message,
-    truncate_long_message_text,
 )
 from mathtext_fastapi.v2_nlu import (
     run_keyword_and_intent_evaluations,
-    v2_evaluate_message_with_nlu,
 )
 from mathtext_fastapi.django_logging.django_logging import (
     log_user_and_message_context,
-    get_user_model,
 )
 
-from mathtext_fastapi.django_logging.student_ability_model import get_bkt_params, calculate_lesson_mastery
+from mathtext_fastapi.endpoint_utils import (
+    extract_student_message,
+    run_nlu_and_activity_evaluation,
+)
 
 log = getLogger(__name__)
 
-sentry_sdk.init(
-    dsn=SENTRY_DSN,
-    # Set traces_sample_rate to 1.0 to capture 100%
-    # of transactions for performance monitoring.
-    # We recommend adjusting this value in production,
-    traces_sample_rate=SENTRY_TRACES_SAMPLE_RATE,
-    profiles_sample_rate=SENTRY_PROFILES_SAMPLE_RATE,
-)
+# sentry_sdk.init(
+#     dsn=SENTRY_DSN,
+#     # Set traces_sample_rate to 1.0 to capture 100%
+#     # of transactions for performance monitoring.
+#     # We recommend adjusting this value in production,
+#     traces_sample_rate=SENTRY_TRACES_SAMPLE_RATE,
+#     profiles_sample_rate=SENTRY_PROFILES_SAMPLE_RATE,
+# )
 
 app = FastAPI()
 
@@ -90,9 +90,7 @@ async def recognize_keywords_and_intents(request: Request):
     if message_dict == ERROR_RESPONSE_DICT:
         return ERROR_RESPONSE_DICT
 
-    message_text = str(message_dict.get("message_body", ""))
-    message_text = truncate_long_message_text(message_text)
-    log.info(f"Message text: {message_text}")
+    message_text = await extract_student_message(message_dict)
     try:
         nlu_response = await asyncio.wait_for(
             run_keyword_and_intent_evaluations(message_text),
@@ -120,31 +118,19 @@ async def v2_evaluate_user_message_with_nlu_api(request: Request):
     if message_dict == ERROR_RESPONSE_DICT:
         return ERROR_RESPONSE_DICT
 
-    message_text = str(message_dict.get("message_body", ""))
-    message_text = truncate_long_message_text(message_text)
-    expected_answer = str(message_dict.get("expected_answer", ""))
-    log.info(f"Message text: {message_text}, Expected answer: {expected_answer}")
-
-    user, user_status, activity, activity_session = await get_user_model(message_dict)
-
     try:
-        nlu_response = await asyncio.wait_for(
-            v2_evaluate_message_with_nlu(message_text, expected_answer),
+        nlu_response, activity_session = await asyncio.wait_for(
+            run_nlu_and_activity_evaluation(message_dict),
             TIMEOUT_THRESHOLD,
         )
-
-        p_learn, p_slip, p_guess, p_transit = get_bkt_params(activity_session)
-        if p_learn:
-            new_p_learn = calculate_lesson_mastery(nlu_response.type, p_slip, p_guess, p_transit)
-
     except asyncio.TimeoutError:
         nlu_response = TIMEOUT_RESPONSE_DICT
     except Exception as e:
         nlu_response = ERROR_RESPONSE_DICT
         log.error(f"V2 NLU Endpoint Exception: {e}")
+
     asyncio.create_task(
         log_user_and_message_context(message_dict, nlu_response, activity_session)
     )
-
 
     return JSONResponse(content=nlu_response)
