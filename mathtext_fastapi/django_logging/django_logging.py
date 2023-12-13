@@ -1,4 +1,5 @@
 # from asgiref.sync import sync_to_async
+import asyncio
 
 from channels.db import database_sync_to_async
 from django.db import transaction
@@ -36,18 +37,29 @@ def update_activity_session(user_status):
     return previous_activity_session
 
 
-def update_user_status(user_status, activity):
-    user_status.current_activity_session.activity = activity
+def update_user_status(user_status, activity_session):
+    user_status.current_activity_session = activity_session
     user_status.save()
     return user_status
 
 
-def create_new_activity_session(user, activity):
+def create_new_activity_session(user, activity, line_number):
     status = ActivitySession.ActivitySessionStatus.IN_PROGRESS
+
+    properties = {}
+
+    if ("bkt_params" in activity.content) and (line_number in activity.content["bkt_params"]):
+        properties["bkt_params"] = {}
+        properties["bkt_params"]["p_learn"] = activity.content["bkt_params"][line_number]["l0"]
+        properties["bkt_params"]["p_guess"] = activity.content["bkt_params"][line_number]["p_slip"]
+        properties["bkt_params"]["p_slip"] = activity.content["bkt_params"][line_number]["p_guess"]
+        properties["bkt_params"]["p_transit"] = activity.content["bkt_params"][line_number]["p_transit"]
+
     current_activity_session_context = {
         "activity": activity,
         "user": user,
         "status": status,
+        "properties": properties
     }
     activity_session = ActivitySession.objects.create(
         **current_activity_session_context
@@ -55,25 +67,24 @@ def create_new_activity_session(user, activity):
     return activity_session
 
 
-def update_user_and_activity_context(user, user_status, activity):
+def update_user_and_activity_context(user, user_status, activity, line_number):
     update_activity_session(user_status)
-    update_user_status(user_status, activity)
-    activity_session = create_new_activity_session(user, activity)
+    activity_session = create_new_activity_session(user, activity, line_number)
     return activity_session
 
 
-def retrieve_activity_session(user, user_status, activity):
+def retrieve_activity_session(user, user_status, activity, line_number):
     """Returns the most current ActivitySession for a user"""
     activity_session = None
     try:
         if user_status.current_activity_session.activity.id != activity.id:
             activity_session = update_user_and_activity_context(
-                user, user_status, activity
+                user, user_status, activity, line_number
             )
+            update_user_status(user_status, activity_session)
     except AttributeError as e:
-        activity_session = create_new_activity_session(user, activity)
-        user_status.current_activity_session = activity_session
-        user_status.save()
+        activity_session = create_new_activity_session(user, activity, line_number)
+        update_user_status(user_status, activity_session)
     if not activity_session:
         activity_session = user_status.current_activity_session
     return activity_session
@@ -133,7 +144,8 @@ def get_user_model(message_data):
     content_unit_name = message_data.get("question_micro_lesson", "")
     activity = Activity.objects.get(name=content_unit_name)
 
-    activity_session = retrieve_activity_session(user, user_status, activity)
+    line_number = message_data.get("line_number", "")
+    activity_session = retrieve_activity_session(user, user_status, activity, line_number)
     return user, user_status, activity, activity_session
 
 
@@ -153,3 +165,30 @@ def log_user_and_message_context(message_data, nlu_response, activity_session):
         student_message = log_student_message(activity_session, message_data)
 
         log_message_metadata(student_message, message_data, nlu_response)
+
+
+# async def main():
+#     message_data = {
+#         "author_id": "57787919091",
+#         "author_type": "OWNER",
+#         "contact_uuid": "df78gsdf78df",
+#         "message_direction": "inbound",
+#         "message_id": "ABGGIyd4CZSfAhANH3bakk0ByOtSYj8I7Dxz",
+#         "line_number": "+12062587201",
+#         "message_inserted_at": "2023-05-31T13:20:25.779686Z",
+#         "message_updated_at": "2023-05-31T13:57:40.650739Z",
+#         "question_micro_lesson": "G1.N1.3.1.1",
+#         "question": "___, 27, 28, 29, 30",
+#         "question_level": "1",
+#         "question_skill": "Fractions",
+#         "question_topic": "Fractions",
+#         "question_number": "1",
+#         "expected_answer": "2,253",
+#         "message_body": "maybe 26.5",
+#     }
+#     user, user_status, activity, activity_session = await get_user_model(message_data)
+#     print(user)
+#     print(user_status)
+#
+# if __name__ == "__main__":
+#     asyncio.run(main())

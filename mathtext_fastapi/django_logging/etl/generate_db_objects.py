@@ -1,13 +1,12 @@
 import pandas as pd
+from pathlib import Path
 from mathtext_fastapi.django_logging.django_app.models import Activity
 
-lesson_list_file = "mathtext_fastapi/django_logging/etl/rori_lesson_list.csv"
-open_line_params_file = (
-    "mathtext_fastapi/django_logging/etl/rori_bkt_params_open_line.csv"
-)
-rising_line_params_file = (
-    "mathtext_fastapi/django_logging/etl/rori_bkt_params_rising_line.csv"
-)
+DIR_PATH = Path(__file__).resolve().parent
+
+lesson_list_file = DIR_PATH / "rori_lesson_list.csv"
+open_line_params_file = DIR_PATH / "rori_bkt_params_rising_line.csv"
+rising_line_params_file = DIR_PATH / "rori_bkt_params_rising_line.csv"
 
 
 def generate_activity_db_objects():
@@ -65,3 +64,6 @@ def generate_activity_db_objects():
             content=content if content else {},
         )
         activity.save()
+
+if __name__ == "__main__":
+    generate_activity_db_objects()
