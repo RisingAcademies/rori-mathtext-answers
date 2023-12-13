@@ -6,14 +6,14 @@ or
 import asyncio
 import sentry_sdk
 
+from logging import getLogger
+
 from fastapi import FastAPI, Request
 from fastapi.responses import JSONResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
-from logging import getLogger
 from pydantic import BaseModel
 
-from mathtext.predict_intent import predict_message_intent
 from mathtext_fastapi.constants import (
     APPROVED_KEYWORDS,
     ERROR_RESPONSE_DICT,
@@ -23,21 +23,20 @@ from mathtext_fastapi.constants import (
     TIMEOUT_RESPONSE_DICT,
     TIMEOUT_THRESHOLD,
 )
-
+from mathtext_fastapi.django_logging.django_logging import (
+    log_user_and_message_context,
+)
+from mathtext_fastapi.endpoint_utils import (
+    extract_student_message,
+    run_nlu_and_activity_evaluation,
+)
 from mathtext_fastapi.request_validators import (
     parse_nlu_api_request_for_message,
 )
 from mathtext_fastapi.v2_nlu import (
     run_keyword_and_intent_evaluations,
 )
-from mathtext_fastapi.django_logging.django_logging import (
-    log_user_and_message_context,
-)
-
-from mathtext_fastapi.endpoint_utils import (
-    extract_student_message,
-    run_nlu_and_activity_evaluation,
-)
+from mathtext.predict_intent import predict_message_intent
 
 log = getLogger(__name__)
 
