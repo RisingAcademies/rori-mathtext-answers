@@ -1,3 +1,10 @@
+## In Progress
+Support real-time logging and use of student data in NLU evaluation
+- Switch logging ORM to Django
+- Update logging processes based on a new model schema
+- Integrate BKT model into the NLU evaluation endpoint
+- 
+
 ## [2.0.6](https://github.com/RisingAcademies/rori-mathtext-answers/tree/2.0.6)
 Add support for 'next' keyword as 'menu' keyword trigger
 - Update mathtext to 2.0.4

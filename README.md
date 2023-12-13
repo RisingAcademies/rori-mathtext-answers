@@ -27,7 +27,9 @@ source .venv/bin/activate || source .venv/scripts/activate
 # 6. Install Math Answers API dependencies
 pip install --editable .
 
-# 7. Prepare database via migrations
+# 7. Ensure you have an .env file with the relevant constants
+
+# 8. Prepare database via migrations
 python mathtext_fastapi/django_logging/manage.py makemigrations
 python mathtext_fastapi/django_logging/manage.py migrate
 ```
@@ -49,9 +51,12 @@ python mathtext_fastapi/django_logging/manage.py migrate
 │   ├── django_logging
 │   │   ├── django_app
 │   │   │   ├── models.py # Message model 
-│   │   ├── django_logging # Background logging of each request
+│   │   ├── etl
+│   │   │   ├── generate_db_objects # Generates Rori Activity db records with this folder's .csvs
+│   │   ├── django_logging # Used to retrieve/update user records and log message context
 │   │   ├── manage.py # Used for making migration files
 │   │   ├── settings.py # Specifies DB creds for local and live instances
+│   │   ├── student_ability_model.py # Retrieving BKT params and calculate's student's mastery
 │   ├── nlu_evaluations
 │   │   ├── evaluation_utils.py # Support functions for message evaluations
 │   │   ├── evaluations.py # Evaluations for specific types of responses
@@ -59,7 +64,6 @@ python mathtext_fastapi/django_logging/manage.py migrate
 │   ├── constants.py # Configuration variables for the application
 │   ├── request_validators.py # Validates the request object
 │   ├── response_formaters.py # Converts evaluation result to response obj
-│   ├── supabase_logging_async.py # Background logging Deque management
 │   ├── v2_nlu.py # Sequences of evaluations
 ├── scripts
 ├── tests
