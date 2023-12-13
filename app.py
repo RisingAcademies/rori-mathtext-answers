@@ -26,11 +26,11 @@ from mathtext_fastapi.constants import (
 from mathtext_fastapi.django_logging.django_logging import (
     log_user_and_message_context,
 )
-from mathtext_fastapi.endpoint_utils import (
+from mathtext_fastapi.endpoint_utils.endpoint_utils import (
     extract_student_message,
     run_nlu_and_activity_evaluation,
 )
-from mathtext_fastapi.request_validators import (
+from mathtext_fastapi.endpoint_utils.request_validators import (
     parse_nlu_api_request_for_message,
 )
 from mathtext_fastapi.v2_nlu import (

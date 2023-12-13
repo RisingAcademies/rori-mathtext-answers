@@ -57,13 +57,15 @@ python mathtext_fastapi/django_logging/manage.py migrate
 │   │   ├── manage.py # Used for making migration files
 │   │   ├── settings.py # Specifies DB creds for local and live instances
 │   │   ├── student_ability_model.py # Retrieving BKT params and calculate's student's mastery
+│   ├── endpoint_utils
+│   │   ├── endpoint_utils.py # Support functions for endpoint tasks
+│   │   ├── request_validators.py # Validates the request object
+│   │   ├── response_formaters.py # Converts evaluation result to response obj
 │   ├── nlu_evaluations
 │   │   ├── evaluation_utils.py # Support functions for message evaluations
 │   │   ├── evaluations.py # Evaluations for specific types of responses
 │   ├── cache.py
 │   ├── constants.py # Configuration variables for the application
-│   ├── request_validators.py # Validates the request object
-│   ├── response_formaters.py # Converts evaluation result to response obj
 │   ├── v2_nlu.py # Sequences of evaluations
 ├── scripts
 ├── tests

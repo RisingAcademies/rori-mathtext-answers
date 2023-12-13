@@ -7,7 +7,9 @@ from dotenv import load_dotenv
 load_dotenv()
 
 from mathtext.constants import TOKENS2INT_ERROR_INT
-from mathtext_fastapi.response_formaters import build_single_event_nlu_response
+from mathtext_fastapi.endpoint_utils.response_formaters import (
+    build_single_event_nlu_response,
+)
 
 # Intent recognition model file paths and names
 try:

@@ -32,7 +32,9 @@ from mathtext_fastapi.nlu_evaluations.evaluations import (
     extract_special_numbers_with_regex,
     find_highest_confidence_intent_over_threshold,
 )
-from mathtext_fastapi.response_formaters import build_single_event_nlu_response
+from mathtext_fastapi.endpoint_utils.response_formaters import (
+    build_single_event_nlu_response,
+)
 
 log = getLogger(__name__)
 

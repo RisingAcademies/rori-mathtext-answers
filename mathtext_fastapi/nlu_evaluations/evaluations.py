@@ -22,7 +22,9 @@ from mathtext_fastapi.nlu_evaluations.evaluation_utils import (
     evaluate_for_exact_keyword_match_in_phrase,
     evaluate_for_exact_match_with_expected_answer,
 )
-from mathtext_fastapi.response_formaters import build_single_event_nlu_response
+from mathtext_fastapi.endpoint_utils.response_formaters import (
+    build_single_event_nlu_response,
+)
 
 
 def check_for_invalid_input(student_message):
