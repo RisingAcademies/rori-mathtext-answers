@@ -1,5 +1,5 @@
 
-def get_bkt_params(activity_session, line_number):
+def get_bkt_params(activity_session):
     try:
         params = activity_session.properties["bkt_params"]
         return params["p_learn"], params["p_slip"], params["p_guess"], params["p_transit"]

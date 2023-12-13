@@ -37,6 +37,7 @@ from mathtext_fastapi.django_logging.django_logging import (
     get_user_model,
 )
 
+from mathtext_fastapi.django_logging.student_ability_model import get_bkt_params, calculate_lesson_mastery
 
 log = getLogger(__name__)
 
@@ -131,6 +132,11 @@ async def v2_evaluate_user_message_with_nlu_api(request: Request):
             v2_evaluate_message_with_nlu(message_text, expected_answer),
             TIMEOUT_THRESHOLD,
         )
+
+        p_learn, p_slip, p_guess, p_transit = get_bkt_params(activity_session)
+        if p_learn:
+            new_p_learn = calculate_lesson_mastery(nlu_response.type, p_slip, p_guess, p_transit)
+
     except asyncio.TimeoutError:
         nlu_response = TIMEOUT_RESPONSE_DICT
     except Exception as e:
@@ -139,5 +145,6 @@ async def v2_evaluate_user_message_with_nlu_api(request: Request):
     asyncio.create_task(
         log_user_and_message_context(message_dict, nlu_response, activity_session)
     )
+
 
     return JSONResponse(content=nlu_response)

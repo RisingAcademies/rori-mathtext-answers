@@ -42,7 +42,6 @@ def update_user_status(user_status, activity_session):
     user_status.save()
     return user_status
 
-
 def create_new_activity_session(user, activity, line_number):
     status = ActivitySession.ActivitySessionStatus.IN_PROGRESS
 
@@ -147,6 +146,16 @@ def get_user_model(message_data):
     line_number = message_data.get("line_number", "")
     activity_session = retrieve_activity_session(user, user_status, activity, line_number)
     return user, user_status, activity, activity_session
+
+
+@database_sync_to_async
+def update_p_learn(activity_session, new_p_learn):
+    try:
+        activity_session.properties["bkt_params"]["p_learn"] = new_p_learn
+        activity_session.save()
+    except Exception:
+        # TODO log error
+        pass
 
 
 # TODO: need to add validation for each instance
