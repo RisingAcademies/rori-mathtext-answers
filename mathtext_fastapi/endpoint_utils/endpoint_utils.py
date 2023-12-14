@@ -2,7 +2,7 @@ import asyncio
 from logging import getLogger
 
 from mathtext_fastapi.django_logging.django_logging import (
-    get_user_model,
+    get_user_model, update_p_learn
 )
 from mathtext_fastapi.django_logging.student_ability_model import (
     get_bkt_params,
@@ -59,4 +59,11 @@ async def run_nlu_and_activity_evaluation(message_dict):
         new_p_learn = calculate_lesson_mastery(
             nlu_response.type, p_slip, p_guess, p_transit
         )
+        
+        nlu_response["mastery"] = new_p_learn
+
+        await update_p_learn(activity_session, new_p_learn)
+    else:
+        nlu_response["mastery"] = -1
+
     return nlu_response, activity_session
