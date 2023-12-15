@@ -18,7 +18,7 @@ class User(models.Model):
     properties = models.JSONField()
 
     class Meta:
-        db_table = "math_api_user"
+        db_table = "user"
 
 
 class Activity(models.Model):
@@ -29,7 +29,7 @@ class Activity(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
 
     class Meta:
-        db_table = "math_api_activity"
+        db_table = "activity"
 
 
 class ActivitySession(models.Model):
@@ -55,7 +55,7 @@ class ActivitySession(models.Model):
     properties = models.JSONField(default=dict)
 
     class Meta:
-        db_table = "math_api_activity_session"
+        db_table = "activity_session"
 
 
 class Message(models.Model):
@@ -76,7 +76,7 @@ class Message(models.Model):
     created_at = models.DateTimeField(default=get_current_datetime)
 
     class Meta:
-        db_table = "math_api_message"
+        db_table = "rori_message"
 
 
 class MathAnswerMessageMetadata(models.Model):
@@ -93,7 +93,7 @@ class MathAnswerMessageMetadata(models.Model):
     hint_shown = models.TextField(null=True)
 
     class Meta:
-        db_table = "math_api_message_metadata"
+        db_table = "math_answer_message_metadata"
 
 
 class UserStatus(models.Model):
@@ -105,7 +105,7 @@ class UserStatus(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
 
     class Meta:
-        db_table = "math_api_user_status"
+        db_table = "user_status"
 
 
 class UserProperties(models.Model):
@@ -114,4 +114,4 @@ class UserProperties(models.Model):
     value = models.TextField()
 
     class Meta:
-        db_table = "math_api_user_properties"
+        db_table = "user_properties"
