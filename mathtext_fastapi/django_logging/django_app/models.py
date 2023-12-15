@@ -24,7 +24,7 @@ class User(models.Model):
 class Activity(models.Model):
     name = models.TextField(unique=True)
     type = models.TextField()
-    content = models.JSONField()
+    properties = models.JSONField()
     created_at = models.DateTimeField(default=get_current_datetime)
     updated_at = models.DateTimeField(auto_now=True)
 

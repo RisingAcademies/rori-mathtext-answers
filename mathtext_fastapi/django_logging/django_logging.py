@@ -57,20 +57,20 @@ def create_new_activity_session(user, activity, line_number):
 
     properties = {}
 
-    if ("bkt_params" in activity.content) and (
-        line_number in activity.content["bkt_params"]
+    if ("bkt_params" in activity.properties) and (
+        line_number in activity.properties["bkt_params"]
     ):
         properties["bkt_params"] = {}
-        properties["bkt_params"]["p_learn"] = activity.content["bkt_params"][
+        properties["bkt_params"]["p_learn"] = activity.properties["bkt_params"][
             line_number
         ]["l0"]
-        properties["bkt_params"]["p_guess"] = activity.content["bkt_params"][
+        properties["bkt_params"]["p_guess"] = activity.properties["bkt_params"][
             line_number
         ]["p_slip"]
-        properties["bkt_params"]["p_slip"] = activity.content["bkt_params"][
+        properties["bkt_params"]["p_slip"] = activity.properties["bkt_params"][
             line_number
         ]["p_guess"]
-        properties["bkt_params"]["p_transit"] = activity.content["bkt_params"][
+        properties["bkt_params"]["p_transit"] = activity.properties["bkt_params"][
             line_number
         ]["p_transit"]
 
