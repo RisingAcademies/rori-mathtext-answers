@@ -76,7 +76,9 @@ class Message(models.Model):
     created_at = models.DateTimeField(default=get_current_datetime)
 
     class Meta:
-        db_table = "rori_message"
+        db_table = (
+            "rori_message"  # TODO: Change this to 'message' after adjusting tests
+        )
 
 
 class MathAnswerMessageMetadata(models.Model):
