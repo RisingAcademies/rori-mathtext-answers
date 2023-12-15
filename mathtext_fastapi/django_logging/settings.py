@@ -11,13 +11,14 @@ from mathtext_fastapi.constants import (
     POSTGRES_PASSWORD,
     POSTGRES_HOST,
     POSTGRES_PORT,
+    DJANGO_ALLOWED_HOSTS,
 )
 
 LANGUAGE_CODE = "en-us"
 TIME_ZONE = "UTC"
 USE_TZ = True
-DEBUG = True
-
+DEBUG = False
+ALLOWED_HOSTS = DJANGO_ALLOWED_HOSTS
 
 if not POSTGRES_HOST and not GOOGLE_CLOUD_SQL_HOST:
     DATABASES = {
