@@ -43,9 +43,9 @@ async def run_keyword_and_intent_evaluations(text):
     """Evaluates a student message to check the message's intent through an approved keyword or intent
 
     >>> asyncio.run(run_keyword_and_intent_evaluations("fuck"))
-    {'type': 'intent', 'data': 'profanity', 'confidence': 1.0}
+    {'type': 'intent', 'data': 'profanity', 'confidence': 1.0, 'p_learn': 0}
     >>> asyncio.run(run_keyword_and_intent_evaluations("menu"))
-    {'type': 'keyword', 'data': 'menu', 'confidence': 1.0}
+    {'type': 'keyword', 'data': 'menu', 'confidence': 1.0, 'p_learn': 0}
     >>> result = asyncio.run(run_keyword_and_intent_evaluations("I want to change topics"))
     >>> result.get("type", "")
     'intent'

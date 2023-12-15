@@ -31,9 +31,9 @@ def check_for_invalid_input(student_message):
     """Runs evaluations to check if a student message contains inappropriate content for a Q and A conversational turn
 
     >>> check_for_invalid_input("fuck")
-    {'type': 'intent', 'data': 'profanity', 'confidence': 1.0}
+    {'type': 'intent', 'data': 'profanity', 'confidence': 1.0, 'p_learn': 0}
     >>> check_for_invalid_input("Continue")
-    {'type': 'intent', 'data': 'old_button', 'confidence': 1.0}
+    {'type': 'intent', 'data': 'old_button', 'confidence': 1.0, 'p_learn': 0}
     >>> check_for_invalid_input("2")
     {}
     """
@@ -51,7 +51,7 @@ def extract_exact_answer_match(
     """Runs direct comparison of normalized student message and expected answer
 
     >>> extract_exact_answer_match("true", "true", "True")
-    {'type': 'correct_answer', 'data': 'True', 'confidence': 1.0}
+    {'type': 'correct_answer', 'data': 'True', 'confidence': 1.0, 'p_learn': 0}
     >>> extract_exact_answer_match("it's 5", "5", "5")
     {}
     >>> extract_exact_answer_match("false", "true", "True")
@@ -74,13 +74,13 @@ def extract_approved_answer(
     """Runs evaluation of student message for approved text and numerical expect answers
 
     >>> extract_approved_answer("yes", "yes", "Yes", "Yes")
-    {'type': 'correct_answer', 'data': 'Yes', 'confidence': 1.0}
+    {'type': 'correct_answer', 'data': 'Yes', 'confidence': 1.0, 'p_learn': 0}
     >>> extract_approved_answer("b", "a", "B", "A")
-    {'type': 'wrong_answer', 'data': 'B', 'confidence': 1.0}
+    {'type': 'wrong_answer', 'data': 'B', 'confidence': 1.0, 'p_learn': 0}
     >>> extract_approved_answer("g", ">", ">", "G")
-    {'type': 'correct_answer', 'data': '>', 'confidence': 1.0}
+    {'type': 'correct_answer', 'data': '>', 'confidence': 1.0, 'p_learn': 0}
     >>> extract_approved_answer("6", "6", "6", "6")
-    {'type': 'correct_answer', 'data': '6', 'confidence': 1.0}
+    {'type': 'correct_answer', 'data': '6', 'confidence': 1.0, 'p_learn': 0}
     """
     result, is_result_correct = evaluate_for_exact_answer_match_in_phrase(
         normalized_student_message,
@@ -108,9 +108,9 @@ def extract_approved_keyword(
     """Runs evaluation to extract an approved keyword from a student message
 
     >>> extract_approved_keyword('menu', '34', '34')
-    {'type': 'keyword', 'data': 'menu', 'confidence': 1.0}
+    {'type': 'keyword', 'data': 'menu', 'confidence': 1.0, 'p_learn': 0}
     >>> extract_approved_keyword('menu please', '34', '34')
-    {'type': 'keyword', 'data': 'menu', 'confidence': 1.0}
+    {'type': 'keyword', 'data': 'menu', 'confidence': 1.0, 'p_learn': 0}
     >>> extract_approved_keyword('34', '34', '34')
     {}
     """
@@ -130,9 +130,9 @@ def extract_special_numbers_with_regex(student_message, normalized_expected_answ
     """Runs evaluation of student message for decimal, fraction, time, and exponent answers
 
     >>> extract_special_numbers_with_regex("that's 2 / 3", "2/3")
-    {'type': 'correct_answer', 'data': '2/3', 'confidence': 1.0}
+    {'type': 'correct_answer', 'data': '2/3', 'confidence': 1.0, 'p_learn': 0}
     >>> extract_special_numbers_with_regex("10: 45 PM", "10:30")
-    {'type': 'wrong_answer', 'data': '10:45', 'confidence': 1.0}
+    {'type': 'wrong_answer', 'data': '10:45', 'confidence': 1.0, 'p_learn': 0}
     >>> extract_special_numbers_with_regex("idk", "10:30")
     {}
     """
@@ -149,9 +149,9 @@ def extract_integers_and_floats_with_regex(student_message, expected_answer):
     """Runs evaluations to extract numbers or convert number words to numbers
 
     >>> extract_integers_and_floats_with_regex("that's twenty", 20)
-    {'type': 'correct_answer', 'data': '20', 'confidence': 1.0}
+    {'type': 'correct_answer', 'data': '20', 'confidence': 1.0, 'p_learn': 0}
     >>> extract_integers_and_floats_with_regex("785.12", 20)
-    {'type': 'wrong_answer', 'data': '785.12', 'confidence': 1.0}
+    {'type': 'wrong_answer', 'data': '785.12', 'confidence': 1.0, 'p_learn': 0}
     >>> extract_integers_and_floats_with_regex("idk", 20)
     {}
     """
@@ -171,9 +171,9 @@ def check_for_yes_answer_in_intents(intents_results, normalized_expected_answer)
     """Check if a yes intent in the expected answer is a correct answer
 
     >>> check_for_yes_answer_in_intents([{'type': 'intent', 'data': 'yes', 'confidence': 0.89}], 'yes')
-    {'type': 'correct_answer', 'data': 'yes', 'confidence': 0.89}
+    {'type': 'correct_answer', 'data': 'yes', 'confidence': 0.89, 'p_learn': 0}
     >>> check_for_yes_answer_in_intents([{'type': 'intent', 'data': 'yes', 'confidence': 0.67}], 'no')
-    {'type': 'wrong_answer', 'data': 'yes', 'confidence': 0.67}
+    {'type': 'wrong_answer', 'data': 'yes', 'confidence': 0.67, 'p_learn': 0}
     >>> check_for_yes_answer_in_intents([{'type': 'intent', 'data': 'yes', 'confidence': 0.22}], 'yes')
     """
     if normalized_expected_answer in ["yes", "no"]:
@@ -198,7 +198,7 @@ def find_highest_confidence_intent_over_threshold(intents_results):
     """Evaluates intent results for the highest confidence intent that is over the approved confidence threshold
 
     >>> find_highest_confidence_intent_over_threshold([{'type': 'intent', 'data': 'math_answer', 'confidence': 0.89}, {'type': 'intent', 'data': 'change_topic', 'confidence': 0.70}])
-    {'type': 'intent', 'data': 'math_answer', 'confidence': 0.89}
+    {'type': 'intent', 'data': 'math_answer', 'confidence': 0.89, 'p_learn': 0}
     >>> find_highest_confidence_intent_over_threshold([{'type': 'intent', 'data': 'math_answer', 'confidence': 0.20}, {'type': 'intent', 'data': 'change_topic', 'confidence': 0.10}])
     {}
     """
@@ -226,9 +226,9 @@ def extract_number_match_to_expected_answer(
     """Runs evaluation to check for decimals or integers in a student message
 
     >>> extract_number_match_to_expected_answer("6.5", "55.5")
-    {'type': 'wrong_answer', 'data': '6.5', 'confidence': 1.0}
+    {'type': 'wrong_answer', 'data': '6.5', 'confidence': 1.0, 'p_learn': 0}
     >>> extract_number_match_to_expected_answer("20", "20")
-    {'type': 'correct_answer', 'data': '20', 'confidence': 1.0}
+    {'type': 'correct_answer', 'data': '20', 'confidence': 1.0, 'p_learn': 0}
     >>> extract_number_match_to_expected_answer("I love math", "100")
     {}
     >>> extract_number_match_to_expected_answer("that's 6", "6")
@@ -249,9 +249,9 @@ def check_nlu_number_result_for_correctness(nlu_eval_result, expected_answer):
     """Check whether an integer or float result is a correct answer or not
 
     >>> check_nlu_number_result_for_correctness(100, "100")
-    {'type': 'correct_answer', 'data': '100', 'confidence': 1.0}
+    {'type': 'correct_answer', 'data': '100', 'confidence': 1.0, 'p_learn': 0}
     >>> check_nlu_number_result_for_correctness(10, "100")
-    {'type': 'wrong_answer', 'data': '10', 'confidence': 1.0}
+    {'type': 'wrong_answer', 'data': '10', 'confidence': 1.0, 'p_learn': 0}
     >>> check_nlu_number_result_for_correctness(None, "20")
     {}
     """
