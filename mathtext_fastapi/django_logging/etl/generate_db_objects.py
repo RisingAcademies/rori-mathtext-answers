@@ -23,8 +23,8 @@ def generate_activity_db_objects():
         activity_name = row["lesson_name"]
         lesson_type = "math_answer_api"
 
-        # Initialize content as None
-        content = {}
+        # Initialize properties as None
+        properties = {}
 
         # Check if open_line_params_df is available and contains data for the activity
 
@@ -33,7 +33,7 @@ def generate_activity_db_objects():
         ]
         if not open_line_data.empty:
             params = open_line_data.iloc[0]
-            content = {
+            properties = {
                 "bkt_params": {
                     "+12065906259": {
                         "l0": float(params["L0"]),
@@ -49,9 +49,9 @@ def generate_activity_db_objects():
         ]
         if not rising_line_data.empty:
             params = rising_line_data.iloc[0]
-            if not content:
-                content["bkt_params"] = {}
-            content["bkt_params"]["+12062587201"] = {
+            if not properties:
+                properties["bkt_params"] = {}
+            properties["bkt_params"]["+12062587201"] = {
                 "l0": float(params["L0"]),
                 "p_slip": float(params["S"]),
                 "p_guess": float(params["G"]),
@@ -61,9 +61,10 @@ def generate_activity_db_objects():
         activity, created = Activity.objects.get_or_create(
             name=activity_name,
             type=lesson_type,
-            content=content if content else {},
+            properties=properties if properties else {},
         )
         activity.save()
+
 
 if __name__ == "__main__":
     generate_activity_db_objects()
