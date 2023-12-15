@@ -156,7 +156,7 @@ def log_message_metadata(student_message, message_data, nlu_response):
         "nlu_response_type": nlu_response["type"],
         "nlu_response_data": nlu_response["data"],
         "nlu_response_confidence": nlu_response["confidence"],
-        "user_attempts": nlu_response["user_attempts"],
+        "user_attempts": message_data["user_attempts"],
     }
     message_metadata = MathAnswerMessageMetadata.objects.create(
         **message_metadata_context
