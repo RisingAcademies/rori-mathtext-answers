@@ -93,6 +93,7 @@ class MathAnswerMessageMetadata(models.Model):
     nlu_response_type = models.TextField()
     nlu_response_confidence = models.TextField()
     hint_shown = models.TextField(null=True)
+    user_attempts = models.IntegerField(default=0)
 
     class Meta:
         db_table = "math_answer_message_metadata"

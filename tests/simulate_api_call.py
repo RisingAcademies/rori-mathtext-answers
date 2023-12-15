@@ -18,7 +18,7 @@ def add_message_text_to_sample_object(student_message, expected_answer):
     """
     message_data = (
         "{"
-        + f'"author_id": "+3578931789", "author_type": "OWNER", "contact_uuid": "43qy76ga-4hjk-24nj-sfd7-k4ljl46j0ds09", "message_body": "{student_message}", "expected_answer": "{expected_answer}", "message_direction": "inbound", "message_id": "4kl209sd0-a7b8-2hj3-8563-3hu4a89b32", "message_inserted_at": "2023-01-10T02:37:28.477940Z", "message_updated_at": "2023-01-10T02:37:28.487319Z", "question_micro_lesson": "G1.N1.1.2.1", "question": "___, 27, 28, 29, 30", "question_level": "1", "question_skill": "Test API Skill", "question_topic": "Test API Topic", "question_number": "5"'
+        + f'"author_id": "+3578931789", "author_type": "OWNER", "contact_uuid": "43qy76ga-4hjk-24nj-sfd7-k4ljl46j0ds09", "message_body": "{student_message}", "expected_answer": "{expected_answer}", "message_direction": "inbound", "message_id": "4kl209sd0-a7b8-2hj3-8563-3hu4a89b32", "message_inserted_at": "2023-01-10T02:37:28.477940Z", "message_updated_at": "2023-01-10T02:37:28.487319Z", "question_micro_lesson": "G1.N1.1.2.1", "question": "___, 27, 28, 29, 30", "question_level": "1", "question_skill": "Test API Skill", "question_topic": "Test API Topic", "question_number": "5", "user_attempts": "1"'
         + "}"
     )
     json_string = "{" + f'"message_data": {message_data}' + "}"
