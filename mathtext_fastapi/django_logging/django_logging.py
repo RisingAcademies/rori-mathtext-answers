@@ -36,12 +36,16 @@ def retrieve_user_status(is_new_user, user):
     return user_status
 
 
-def update_activity_session(user_status):
+def update_activity_session(user_status, question_number):
     """Update the old ActivitySession and create a new ActivitySession"""
-
-    previous_activity_session = (
-        user_status.current_activity_session.status
-    ) = ActivitySession.ActivitySessionStatus.EARLY_EXIT
+    if question_number == "16":
+        previous_activity_session = (
+            user_status.current_activity_session.status
+        ) = ActivitySession.ActivitySessionStatus.COMPLETE
+    else:
+        previous_activity_session = (
+            user_status.current_activity_session.status
+        ) = ActivitySession.ActivitySessionStatus.EARLY_EXIT
     previous_activity_session.save()
     return previous_activity_session
 
@@ -86,19 +90,26 @@ def create_new_activity_session(user, activity, line_number):
     return activity_session
 
 
-def update_user_and_activity_context(user, user_status, activity, line_number):
-    update_activity_session(user_status)
+def update_user_and_activity_context(
+    user, user_status, activity, line_number, question_number
+):
+    update_activity_session(user_status, question_number)
     activity_session = create_new_activity_session(user, activity, line_number)
     return activity_session
 
 
-def retrieve_activity_session(user, user_status, activity, line_number):
+def retrieve_activity_session(
+    user, user_status, activity, line_number, question_number
+):
     """Returns the most current ActivitySession for a user"""
     activity_session = None
     try:
-        if user_status.current_activity_session.activity.id != activity.id:
+        if (
+            user_status.current_activity_session.activity.id != activity.id
+            or question_number == "16"
+        ):
             activity_session = update_user_and_activity_context(
-                user, user_status, activity, line_number
+                user, user_status, activity, line_number, question_number
             )
             update_user_status(user_status, activity_session)
     except AttributeError as e:
@@ -167,8 +178,9 @@ def get_user_model(message_data):
         activity = Activity.objects.get(name=content_unit_name)
 
         line_number = message_data.get("line_number", "")
+        question_number = message_data.get("question_number", "0")
         activity_session = retrieve_activity_session(
-            user, user_status, activity, line_number
+            user, user_status, activity, line_number, question_number
         )
         return user, user_status, activity, activity_session
 
