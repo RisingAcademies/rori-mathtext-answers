@@ -86,7 +86,6 @@ class MathAnswerMessageMetadata(models.Model):
     question_topic = models.TextField()
     question_number = models.TextField()
     expected_answer = models.TextField()
-    answer_type = models.TextField()
     question_micro_lesson = models.TextField()
     nlu_response_data = models.TextField()
     nlu_response_type = models.TextField()
