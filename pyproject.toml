@@ -21,7 +21,7 @@ classifiers = [
 asgiref = "*"
 asyncpg = "*"
 channels = "*"
-django = "*"
+django = "==4.2.7"
 fastapi = ">=0.104.0"
 fuzzywuzzy = "*"
 httpx = "<0.22,>=0.19"
