@@ -70,10 +70,10 @@ def create_new_activity_session(user, activity, line_number):
         ]["l0"]
         properties["bkt_params"]["p_guess"] = activity.properties["bkt_params"][
             line_number
-        ]["p_slip"]
+        ]["p_guess"]
         properties["bkt_params"]["p_slip"] = activity.properties["bkt_params"][
             line_number
-        ]["p_guess"]
+        ]["p_slip"]
         properties["bkt_params"]["p_transit"] = activity.properties["bkt_params"][
             line_number
         ]["p_transit"]

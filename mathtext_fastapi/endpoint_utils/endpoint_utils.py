@@ -58,7 +58,7 @@ async def run_nlu_and_activity_evaluation(message_dict):
     p_learn, p_slip, p_guess, p_transit = get_bkt_params(activity_session)
 
     if message_dict["user_attempts"] != "1":
-        nlu_response["mastery"] = p_learn
+        nlu_response["mastery"] = -1
 
     if p_learn:
         new_p_learn = calculate_lesson_mastery(
@@ -72,3 +72,4 @@ async def run_nlu_and_activity_evaluation(message_dict):
         nlu_response["mastery"] = -1
 
     return nlu_response, activity_session
+
