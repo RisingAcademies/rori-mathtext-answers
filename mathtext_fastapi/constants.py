@@ -77,3 +77,4 @@ RISING_LINE_NUMBER = "+12062587201"
 
 
 DJANGO_ALLOWED_HOSTS = os.environ.get("DJANGO_ALLOWED_HOSTS").split(",")
+USE_LOCAL_DB = os.environ.get("USE_LOCAL_DB", "False").lower() in ("true", "1", "t")

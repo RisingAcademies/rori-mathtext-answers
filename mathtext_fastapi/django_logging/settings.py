@@ -12,6 +12,7 @@ from mathtext_fastapi.constants import (
     POSTGRES_HOST,
     POSTGRES_PORT,
     DJANGO_ALLOWED_HOSTS,
+    USE_LOCAL_DB,
 )
 
 LANGUAGE_CODE = "en-us"
@@ -20,7 +21,7 @@ USE_TZ = True
 DEBUG = False
 ALLOWED_HOSTS = DJANGO_ALLOWED_HOSTS
 
-if not POSTGRES_HOST and not GOOGLE_CLOUD_SQL_HOST:
+if (not POSTGRES_HOST and not GOOGLE_CLOUD_SQL_HOST) or USE_LOCAL_DB:
     DATABASES = {
         "default": {
             "ENGINE": "django.db.backends.sqlite3",

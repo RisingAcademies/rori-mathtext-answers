@@ -6,7 +6,11 @@ client = TestClient(app.app)
 
 
 def test_exponent_correct_answer():
-    response = simulate_api_call(client, "1^9", "1^9")
+    message_context = {
+        "expected_answer": "1^9",
+        "message_body": "1^9",
+    }
+    response = simulate_api_call(client, message_context)
     expected_nlu_response_type = "correct_answer"
     expected_nlu_response_data = "1^9"
     assert response.status_code == 200
@@ -15,7 +19,11 @@ def test_exponent_correct_answer():
 
 
 def test_exponent_wrong_answer():
-    response = simulate_api_call(client, "1^5", "1^9")
+    message_context = {
+        "expected_answer": "1^9",
+        "message_body": "1^5",
+    }
+    response = simulate_api_call(client, message_context)
     expected_nlu_response_type = "wrong_answer"
     expected_nlu_response_data = "1^5"
     assert response.status_code == 200
@@ -24,7 +32,11 @@ def test_exponent_wrong_answer():
 
 
 def test_exponent_correct_answer_with_spaces():
-    response = simulate_api_call(client, "2 ^ 3", "2^3")
+    message_context = {
+        "expected_answer": "2^3",
+        "message_body": "2 ^ 3",
+    }
+    response = simulate_api_call(client, message_context)
     expected_nlu_response_type = "correct_answer"
     expected_nlu_response_data = "2^3"
     assert response.status_code == 200
@@ -33,7 +45,11 @@ def test_exponent_correct_answer_with_spaces():
 
 
 def test_integer_against_exponent():
-    response = simulate_api_call(client, "1159", "11^59")
+    message_context = {
+        "expected_answer": "11^59",
+        "message_body": "1159",
+    }
+    response = simulate_api_call(client, message_context)
     expected_nlu_response_type = "wrong_answer"
     expected_nlu_response_data = "1159"
     assert response.status_code == 200
@@ -42,7 +58,11 @@ def test_integer_against_exponent():
 
 
 def test_decimal_against_exponent():
-    response = simulate_api_call(client, "2.3", "2^3")
+    message_context = {
+        "expected_answer": "2^3",
+        "message_body": "2.3",
+    }
+    response = simulate_api_call(client, message_context)
     expected_nlu_response_type = "wrong_answer"
     expected_nlu_response_data = "2.3"
     assert response.status_code == 200
@@ -51,7 +71,11 @@ def test_decimal_against_exponent():
 
 
 def test_fraction_against_exponent():
-    response = simulate_api_call(client, "5/4", "5^4")
+    message_context = {
+        "expected_answer": "5^4",
+        "message_body": "5/4",
+    }
+    response = simulate_api_call(client, message_context)
     expected_nlu_response_type = "wrong_answer"
     expected_nlu_response_data = "5/4"
     assert response.status_code == 200

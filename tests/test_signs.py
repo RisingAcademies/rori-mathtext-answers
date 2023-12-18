@@ -6,7 +6,11 @@ client = TestClient(app.app)
 
 
 def test_greater_sign_correct_answer():
-    response = simulate_api_call(client, ">", ">")
+    message_context = {
+        "expected_answer": ">",
+        "message_body": ">",
+    }
+    response = simulate_api_call(client, message_context)
     expected_nlu_response_type = "correct_answer"
     expected_nlu_response_data = ">"
     assert response.status_code == 200
@@ -15,7 +19,11 @@ def test_greater_sign_correct_answer():
 
 
 def test_less_or_equal_sign_correct_answer():
-    response = simulate_api_call(client, "<=", "<=")
+    message_context = {
+        "expected_answer": "<=",
+        "message_body": "<=",
+    }
+    response = simulate_api_call(client, message_context)
     expected_nlu_response_type = "correct_answer"
     expected_nlu_response_data = "<="
     assert response.status_code == 200
@@ -24,7 +32,11 @@ def test_less_or_equal_sign_correct_answer():
 
 
 def test_sign_correct_answer_abbreviated():
-    response = simulate_api_call(client, "G", ">")
+    message_context = {
+        "expected_answer": ">",
+        "message_body": "G",
+    }
+    response = simulate_api_call(client, message_context)
     expected_nlu_response_type = "correct_answer"
     expected_nlu_response_data = ">"
     assert response.status_code == 200
@@ -33,7 +45,11 @@ def test_sign_correct_answer_abbreviated():
 
 
 def test_less_or_equal_sign_correct_answer_abbreviated():
-    response = simulate_api_call(client, "LTE", "<=")
+    message_context = {
+        "expected_answer": "<=",
+        "message_body": "LTE",
+    }
+    response = simulate_api_call(client, message_context)
     expected_nlu_response_type = "correct_answer"
     expected_nlu_response_data = "<="
     assert response.status_code == 200
@@ -42,7 +58,11 @@ def test_less_or_equal_sign_correct_answer_abbreviated():
 
 
 def test_sign_correct_answer_in_phrase():
-    response = simulate_api_call(client, "I think it's >", ">")
+    message_context = {
+        "expected_answer": ">",
+        "message_body": "I think it's >",
+    }
+    response = simulate_api_call(client, message_context)
     expected_nlu_response_type = "correct_answer"
     expected_nlu_response_data = ">"
     assert response.status_code == 200
@@ -51,7 +71,11 @@ def test_sign_correct_answer_in_phrase():
 
 
 def test_fraction_against_sign():
-    response = simulate_api_call(client, "1/2", ">")
+    message_context = {
+        "expected_answer": ">",
+        "message_body": "1/2",
+    }
+    response = simulate_api_call(client, message_context)
     expected_nlu_response_type = "wrong_answer"
     expected_nlu_response_data = "1/2"
     assert response.status_code == 200
@@ -60,7 +84,11 @@ def test_fraction_against_sign():
 
 
 def test_decimal_against_sign():
-    response = simulate_api_call(client, "1.2", "<")
+    message_context = {
+        "expected_answer": "<",
+        "message_body": "1.2",
+    }
+    response = simulate_api_call(client, message_context)
     expected_nlu_response_type = "wrong_answer"
     expected_nlu_response_data = "1.2"
     assert response.status_code == 200
@@ -69,7 +97,11 @@ def test_decimal_against_sign():
 
 
 def test_equal_correct_answer():
-    response = simulate_api_call(client, "this is =", "=")
+    message_context = {
+        "expected_answer": "=",
+        "message_body": "this is =",
+    }
+    response = simulate_api_call(client, message_context)
     expected_nlu_response_type = "correct_answer"
     expected_nlu_response_data = "="
     assert response.status_code == 200

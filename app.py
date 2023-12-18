@@ -40,14 +40,14 @@ from mathtext.predict_intent import predict_message_intent
 
 log = getLogger(__name__)
 
-sentry_sdk.init(
-    dsn=SENTRY_DSN,
-    # Set traces_sample_rate to 1.0 to capture 100%
-    # of transactions for performance monitoring.
-    # We recommend adjusting this value in production,
-    traces_sample_rate=SENTRY_TRACES_SAMPLE_RATE,
-    profiles_sample_rate=SENTRY_PROFILES_SAMPLE_RATE,
-)
+# sentry_sdk.init(
+#     dsn=SENTRY_DSN,
+#     # Set traces_sample_rate to 1.0 to capture 100%
+#     # of transactions for performance monitoring.
+#     # We recommend adjusting this value in production,
+#     traces_sample_rate=SENTRY_TRACES_SAMPLE_RATE,
+#     profiles_sample_rate=SENTRY_PROFILES_SAMPLE_RATE,
+# )
 
 app = FastAPI()
 

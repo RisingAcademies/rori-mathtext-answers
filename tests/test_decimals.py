@@ -6,7 +6,11 @@ client = TestClient(app.app)
 
 
 def test_decimal_correct_answer():
-    response = simulate_api_call(client, "14.5", "14.5")
+    message_context = {
+        "expected_answer": "14.5",
+        "message_body": "14.5",
+    }
+    response = simulate_api_call(client, message_context)
     expected_nlu_response_type = "correct_answer"
     expected_nlu_response_data = "14.5"
     assert response.status_code == 200
@@ -15,7 +19,11 @@ def test_decimal_correct_answer():
 
 
 def test_decimal_wrong_answer():
-    response = simulate_api_call(client, "2.5", "1.5")
+    message_context = {
+        "expected_answer": "1.5",
+        "message_body": "2.5",
+    }
+    response = simulate_api_call(client, message_context)
     expected_nlu_response_type = "wrong_answer"
     expected_nlu_response_data = "2.5"
     assert response.status_code == 200
@@ -24,7 +32,11 @@ def test_decimal_wrong_answer():
 
 
 def test_decimal_with_double_decimal_points():
-    response = simulate_api_call(client, "2..5", "2.5")
+    message_context = {
+        "expected_answer": "2.5",
+        "message_body": "2..5",
+    }
+    response = simulate_api_call(client, message_context)
     expected_nlu_response_type = "correct_answer"
     expected_nlu_response_data = "2.5"
     assert response.status_code == 200
@@ -33,7 +45,11 @@ def test_decimal_with_double_decimal_points():
 
 
 def test_decimal_with_double_extra_spacing():
-    response = simulate_api_call(client, "4 . 4", "4.4")
+    message_context = {
+        "expected_answer": "4.4",
+        "message_body": "4 . 4",
+    }
+    response = simulate_api_call(client, message_context)
     expected_nlu_response_type = "correct_answer"
     expected_nlu_response_data = "4.4"
     assert response.status_code == 200
@@ -42,7 +58,11 @@ def test_decimal_with_double_extra_spacing():
 
 
 def test_decimal_against_integer():
-    response = simulate_api_call(client, "4 . 4", "44")
+    message_context = {
+        "expected_answer": "44",
+        "message_body": "4 . 4",
+    }
+    response = simulate_api_call(client, message_context)
     expected_nlu_response_type = "wrong_answer"
     expected_nlu_response_data = "4.4"
     assert response.status_code == 200
@@ -51,7 +71,11 @@ def test_decimal_against_integer():
 
 
 def test_decimal_right_answer_in_phrase():
-    response = simulate_api_call(client, "that one is 78.2", "78.2")
+    message_context = {
+        "expected_answer": "78.2",
+        "message_body": "that one is 78.2",
+    }
+    response = simulate_api_call(client, message_context)
     expected_nlu_response_type = "correct_answer"
     expected_nlu_response_data = "78.2"
     assert response.status_code == 200
@@ -60,7 +84,11 @@ def test_decimal_right_answer_in_phrase():
 
 
 def test_decimal_wrong_answer_in_phrase():
-    response = simulate_api_call(client, "The answer is 54.4", "54.0")
+    message_context = {
+        "expected_answer": "54.0",
+        "message_body": "The answer is 54.4",
+    }
+    response = simulate_api_call(client, message_context)
     expected_nlu_response_type = "wrong_answer"
     expected_nlu_response_data = "54.4"
     assert response.status_code == 200
@@ -69,7 +97,11 @@ def test_decimal_wrong_answer_in_phrase():
 
 
 def test_fraction_again_decimal():
-    response = simulate_api_call(client, "3/0", "3.0")
+    message_context = {
+        "expected_answer": "3.0",
+        "message_body": "3/0",
+    }
+    response = simulate_api_call(client, message_context)
     expected_nlu_response_type = "wrong_answer"
     expected_nlu_response_data = "3/0"
     assert response.status_code == 200
@@ -78,7 +110,11 @@ def test_fraction_again_decimal():
 
 
 def test_wrong_decimal_answer_in_place_of_integer():
-    response = simulate_api_call(client, "0.9", "9")
+    message_context = {
+        "expected_answer": "9",
+        "message_body": "0.9",
+    }
+    response = simulate_api_call(client, message_context)
     expected_nlu_response_type = "wrong_answer"
     expected_nlu_response_data = "0.9"
     assert response.status_code == 200
