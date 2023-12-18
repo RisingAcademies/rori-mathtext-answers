@@ -33,14 +33,14 @@ assert DATA_DIR.is_dir()  # without a DATA_DIR this package can't run
 
 # Sentry monitoring link
 SENTRY_DSN = os.environ.get("SENTRY_DSN")
-SENTRY_TRACES_SAMPLE_RATE = float(os.environ.get("SENTRY_TRACES_SAMPLE_RATE"))
-SENTRY_PROFILES_SAMPLE_RATE = float(os.environ.get("SENTRY_PROFILES_SAMPLE_RATE"))
+SENTRY_TRACES_SAMPLE_RATE = float(os.environ.get("SENTRY_TRACES_SAMPLE_RATE", 1.0))
+SENTRY_PROFILES_SAMPLE_RATE = float(os.environ.get("SENTRY_PROFILES_SAMPLE_RATE", 1.0))
 
 # Supabase logging
-SUPABASE_URL = os.environ.get("SUPABASE_URL")
+SUPABASE_URL = os.environ.get("SUPABASE_URL", "")
 
 # Cutoff time for NLU endpoint
-TIMEOUT_THRESHOLD = int(os.environ.get("TIMEOUT_THRESHOLD"))
+TIMEOUT_THRESHOLD = int(os.environ.get("TIMEOUT_THRESHOLD", 5))
 ERROR_RESPONSE_DICT = build_single_event_nlu_response("error", TOKENS2INT_ERROR_INT, 0)
 TIMEOUT_RESPONSE_DICT = build_single_event_nlu_response(
     "timeout", TOKENS2INT_ERROR_INT, 0
@@ -76,5 +76,5 @@ OPEN_LINE_NUMBER = "+12065906259"
 RISING_LINE_NUMBER = "+12062587201"
 
 
-DJANGO_ALLOWED_HOSTS = os.environ.get("DJANGO_ALLOWED_HOSTS").split(",")
+DJANGO_ALLOWED_HOSTS = os.environ.get("DJANGO_ALLOWED_HOSTS", []).split(",")
 USE_LOCAL_DB = os.environ.get("USE_LOCAL_DB", "False").lower() in ("true", "1", "t")
