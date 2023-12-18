@@ -62,7 +62,7 @@ async def run_nlu_and_activity_evaluation(message_dict):
 
     if p_learn:
         new_p_learn = calculate_lesson_mastery(
-            nlu_response.type, p_slip, p_guess, p_transit
+            nlu_response["type"], p_learn, p_slip, p_guess, p_transit
         )
 
         nlu_response["mastery"] = new_p_learn
@@ -72,4 +72,3 @@ async def run_nlu_and_activity_evaluation(message_dict):
         nlu_response["mastery"] = -1
 
     return nlu_response, activity_session
-
