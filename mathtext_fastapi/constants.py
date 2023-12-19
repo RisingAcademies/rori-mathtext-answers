@@ -1,3 +1,4 @@
+import json
 import os
 from pathlib import Path
 
@@ -6,7 +7,9 @@ from dotenv import load_dotenv
 load_dotenv()
 
 from mathtext.constants import TOKENS2INT_ERROR_INT
-from mathtext_fastapi.response_formaters import build_single_event_nlu_response
+from mathtext_fastapi.endpoint_utils.response_formaters import (
+    build_single_event_nlu_response,
+)
 
 # Intent recognition model file paths and names
 try:
@@ -30,17 +33,14 @@ assert DATA_DIR.is_dir()  # without a DATA_DIR this package can't run
 
 # Sentry monitoring link
 SENTRY_DSN = os.environ.get("SENTRY_DSN")
-SENTRY_TRACES_SAMPLE_RATE = float(os.environ.get("SENTRY_TRACES_SAMPLE_RATE"))
-SENTRY_PROFILES_SAMPLE_RATE = float(os.environ.get("SENTRY_PROFILES_SAMPLE_RATE"))
+SENTRY_TRACES_SAMPLE_RATE = float(os.environ.get("SENTRY_TRACES_SAMPLE_RATE", 1.0))
+SENTRY_PROFILES_SAMPLE_RATE = float(os.environ.get("SENTRY_PROFILES_SAMPLE_RATE", 1.0))
 
 # Supabase logging
-SUPABASE_URL = os.environ.get("SUPABASE_URL")
-
-# Cache for NLU Response
-REDIS_RESPONSE_CACHE_URL = os.environ.get("REDIS_RESPONSE_CACHE_URL", "")
+SUPABASE_URL = os.environ.get("SUPABASE_URL", "")
 
 # Cutoff time for NLU endpoint
-TIMEOUT_THRESHOLD = int(os.environ.get("TIMEOUT_THRESHOLD"))
+TIMEOUT_THRESHOLD = int(os.environ.get("TIMEOUT_THRESHOLD", 5))
 ERROR_RESPONSE_DICT = build_single_event_nlu_response("error", TOKENS2INT_ERROR_INT, 0)
 TIMEOUT_RESPONSE_DICT = build_single_event_nlu_response(
     "timeout", TOKENS2INT_ERROR_INT, 0
@@ -58,3 +58,23 @@ APPROVED_INTENTS = [
     "safety",
 ]
 APPROVED_INTENT_CONFIDENCE_THRESHOLD = 0.5
+
+POSTGRES_DATABASE = os.environ.get("POSTGRES_DATABASE", "")
+POSTGRES_USERNAME = os.environ.get("POSTGRES_USERNAME", "")
+POSTGRES_PASSWORD = os.environ.get("POSTGRES_PASSWORD", "")
+POSTGRES_HOST = os.environ.get("POSTGRES_HOST", "")
+POSTGRES_PORT = os.environ.get("POSTGRES_PORT", "")
+
+
+GOOGLE_CLOUD_SQL_HOST = os.environ.get("GOOGLE_CLOUD_SQL_HOST", "")
+GOOGLE_CLOUD_SQL_USER = os.environ.get("GOOGLE_CLOUD_SQL_USER", "")
+GOOGLE_CLOUD_SQL_PASSWORD = os.environ.get("GOOGLE_CLOUD_SQL_PASSWORD", "")
+GOOGLE_CLOUD_SQL_NAME = os.environ.get("GOOGLE_CLOUD_SQL_NAME", "")
+GOOGLE_CLOUD_SQL_PORT = os.environ.get("GOOGLE_CLOUD_SQL_PORT", "")
+
+OPEN_LINE_NUMBER = "+12065906259"
+RISING_LINE_NUMBER = "+12062587201"
+
+
+DJANGO_ALLOWED_HOSTS = os.environ.get("DJANGO_ALLOWED_HOSTS", "127.0.0.1").split(",")
+USE_LOCAL_DB = os.environ.get("USE_LOCAL_DB", "False").lower() in ("true", "1", "t")

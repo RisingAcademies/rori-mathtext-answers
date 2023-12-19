@@ -6,7 +6,11 @@ client = TestClient(app.app)
 
 
 def test_short_true_correct_answer():
-    response = simulate_api_call(client, "T", "T")
+    message_context = {
+        "expected_answer": "T",
+        "message_body": "T",
+    }
+    response = simulate_api_call(client, message_context)
     expected_nlu_response_type = "correct_answer"
     expected_nlu_response_data = "T"
     assert response.status_code == 200
@@ -15,7 +19,11 @@ def test_short_true_correct_answer():
 
 
 def test_long_true_correct_answer():
-    response = simulate_api_call(client, "True", "T")
+    message_context = {
+        "expected_answer": "T",
+        "message_body": "True",
+    }
+    response = simulate_api_call(client, message_context)
     expected_nlu_response_type = "correct_answer"
     expected_nlu_response_data = "T"
     assert response.status_code == 200
@@ -24,7 +32,11 @@ def test_long_true_correct_answer():
 
 
 def test_no_false_correct_answer():
-    response = simulate_api_call(client, "no", "F")
+    message_context = {
+        "expected_answer": "F",
+        "message_body": "no",
+    }
+    response = simulate_api_call(client, message_context)
     expected_nlu_response_type = "correct_answer"
     expected_nlu_response_data = "F"
     assert response.status_code == 200
@@ -33,7 +45,11 @@ def test_no_false_correct_answer():
 
 
 def test_no_correct_answer_in_phrase():
-    response = simulate_api_call(client, "That one is false", "F")
+    message_context = {
+        "expected_answer": "F",
+        "message_body": "That one is false",
+    }
+    response = simulate_api_call(client, message_context)
     expected_nlu_response_type = "correct_answer"
     expected_nlu_response_data = "F"
     assert response.status_code == 200
@@ -42,7 +58,11 @@ def test_no_correct_answer_in_phrase():
 
 
 def test_odd_wrong_answer():
-    response = simulate_api_call(client, "odd", "Even")
+    message_context = {
+        "expected_answer": "Even",
+        "message_body": "odd",
+    }
+    response = simulate_api_call(client, message_context)
     expected_nlu_response_type = "wrong_answer"
     expected_nlu_response_data = "Odd"
     assert response.status_code == 200
@@ -51,7 +71,11 @@ def test_odd_wrong_answer():
 
 
 def test_even_correct_answer_in_phrase():
-    response = simulate_api_call(client, "it's even", "Even")
+    message_context = {
+        "expected_answer": "Even",
+        "message_body": "it's even",
+    }
+    response = simulate_api_call(client, message_context)
     expected_nlu_response_type = "correct_answer"
     expected_nlu_response_data = "Even"
     assert response.status_code == 200
@@ -60,7 +84,11 @@ def test_even_correct_answer_in_phrase():
 
 
 def test_short_day_of_week_correct_answer():
-    response = simulate_api_call(client, "wed", "Wednesday")
+    message_context = {
+        "expected_answer": "Wednesday",
+        "message_body": "wed",
+    }
+    response = simulate_api_call(client, message_context)
     expected_nlu_response_type = "correct_answer"
     expected_nlu_response_data = "Wednesday"
     assert response.status_code == 200
@@ -69,7 +97,11 @@ def test_short_day_of_week_correct_answer():
 
 
 def test_long_day_of_week_correct_answer():
-    response = simulate_api_call(client, "Thursday", "Thursday")
+    message_context = {
+        "expected_answer": "Thursday",
+        "message_body": "Thursday",
+    }
+    response = simulate_api_call(client, message_context)
     expected_nlu_response_type = "correct_answer"
     expected_nlu_response_data = "Thursday"
     assert response.status_code == 200
@@ -78,7 +110,11 @@ def test_long_day_of_week_correct_answer():
 
 
 def test_short_day_of_week_correct_answer_in_phrase():
-    response = simulate_api_call(client, "maybe they'd go on Sat", "Saturday")
+    message_context = {
+        "expected_answer": "Saturday",
+        "message_body": "maybe they'd go on Sat",
+    }
+    response = simulate_api_call(client, message_context)
     expected_nlu_response_type = "correct_answer"
     expected_nlu_response_data = "Saturday"
     assert response.status_code == 200
@@ -87,7 +123,11 @@ def test_short_day_of_week_correct_answer_in_phrase():
 
 
 def test_short_day_of_week_wrong_answer():
-    response = simulate_api_call(client, "mon", "Tuesday")
+    message_context = {
+        "expected_answer": "Tuesday",
+        "message_body": "mon",
+    }
+    response = simulate_api_call(client, message_context)
     expected_nlu_response_type = "wrong_answer"
     expected_nlu_response_data = "Monday"
     assert response.status_code == 200
@@ -96,7 +136,11 @@ def test_short_day_of_week_wrong_answer():
 
 
 def test_multiple_choice_correct_answer():
-    response = simulate_api_call(client, "a", "A")
+    message_context = {
+        "expected_answer": "A",
+        "message_body": "a",
+    }
+    response = simulate_api_call(client, message_context)
     expected_nlu_response_type = "correct_answer"
     expected_nlu_response_data = "A"
     assert response.status_code == 200
@@ -105,7 +149,11 @@ def test_multiple_choice_correct_answer():
 
 
 def test_multiple_choice_wrong_answer():
-    response = simulate_api_call(client, "That'd be C", "D")
+    message_context = {
+        "expected_answer": "D",
+        "message_body": "That'd be C",
+    }
+    response = simulate_api_call(client, message_context)
     expected_nlu_response_type = "wrong_answer"
     expected_nlu_response_data = "C"
     assert response.status_code == 200
@@ -114,7 +162,11 @@ def test_multiple_choice_wrong_answer():
 
 
 def test_multiple_choice_wrong_answer():
-    response = simulate_api_call(client, "yep", "10")
+    message_context = {
+        "expected_answer": "10",
+        "message_body": "yep",
+    }
+    response = simulate_api_call(client, message_context)
     expected_nlu_response_type = "out_of_scope"
     expected_nlu_response_data = "yep"
     assert response.status_code == 200
@@ -123,7 +175,11 @@ def test_multiple_choice_wrong_answer():
 
 
 def test_multiple_choice_wrong_answer():
-    response = simulate_api_call(client, "sure", "yes")
+    message_context = {
+        "expected_answer": "yes",
+        "message_body": "sure",
+    }
+    response = simulate_api_call(client, message_context)
     expected_nlu_response_type = "correct_answer"
     expected_nlu_response_data = "yes"
     assert response.status_code == 200
@@ -132,7 +188,11 @@ def test_multiple_choice_wrong_answer():
 
 
 def test_multiple_choice_wrong_answer():
-    response = simulate_api_call(client, "I want a hint", "B")
+    message_context = {
+        "expected_answer": "B",
+        "message_body": "I want a hint",
+    }
+    response = simulate_api_call(client, message_context)
     expected_nlu_response_type = "intent"
     expected_nlu_response_data = "math_question"
     assert response.status_code == 200
@@ -141,7 +201,11 @@ def test_multiple_choice_wrong_answer():
 
 
 def test_yes_no_wrong_answer():
-    response = simulate_api_call(client, "Yes", "No")
+    message_context = {
+        "expected_answer": "No",
+        "message_body": "Yes",
+    }
+    response = simulate_api_call(client, message_context)
     expected_nlu_response_type = "wrong_answer"
     expected_nlu_response_data = "yes"
     assert response.status_code == 200
@@ -150,7 +214,11 @@ def test_yes_no_wrong_answer():
 
 
 def test_true_false_wrong_answer():
-    response = simulate_api_call(client, "T", "F")
+    message_context = {
+        "expected_answer": "F",
+        "message_body": "T",
+    }
+    response = simulate_api_call(client, message_context)
     expected_nlu_response_type = "wrong_answer"
     expected_nlu_response_data = "T"
     assert response.status_code == 200
@@ -159,7 +227,11 @@ def test_true_false_wrong_answer():
 
 
 def test_wrong_answer_type_tf_mc_1():
-    response = simulate_api_call(client, "C", "T")
+    message_context = {
+        "expected_answer": "T",
+        "message_body": "C",
+    }
+    response = simulate_api_call(client, message_context)
     expected_nlu_response_type = "wrong_answer"
     expected_nlu_response_data = "C"
     assert response.status_code == 200
@@ -168,7 +240,11 @@ def test_wrong_answer_type_tf_mc_1():
 
 
 def test_wrong_answer_type_tf_mc_2():
-    response = simulate_api_call(client, "D", "F")
+    message_context = {
+        "expected_answer": "F",
+        "message_body": "D",
+    }
+    response = simulate_api_call(client, message_context)
     expected_nlu_response_type = "wrong_answer"
     expected_nlu_response_data = "D"
     assert response.status_code == 200

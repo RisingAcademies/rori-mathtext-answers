@@ -30,6 +30,14 @@ jobs:
         pip install --editable .
         python -m spacy download en_core_web_sm
 
+    - name: Migrate local Django DB
+      run: |
+        python mathtext_fastapi/django_logging/manage.py migrate
+
+    - name: Add Activity data to Django DB
+      run: |
+        python mathtext_fastapi/django_logging/etl/generate_db_objects.py
+
     - name: Run pytest
       run: pytest
       env:
@@ -41,7 +49,13 @@ jobs:
         CSV_GOOGLE_SHEET_ID: ${{ vars.CSV_GOOGLE_SHEET_ID }}
         REDIS_RESPONSE_CACHE_URL: ${{ secrets.REDIS_RESPONSE_CACHE_URL }}
         SENTRY_DSN: ${{ secrets.SENTRY_DSN }}
-        SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+        POSTGRES_DATABASE: ${{ secrets.POSTGRES_DATABASE }}
+        POSTGRES_USERNAME: ${{ secrets.POSTGRES_USERNAME }}
+        POSTGRES_PASSWORD: ${{ secrets.POSTGRES_PASSWORD }}
+        POSTGRES_HOST: ${{ secrets.POSTGRES_HOST }}
+        POSTGRES_PORT: ${{ secrets.POSTGRES_PORT }}
         OBJECT_STORAGE_NAME: ${{ secrets.OBJECT_STORAGE_NAME }}
         OBJECT_STORAGE_PROVIDER: ${{ secrets.OBJECT_STORAGE_PROVIDER }}
         GOOGLE_CLOUD_MODEL_SERVICE_AGENT_CREDENTIALS_JSON: ${{ secrets.GOOGLE_CLOUD_MODEL_SERVICE_AGENT_CREDENTIALS_JSON }}
+        DJANGO_ALLOWED_HOSTS: ${{ vars.DJANGO_ALLOWED_HOSTS }}
+        USE_LOCAL_DB: ${{ vars.USE_LOCAL_DB }}
