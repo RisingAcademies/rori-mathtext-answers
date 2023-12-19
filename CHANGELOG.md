@@ -1,17 +1,24 @@
-## In Progress
+## In Progress (2.0.7)
 Support real-time logging and use of student data in NLU evaluation
 - Switch logging ORM to Django
 - Update logging processes based on a new model schema
 - Integrate BKT model into the NLU evaluation endpoint
-- 
+- Add tests of mastery calculations
+- Improve flexibilty of test message and overriding default values
+
+Add progress report endpoint and bug fixes
+- Add `/progress` GET endpoint to test sending a Cloudinary progress report image URL
+- Update mathtext to 2.0.5
 
 ## [2.0.6](https://github.com/RisingAcademies/rori-mathtext-answers/tree/2.0.6)
 Add support for 'next' keyword as 'menu' keyword trigger
 - Update mathtext to 2.0.4
 
+
 ## [2.0.5](https://github.com/RisingAcademies/rori-mathtext-answers/tree/2.0.5)
 Add liveness check
 - Add the keywords endpoint for liveness check
+
 
 ## [2.0.4](https://github.com/RisingAcademies/rori-mathtext-answers/tree/2.0.4)
 Remove calls to joblib prediction cache clean up

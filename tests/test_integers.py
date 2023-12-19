@@ -225,3 +225,21 @@ def test_right_answer_with_comma_in_wrong_position():
     assert response.status_code == 200
     assert response.json()["type"] == expected_nlu_response_type
     assert response.json()["data"] == expected_nlu_response_data
+
+
+def test_period_substitute_for_comma_fails():
+    response = simulate_api_call(client, "80.005", "80,005")
+    expected_nlu_response_type = "wrong_answer"
+    expected_nlu_response_data = "80.005"
+    assert response.status_code == 200
+    assert response.json()["type"] == expected_nlu_response_type
+    assert response.json()["data"] == expected_nlu_response_data
+
+
+def test_period_substitute_for_comma_fails_2():
+    response = simulate_api_call(client, "1.3", "13")
+    expected_nlu_response_type = "wrong_answer"
+    expected_nlu_response_data = "1.3"
+    assert response.status_code == 200
+    assert response.json()["type"] == expected_nlu_response_type
+    assert response.json()["data"] == expected_nlu_response_data
