@@ -37,11 +37,17 @@ def retrieve_user_status(is_new_user, user):
 
 
 def update_activity_session(user_status, question_number):
-    """Update the old ActivitySession and create a new ActivitySession"""
+    """Update an ActivitySession that has concluded
+
+    Possible conclusions are CO (complete) or EE (early exit)
+    """
     if question_number == "16":
         user_status.current_activity_session.status = (
             ActivitySession.ActivitySessionStatus.COMPLETE
         )
+    elif user_status.previous_activity_session.status == "CO":
+        # ActivitySession not updated when student finished it
+        pass
     else:
         user_status.current_activity_session.status = (
             ActivitySession.ActivitySessionStatus.EARLY_EXIT
@@ -101,8 +107,15 @@ def create_new_activity_session(user, activity, line_number):
 def update_user_and_activity_context(
     user, user_status, activity, line_number, question_number
 ):
+    """Update activity session through UserStatus and creates new activity session when necessary
+
+    A new ActivitySession should not be created on the last question of a microlesson (Q#16)
+    """
     update_activity_session(user_status, question_number)
-    activity_session = create_new_activity_session(user, activity, line_number)
+    if question_number != "16":
+        activity_session = create_new_activity_session(user, activity, line_number)
+    else:
+        activity_session = user_status.current_activity_session
     return activity_session
 
 
