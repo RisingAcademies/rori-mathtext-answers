@@ -51,8 +51,16 @@ def update_activity_session(user_status, question_number):
 
 
 def update_user_status(user_status, activity_session):
+    """Updates the current and past activity_sessions through the UserStatus model"""
+    try:
+        old_session = user_status.current_activity_session
+    except:
+        # Handles first time user
+        old_session = None
     user_status.current_activity_session = activity_session
+    user_status.current_activity_session.previous_activity_session = old_session
     user_status.save()
+
     return user_status
 
 
