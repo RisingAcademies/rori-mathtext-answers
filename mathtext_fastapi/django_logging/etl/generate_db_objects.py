@@ -58,6 +58,18 @@ def generate_activity_db_objects():
                 "p_transit": float(params["T"]),
             }
 
+        # Creates staging line data
+        if not rising_line_data.empty:
+            params = rising_line_data.iloc[0]
+            if not properties:
+                properties["bkt_params"] = {}
+            properties["bkt_params"]["+12027737940"] = {
+                "l0": float(params["L0"]),
+                "p_slip": float(params["S"]),
+                "p_guess": float(params["G"]),
+                "p_transit": float(params["T"]),
+            }
+
         activity, created = Activity.objects.get_or_create(
             name=activity_name,
             type=lesson_type,
