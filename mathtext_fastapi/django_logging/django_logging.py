@@ -39,15 +39,15 @@ def retrieve_user_status(is_new_user, user):
 def update_activity_session(user_status, question_number):
     """Update the old ActivitySession and create a new ActivitySession"""
     if question_number == "16":
-        previous_activity_session = (
-            user_status.current_activity_session.status
-        ) = ActivitySession.ActivitySessionStatus.COMPLETE
+        user_status.current_activity_session.status = (
+            ActivitySession.ActivitySessionStatus.COMPLETE
+        )
     else:
-        previous_activity_session = (
-            user_status.current_activity_session.status
-        ) = ActivitySession.ActivitySessionStatus.EARLY_EXIT
-    previous_activity_session.save()
-    return previous_activity_session
+        user_status.current_activity_session.status = (
+            ActivitySession.ActivitySessionStatus.EARLY_EXIT
+        )
+    user_status.current_activity_session.save()
+    return user_status.current_activity_session
 
 
 def update_user_status(user_status, activity_session):
