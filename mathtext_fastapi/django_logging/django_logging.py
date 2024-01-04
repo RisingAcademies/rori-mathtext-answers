@@ -56,7 +56,7 @@ def update_activity_session(user_status, question_number):
     return user_status.current_activity_session
 
 
-def update_user_status(user_status, activity_session):
+def update_user_status(user_status, activity_session, question_number):
     """Updates the current and past activity_sessions through the UserStatus model"""
     try:
         old_session = user_status.current_activity_session
@@ -64,7 +64,9 @@ def update_user_status(user_status, activity_session):
         # Handles first time user
         old_session = None
     user_status.current_activity_session = activity_session
-    user_status.current_activity_session.previous_activity_session = old_session
+
+    if question_number != "16":
+        user_status.current_activity_session.previous_activity_session = old_session
     user_status.save()
 
     return user_status
@@ -132,10 +134,10 @@ def retrieve_activity_session(
             activity_session = update_user_and_activity_context(
                 user, user_status, activity, line_number, question_number
             )
-            update_user_status(user_status, activity_session)
+            update_user_status(user_status, activity_session, question_number)
     except AttributeError as e:
         activity_session = create_new_activity_session(user, activity, line_number)
-        update_user_status(user_status, activity_session)
+        update_user_status(user_status, activity_session, question_number)
     if not activity_session:
         activity_session = user_status.current_activity_session
     return activity_session
