@@ -24,6 +24,7 @@ from mathtext_fastapi.django_logging.django_app.models import (
 log = logging.getLogger(__name__)
 
 
+# TODO: rename get_or_create_user_status
 def retrieve_user_status(is_new_user, user):
     """Retrieves the UserStatus instance for a given User or creates it if the user is new"""
     user_status = None
@@ -45,13 +46,17 @@ def update_activity_session(user_status, question_number):
         user_status.current_activity_session.status = (
             ActivitySession.ActivitySessionStatus.COMPLETE
         )
-    elif user_status.previous_activity_session.status == "CO":
-        # ActivitySession not updated when student finished it
+    elif (
+        # Keeps the status as IP
+        user_status.current_activity_session.previous_activity_session.status == "EE"
+        or user_status.current_activity_session.previous_activity_session.status == "CO"
+    ):
         pass
     else:
-        user_status.current_activity_session.status = (
+        user_status.current_activity_session.previous_activity_session.status = (
             ActivitySession.ActivitySessionStatus.EARLY_EXIT
         )
+        user_status.current_activity_session.previous_activity_session.save()
     user_status.current_activity_session.save()
     return user_status.current_activity_session
 
@@ -113,11 +118,20 @@ def update_user_and_activity_context(
 
     A new ActivitySession should not be created on the last question of a microlesson (Q#16)
     """
-    update_activity_session(user_status, question_number)
+    created_new_session = False
     if question_number != "16":
         activity_session = create_new_activity_session(user, activity, line_number)
+        created_new_session = True
+        new_user_status = update_user_status(
+            user_status, activity_session, question_number
+        )
     else:
         activity_session = user_status.current_activity_session
+
+    if created_new_session:
+        update_activity_session(new_user_status, question_number)
+    else:
+        update_activity_session(user_status, question_number)
     return activity_session
 
 
@@ -134,7 +148,6 @@ def retrieve_activity_session(
             activity_session = update_user_and_activity_context(
                 user, user_status, activity, line_number, question_number
             )
-            update_user_status(user_status, activity_session, question_number)
     except AttributeError as e:
         activity_session = create_new_activity_session(user, activity, line_number)
         update_user_status(user_status, activity_session, question_number)
