@@ -47,6 +47,7 @@ def add_message_text_to_sample_object(message_context):
         "message_updated_at": "2023-01-10T02:37:28.487319Z",
         # Context
         "line_number": "+12065906259",
+        "line_name": "Local Testing",
     }
 
     default_message_values.update(message_context)
